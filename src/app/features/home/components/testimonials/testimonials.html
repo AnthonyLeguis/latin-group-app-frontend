@@ -1,36 +1,82 @@
 <!-- Testimonials Section -->
-<section id="testimonials" class="testimonials-section bg-gradient-to-br from-blue-50 to-indigo-50">
+<section id="testimonials" class="testimonials-section bg-gradient-to-r from-gray-100 to-gray-200">
     <div class="w-full bg-gradient-to-r from-gray-300 to-red-600 py-6 mb-12">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-2xl lg:text-3xl font-bold text-black">Testimonios de Nuestros Usuarios</h2>
         </div>
     </div>
     <div class="container mx-auto px-4 pb-20">
-        <div class="text-center mb-16">
-            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                La satisfacción de nuestros clientes es nuestra mayor recompensa
-            </p>
+
+        <!-- Testimonials Row - Carousel (mobile) -->
+        <div class="testimonials-carousel-section mb-16 lg:hidden">
+            <!-- Navigation Buttons -->
+            <div class="carousel-nav-container flex items-center justify-center gap-4 mb-6">
+                <button class="carousel-nav carousel-nav-prev" (click)="prevTestimonial()"
+                    aria-label="Previous testimonial">
+                    <span class="nav-arrow">‹</span>
+                </button>
+
+                <!-- Carousel Container -->
+                <div class="testimonial-carousel-container flex-1">
+                    <div class="testimonial-carousel-track testimonial-carousel-track-mobile"
+                        [style.transform]="'translateX(-' + getTestimonialTranslate() + '%)'"
+                        [ngClass]="getTestimonialTransitionClass()">
+                        <div *ngFor="let testimonial of allTestimonials"
+                            class="testimonial-carousel-slide testimonial-carousel-slide-mobile">
+                            <div class="testimonial-card">
+                                <!-- Testimonial Text -->
+                                <p class="testimonial-text mb-6 text-gray-700 italic">{{ testimonial.text }}</p>
+
+                                <!-- Testimonial Author with Image -->
+                                <div class="testimonial-author flex items-center justify-center gap-4">
+                                    <img [src]="testimonial.image" [alt]="testimonial.name" class="testimonial-image">
+                                    <div class="text-left">
+                                        <h4 class="font-bold text-gray-800">{{ testimonial.name }}</h4>
+                                        <p class="text-red-600 font-semibold text-sm">{{ testimonial.state }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="carousel-nav carousel-nav-next" (click)="nextTestimonial()"
+                    aria-label="Next testimonial">
+                    <span class="nav-arrow">›</span>
+                </button>
+            </div>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            <div *ngFor="let testimonial of testimonials"
-                class="testimonial-card bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 animate-fade-in-up">
-                <div class="flex items-center mb-6">
-                    <div
-                        [ngClass]="[testimonial.bgColor, 'w-12 h-12 rounded-full flex items-center justify-center mr-4']">
-                        <mat-icon [ngClass]="testimonial.iconColor">{{ testimonial.icon }}</mat-icon>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-800">{{ testimonial.name }}</h4>
-                        <p class="text-sm text-gray-600">{{ testimonial.role }}</p>
+        <!-- Carousel for large screens (>= lg) - showing 3 items -->
+        <div class="hidden lg:flex lg:flex-col testimonial-carousel-container-lg mb-16">
+            <div class="flex w-full overflow-hidden">
+                <div class="testimonial-carousel-track testimonial-carousel-track-lg w-full"
+                    [style.transform]="'translateX(-' + getTestimonialTranslateLg() + '%)'"
+                    [ngClass]="getTestimonialTransitionClass()">
+                    <div *ngFor="let testimonial of allTestimonials"
+                        class="testimonial-carousel-slide testimonial-carousel-slide-lg">
+                        <div class="testimonial-card">
+                            <!-- Testimonial Text -->
+                            <p class="testimonial-text mb-6 text-gray-700 italic">{{ testimonial.text }}</p>
+
+                            <!-- Testimonial Author with Image -->
+                            <div class="testimonial-author flex items-center gap-4">
+                                <img [src]="testimonial.image" [alt]="testimonial.name" class="testimonial-image">
+                                <div class="text-left">
+                                    <h4 class="font-bold text-gray-800">{{ testimonial.name }}</h4>
+                                    <p class="text-red-600 font-semibold text-sm">{{ testimonial.state }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <p class="text-gray-600 italic leading-relaxed mb-4">
-                    "{{ testimonial.message }}"
-                </p>
-                <div class="flex text-yellow-400">
-                    <mat-icon class="text-sm" *ngFor="let star of [1,2,3,4,5]">star</mat-icon>
-                </div>
+            </div>
+
+            <!-- Pagination dots for lg+ -->
+            <div class="flex items-center justify-center gap-2 mt-8">
+                <span *ngFor="let i of [0, 1, 2]" class="pagination-dot"
+                    [ngClass]="{'active': getDisplayIndexLg() === i}" (click)="goToTestimonialLg(i)">
+                </span>
             </div>
         </div>
     </div>

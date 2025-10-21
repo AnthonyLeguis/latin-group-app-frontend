@@ -1,14 +1,173 @@
-// Testimonials section
-.testimonials-section {
-    animation: fadeInUp 1s ease-out;
+// Testimonials Carousel
+.testimonials-carousel-section {
+    // No definir display aquí, dejamos que Tailwind lo controle con lg:hidden
+    align-items: center;
+    justify-content: center;
 }
 
-.testimonial-card {
+.carousel-nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+// Navigation buttons for testimonials
+.carousel-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    min-height: 48px;
+    background-color: #f3f4f669;
+    border-radius: 50%;
+    cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 
     &:hover {
-        transform: translateY(-5px);
+        background-color: #dc2626;
+        border-color: #dc2626;
+        transform: scale(1.1);
     }
+
+    .nav-arrow {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+
+    &:hover .nav-arrow {
+        color: white;
+    }
+}
+
+.carousel-nav-prev,
+.carousel-nav-next {
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+// Hide carousel nav buttons on large screens
+@media (min-width: 1024px) {
+    .carousel-nav {
+        display: none !important;
+    }
+}
+
+// Testimonials grid container (visible en lg+)
+.testimonials-grid-container {
+    overflow: visible;
+}
+
+// Testimonial carousel container
+.testimonial-carousel-container {
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+}
+
+.testimonial-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    width: 100%;
+
+    &.no-transition {
+        transition: none !important;
+    }
+}
+
+.testimonial-carousel-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+// Mobile carousel - 1 item per slide (100% width)
+.testimonial-carousel-slide-mobile {
+    flex: 0 0 100%;
+    min-width: 100%;
+}
+
+// Desktop carousel - 3 items per row (33.33% width each)
+.testimonial-carousel-slide-lg {
+    flex: 0 0 33.333%;
+    min-width: 33.333%;
+    padding: 0 8px;
+}
+
+// Container para carrusel en lg+
+.testimonial-carousel-container-lg {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+
+// Pagination dots
+.pagination-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &.active {
+        background-color: #dc2626;
+        width: 12px;
+    }
+
+    &:hover {
+        background-color: #dc2626;
+        transform: scale(1.2);
+    }
+}
+
+// Testimonial Cards
+.testimonial-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.397);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(228, 14, 14, 0.432);
+    }
+}
+
+.testimonial-text {
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    font-weight: bolder;
+    line-height: 1.6;
+    color: #555;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.testimonial-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: transparent;
 }
 
 @media (max-width: 768px) {
@@ -18,5 +177,47 @@
         h2 {
             font-size: 2rem !important;
         }
+    }
+
+    .carousel-nav {
+        width: 40px;
+        height: 40px;
+
+        .nav-arrow {
+            font-size: 18px;
+        }
+    }
+
+    .carousel-nav-container {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-nav {
+        width: 36px;
+        height: 36px;
+
+        .nav-arrow {
+            font-size: 16px;
+        }
+    }
+
+    .testimonial-card {
+        padding: 16px;
+    }
+
+    .testimonial-text {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    .testimonial-image {
+        width: 40px;
+        height: 40px;
+    }
+
+    .carousel-nav-container {
+        gap: 8px;
     }
 }

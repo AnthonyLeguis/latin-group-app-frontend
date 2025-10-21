@@ -1,0 +1,81 @@
+// Insurance Companies Ribbon - Infinite Marquee
+.insurance-ribbon-container {
+    width: 100%;
+    overflow: hidden;
+    background: transparent;
+    padding: 20px 0;
+}
+
+.insurance-ribbon-track {
+    display: flex;
+    animation: scroll-left 30s linear infinite;
+    width: fit-content;
+
+    &:hover {
+        animation-play-state: paused;
+    }
+}
+
+// Animation for infinite scroll
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.insurance-ribbon-item {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+}
+
+// Company logo styling
+.company-logo {
+    height: 120px;
+    width: auto;
+    max-width: 240px;
+    background: white;
+    object-fit: contain;
+    filter: grayscale(50%);
+    transition: filter 0.3s ease;
+
+    &:hover {
+        filter: grayscale(0%) brightness(1.1) contrast(1.1);
+    }
+}
+
+@media (max-width: 768px) {
+    .insurance-companies-section {
+        padding: 3rem 1rem;
+
+        h2 {
+            font-size: 2rem !important;
+        }
+    }
+
+    .insurance-ribbon-item {
+        padding: 0 6px;
+    }
+
+    .company-logo {
+        height: 100px;
+        max-width: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .insurance-ribbon-item {
+        padding: 0 4px;
+    }
+
+    .company-logo {
+        height: 80px;
+        max-width: 140px;
+    }
+}

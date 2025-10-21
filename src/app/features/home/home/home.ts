@@ -12,6 +12,7 @@ import { ObamacareComponent } from '../components/obamacare/obamacare';
 import { ServicesComponent } from '../components/services/services';
 import { OurTeamComponent } from '../components/our-team/our-team';
 import { TestimonialsComponent } from '../components/testimonials/testimonials';
+import { InsuranceCompanyComponent } from '../components/insurance-company/insurance-company';
 import { CTAComponent } from '../components/cta/cta';
 
 @Component({
@@ -27,6 +28,7 @@ import { CTAComponent } from '../components/cta/cta';
     ServicesComponent,
     OurTeamComponent,
     TestimonialsComponent,
+    InsuranceCompanyComponent,
     CTAComponent
   ],
   templateUrl: './home.html',
