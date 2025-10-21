@@ -36,13 +36,13 @@ export class OurTeamComponent implements OnInit, OnDestroy {
     // Second row - Testimonials
     testimonials: Testimonial[] = [
         {
-            text: 'Estamos seguros, que junto a nuestro apoyo sentirás la tranquilidad que mereces, damos cada día lo mejor para estar a su disposición...',
+            text: 'En Latin Group Insurence estamos comprometidos con nuestros clientes a llevarlos de la mano por el mundo de los seguros, brindando un apoyo y respaldo a cada una de las situaciones de forma personalizada y empática...',
             name: 'José Colmenarez',
             role: 'Agente',
             image: 'images/our-team/colmenarez_jose.png'
         },
         {
-            text: 'Estamos seguros, que junto a nuestro apoyo sentirás la tranquilidad que mereces, damos cada día lo mejor para estar a su disposición...',
+            text: 'Años de Experiencia y altos estándares de atención nos validan para estar al servicio de nuestros clientes, nuestra misión es que te sientas seguro y protegido...',
             name: 'Nayibeth Leiva',
             role: 'Agente',
             image: 'images/our-team/leiva_nayibeth.png'
@@ -51,7 +51,7 @@ export class OurTeamComponent implements OnInit, OnDestroy {
             text: 'Estamos seguros, que junto a nuestro apoyo sentirás la tranquilidad que mereces, damos cada día lo mejor para estar a su disposición...',
             name: 'Jhoanny C',
             role: 'Post-Venta',
-            image: 'images/our-team/tercera_persona.png'
+            image: 'images/our-team/male-profile.png'
         }
     ];
 
@@ -98,7 +98,7 @@ export class OurTeamComponent implements OnInit, OnDestroy {
             } else {
                 this.cdr.markForCheck();
             }
-        }, 5000); // 5 segundos
+        }, 7000); // 5 segundos
     }
 
     nextTestimonial(): void {
