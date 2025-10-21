@@ -1,0 +1,257 @@
+<!-- Contact Bar -->
+<div class="bg-red-700 text-white py-2 md:py-3 fixed top-0 left-0 right-0 z-[60] w-full">
+    <div class="container mx-auto px-2 md:px-4">
+        <div class="flex items-center justify-between gap-2 md:gap-4 flex-wrap">
+            <!-- Phone 1 -->
+            <a href="tel:+19563290990"
+                class="flex items-center gap-1 md:gap-2 hover:text-red-200 transition-colors whitespace-nowrap">
+                <mat-icon class="text-base md:text-lg">phone</mat-icon>
+                <span class="text-xs md:text-sm font-medium">+1 9563290990</span>
+            </a>
+
+            <!-- Phone 2 -->
+            <a href="tel:+19729149213"
+                class="flex items-center gap-1 md:gap-2 hover:text-red-200 transition-colors whitespace-nowrap">
+                <mat-icon class="text-base md:text-lg">phone</mat-icon>
+                <span class="text-xs md:text-sm font-medium">+1 (972) 914-9213</span>
+            </a>
+
+            <!-- WhatsApp -->
+            <a href="https://wa.me/message"
+                class="flex items-center gap-1 md:gap-2 hover:text-red-200 transition-colors whitespace-nowrap">
+                <mat-icon class="text-base md:text-lg">chat</mat-icon>
+                <span class="text-xs md:text-sm font-medium">Atención al cliente por Whatsapp</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<nav class="fixed top-10 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm transition-all duration-300">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between h-16 md:h-20">
+            <!-- Logo -->
+            <div class="flex items-center z-50">
+                <img src="images/logo.png" alt="LatinGroup App" class="h-16 md:h-20 w-auto">
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex items-center space-x-8">
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('inicio')">
+                    Inicio
+                </button>
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('about')">
+                    Quiénes Somos
+                </button>
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('obamacare')">
+                    Obamacare
+                </button>
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('services')">
+                    Servicios
+                </button>
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('team')">
+                    Nuestro Equipo
+                </button>
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('companies')">
+                    Compañías
+                </button>
+                <button class="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    (click)="scrollToSection('contact')">
+                    Contacto
+                </button>
+                <button
+                    class="ml-4 px-6 py-2 font-semibold rounded-md shadow-lg transform transition-all duration-200 bg-black text-white hover:bg-red-700 hover:text-black hover:shadow-xl hover:scale-105"
+                    (click)="navigateToLogin()">
+                    Portal Agente
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="lg:hidden relative z-[70]">
+                <button
+                    class="relative w-10 h-10 flex items-center justify-center transition-colors duration-200 focus:outline-none"
+                    (click)="toggleMobileMenu()" [attr.aria-expanded]="showMobileMenu" aria-label="Toggle menu">
+                    <!-- Hamburger Icon -->
+                    <div class="relative w-6 h-5">
+                        <span class="absolute top-0 left-0 w-6 h-0.5 bg-gray-700 transform transition-all duration-300"
+                            [class.rotate-45]="showMobileMenu" [class.translate-y-2]="showMobileMenu"></span>
+                        <span class="absolute top-2 left-0 w-6 h-0.5 bg-gray-700 transform transition-all duration-300"
+                            [class.opacity-0]="showMobileMenu"></span>
+                        <span class="absolute top-4 left-0 w-6 h-0.5 bg-gray-700 transform transition-all duration-300"
+                            [class.-rotate-45]="showMobileMenu" [class.-translate-y-2]="showMobileMenu"></span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="lg:hidden fixed inset-0 z-40 mobile-menu-overlay pointer-events-none"
+        [class.pointer-events-auto]="showMobileMenu">
+        <!-- Backdrop -->
+        <div class="absolute inset-0  transition-opacity duration-300" [class.opacity-0]="!showMobileMenu"
+            [class.opacity-100]="showMobileMenu" (click)="closeMobileMenu()"></div>
+
+        <!-- Menu Panel -->
+        <div class="absolute top-[60px] left-0 right-0 bg-white transform transition-all duration-300 ease-out overflow-hidden"
+            [style.maxHeight]="showMobileMenu ? '100vh' : '0px'" [class.shadow-lg]="showMobileMenu">
+
+            <!-- Menu Content -->
+            <div class="flex flex-col px-6 py-8 space-y-6">
+                <!-- Navigation Links -->
+                <div class="flex flex-col justify-center items-center space-y-2 mx-auto">
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('inicio'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-blue-600">home</mat-icon>
+                            <span>Inicio</span>
+                        </div>
+                    </button>
+
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('about'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-blue-600">info</mat-icon>
+                            <span>Quiénes Somos</span>
+                        </div>
+                    </button>
+
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('obamacare'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-orange-600">health_and_safety</mat-icon>
+                            <span>Obamacare</span>
+                        </div>
+                    </button>
+
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('services'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-green-600">build</mat-icon>
+                            <span>Servicios</span>
+                        </div>
+                    </button>
+
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('team'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-purple-600">group</mat-icon>
+                            <span>Nuestro Equipo</span>
+                        </div>
+                    </button>
+
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('companies'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-indigo-600">business</mat-icon>
+                            <span>Compañías</span>
+                        </div>
+                    </button>
+
+                    <button
+                        class="mobile-menu-item block w-full px-4 py-3 text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200 font-medium hover:bg-blue-50"
+                        (click)="scrollToSection('contact'); closeMobileMenu()">
+                        <div class="flex items-center justify-start">
+                            <mat-icon class="mr-2 text-red-600">mail</mat-icon>
+                            <span>Contacto</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-gray-200 pt-6">
+                    <button mat-raised-button color="primary"
+                        class="w-full py-3 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                        (click)="navigateToLogin(); closeMobileMenu()">
+                        <mat-icon class="mr-2">login</mat-icon>
+                        Portal Agente
+                    </button>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600 mb-2">¿Necesitas ayuda?</p>
+                        <p class="text-sm font-medium text-blue-600">soporte@latingroupapp.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section Component -->
+<app-hero (navigateToRegister)="navigateToRegister()" (scrollToSection)="scrollToSection($event)"></app-hero>
+
+<!-- About Section Component -->
+<app-about></app-about>
+
+<!-- Obamacare Section Component -->
+<app-obamacare (scrollToSection)="scrollToSection($event)"></app-obamacare>
+
+<!-- Services Section Component -->
+<app-services></app-services>
+
+<!-- Our Team Section Component -->
+<app-our-team></app-our-team>
+
+<!-- Testimonials Section Component -->
+<app-testimonials></app-testimonials>
+
+<!-- CTA Section Component -->
+<app-cta (navigateToLogin)="navigateToLogin()"></app-cta>
+
+<!-- Footer -->
+<footer class="footer bg-gray-800 text-white py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-4">LatinGroup App</h3>
+                <p class="text-gray-300">
+                    Sistema integral para la gestión eficiente de aplicaciones y documentos.
+                </p>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Características</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li>Planillas de Aplicación</li>
+                    <li>Gestión de Documentos</li>
+                    <li>Control de Acceso</li>
+                    <li>Autenticación Segura</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Soporte</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li>Documentación</li>
+                    <li>Centro de Ayuda</li>
+                    <li>Contactanos</li>
+                    <li>FAQ</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Legal</h4>
+                <ul class="space-y-2 text-gray-300">
+                    <li>Política de Privacidad</li>
+                    <li>Términos de Servicio</li>
+                    <li>Política de Cookies</li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+            <p>&copy; 2025 LatinGroup App. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>

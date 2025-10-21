@@ -1,0 +1,71 @@
+<div class="modal-container">
+    <!-- Botón cerrar (X) en la esquina superior derecha -->
+    <button class="close-button" mat-icon-button mat-dialog-close>
+        <mat-icon>close</mat-icon>
+    </button>
+
+    <h2 class="modal-title">{{ data.title }}</h2>
+    <img [src]="data.image" alt="Información detallada" class="modal-image mx-auto">
+
+    <!-- Renderizar contenido especial para Card 2 -->
+    <ng-container *ngIf="data.title === 'Ventajas Del Obamacare'">
+        <div class="advantages-section">
+            <h3 class="section-title">Ventajas</h3>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <span class="check-icon">✓</span>
+                    <p>Las compañías aseguradoras no pueden aumentar las primas después de que el paciente se enferme.
+                    </p>
+                </div>
+                <div class="advantage-card">
+                    <span class="check-icon">✓</span>
+                    <p>Se eliminan los límites anuales sobre la cobertura médica.</p>
+                </div>
+                <div class="advantage-card">
+                    <span class="check-icon">✓</span>
+                    <p>Los hijos pueden ser agregados a los planes médicos de sus padres hasta los 26 años.</p>
+                </div>
+                <div class="advantage-card">
+                    <span class="check-icon">✓</span>
+                    <p>Se prohíbe negar cobertura por condiciones pre-existentes.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="disadvantages-section">
+            <h3 class="section-title disadvantage-title">Desventajas</h3>
+            <div class="disadvantages-list">
+                <p> Aproximadamente 30 millones de usuarios compran seguro de salud privado actualmente.</p>
+                <p> El incumplimiento con los 10 beneficios de salud ha llevado a cancelar muchos planes.</p>
+                <p> Servicios innecesarios como maternidad encarecen los costos de reemplazo.</p>
+                <p> 3-5 millones de personas podrían perder planes patrocinados por empresas.</p>
+                <p> Muchas empresas prefieren pagar multas en lugar de mantener cobertura.</p>
+                <p> El aumento de cobertura puede incrementar costos generales de salud.</p>
+                <p> Quienes no pagan seguro deben pagar un impuesto (con excepciones).</p>
+                <p> Cerca de 4 millones de personas pagan el impuesto en lugar de comprar seguro.</p>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Renderizar contenido especial para Card 3 -->
+    <ng-container *ngIf="data.title === 'Requisitos para Obamacare 2023'">
+        <div class="requirements-section">
+            <div class="requirement-accordion" *ngFor="let item of requirements; let i = index">
+                <button class="requirement-header" (click)="toggleItem(i)" type="button">
+                    <span class="check-icon">✓</span>
+                    <h4 class="requirement-title">{{ item.title }}</h4>
+                    <mat-icon class="expand-icon" [class.expanded]="isItemExpanded(i)">
+                        expand_more
+                    </mat-icon>
+                </button>
+                <div class="requirement-content-expandable" *ngIf="isItemExpanded(i)">
+                    <p class="requirement-text">{{ item.content }}</p>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Renderizar contenido genérico para Card 1 y otras cards -->
+    <ng-container *ngIf="data.title === '¿Qué es Obamacare?'">
+        <p class="modal-content" [innerHTML]="sanitizer.bypassSecurityTrustHtml(data.content)"></p>
+    </ng-container>

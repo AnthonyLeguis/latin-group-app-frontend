@@ -1,0 +1,79 @@
+<!-- Obamacare Section -->
+<section id="obamacare" class="obamacare-section py-20 bg-gray-50">
+    <div class="w-full bg-gradient-to-r from-gray-300 to-red-600 py-6 mb-12">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl lg:text-3xl font-bold text-black">Obamacare</h2>
+        </div>
+    </div>
+    <div class="container mx-auto px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Card 1 -->
+                <div
+                    class="bg-white shadow-lg rounded-lg p-3 text-center hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                    <img src="images/oba-1.png" alt="Planes de Salud" class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-2xl font-bold text-gray-500 mb-4 text-center">¿Qué es?</h3>
+                    <p class="text-md text-gray-700 leading-relaxed tracking-wide text-justify flex-grow">
+                        El Obamacare, también conocido como la Ley de Cuidado de Salud Asequible (ACA), es una ley
+                        federal en los Estados Unidos que tiene como objetivo mejorar el acceso a la atención médica y
+                        reducir los costos para los ciudadanos. Fue promulgada en 2010 por el presidente Barack Obama.
+                        La ACA establece nuevas regulaciones para las compañías de seguros de salud, incluyendo la
+                        prohibición de negar cobertura debido a condiciones preexistentes o género, así como límites en
+                        los costos de bolsillo que pueden ser pagados por los pacientes. También se creó un mercado de
+                        seguros médicos donde las personas pueden comprar planes de seguro con subsidios gubernamentales
+                        según su ingreso.
+                    </p>
+                    <button (click)="openInfoModal('card1')"
+                        class="bg-white text-red-600 border border-red-600 px-5 py-3 rounded-md font-semibold hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-105 mt-auto">Más
+                        información</button>
+                </div>
+
+                <!-- Card 2 -->
+                <div
+                    class="bg-white shadow-lg rounded-lg p-3 text-center hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                    <img src="images/oba-2.png" alt="Beneficios Obamacare"
+                        class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-2xl font-bold text-gray-500 mb-4 text-center">Ventajas Del Obamacare</h3>
+                    <p class="text-md text-gray-700 leading-relaxed tracking-wide text-justify flex-grow">
+                        <strong>Ventajas que ofrece el Obamacare</strong> para <strong>el sistema de Salud en Estados
+                            Unidos:</strong>
+                        <br><br>
+                        Los costos de salud se ven reducidos porcentualmente lo que beneficia y le facilita seguro
+                        médico a un sinnúmero de personas que antes no gazaban del beneficio de una atención médica
+                        preventiva gratuita. Además favorece a aquellos que necesitan tratamientos evitando así que
+                        dichos pacientes lleguen a necesitar los servicios de emergencia los cuáles dejan de ser
+                        asequibles para muchos bolsillos.
+                        <br><br>
+                        Obliga a los planes de Salud existentes a cubrir los beneficios de salud esenciales que suman 10
+                        en total e incluyen las enfermedades crónicas, las adicciones y los tratamientos de salud
+                        mental.
+                    </p>
+                    <button (click)="openInfoModal('card2')"
+                        class="bg-white text-red-600 border border-red-600 px-5 py-3 rounded-md font-semibold hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-105 mt-auto">Más
+                        información</button>
+                </div>
+
+                <!-- Card 3 -->
+                <div
+                    class="bg-white shadow-lg rounded-lg p-3 text-center hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                    <img src="images/oba-3.png" alt="Asistencia Personalizada"
+                        class="w-full h-48 object-cover rounded-lg mb-4">
+                    <h3 class="text-2xl font-bold text-gray-500 mb-4 text-center">Requisitos para Obamacare 2023</h3>
+                    <p class="text-md text-gray-700 leading-relaxed tracking-wide text-justify flex-grow">
+                        1. Tener un estatus migratorio legal en Estados Unidos.<br><br>
+                        2. Mínimo de Ingresos.<br><br>
+                        3. Aplicar durante el Período de Inscripción Abierta, ó si califica para un Período Especial ,
+                        hágalo en los límites establecidos.<br><br>
+                        4. Si está casado, deben hacer juntos la declaración de impuestos.<br><br>
+                        5. No puede ser reclamado como dependiente de otra persona.<br><br>
+                        6. Usted no debe tener cobertura médica a través de su empleador<br><br>
+                        7. No estar encarcelado.
+                    </p>
+                    <button (click)="openInfoModal('card3')"
+                        class="bg-white text-red-600 border border-red-600 px-5 py-3 rounded-md font-semibold hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-105 mt-auto">Más
+                        información</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

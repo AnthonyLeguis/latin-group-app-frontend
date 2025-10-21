@@ -1,0 +1,22 @@
+// Testimonials section
+.testimonials-section {
+    animation: fadeInUp 1s ease-out;
+}
+
+.testimonial-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+@media (max-width: 768px) {
+    .testimonials-section {
+        padding: 3rem 1rem;
+
+        h2 {
+            font-size: 2rem !important;
+        }
+    }
+}

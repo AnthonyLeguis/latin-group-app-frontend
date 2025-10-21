@@ -1,0 +1,300 @@
+// Navigation
+nav {
+    transform: translateY(-100%);
+    animation: slideDown 0.5s ease-out 0.2s forwards;
+}
+
+@keyframes slideDown {
+    to {
+        transform: translateY(0);
+    }
+}
+
+// Animations
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+// Stagger animations for cards
+.feature-card {
+    animation: fadeInUp 0.8s ease-out;
+    animation-fill-mode: both;
+
+    &:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    &:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+}
+
+.step-card {
+    animation: fadeInUp 0.8s ease-out;
+    animation-fill-mode: both;
+
+    &:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    &:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    &:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+}
+
+.user-type-card {
+    animation: fadeInUp 0.8s ease-out;
+    animation-fill-mode: both;
+
+    &:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    &:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+}
+
+// Global adjustments for fixed nav
+:host {
+    padding-top: 4rem; // Space for fixed navigation
+}
+
+// Prevent body scroll when mobile menu is open
+:host-context(.mobile-menu-open) {
+    overflow: hidden;
+}
+
+// Mobile Menu Styles
+.mobile-menu-overlay {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.mobile-menu-panel {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+// Hamburger Animation
+.hamburger-line {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform-origin: center;
+}
+
+.hamburger-line:nth-child(1) {
+    top: 0;
+}
+
+.hamburger-line:nth-child(2) {
+    top: 8px;
+}
+
+.hamburger-line:nth-child(3) {
+    top: 16px;
+}
+
+// Menu Item Hover Effects
+.mobile-menu-item {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    &:hover::before {
+        left: 100%;
+    }
+}
+
+// Navigation
+nav {
+    transform: translateY(-100%);
+    animation: slideDown 0.5s ease-out 0.2s forwards;
+}
+
+@keyframes slideDown {
+    to {
+        transform: translateY(0);
+    }
+}
+
+// Hero section enhancements
+.hero-section {
+    position: relative;
+    overflow: hidden;
+    margin-top: -4rem; // Compensate for host padding
+    padding-top: 6rem; // Additional space for nav
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.05"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        pointer-events: none;
+    }
+}
+
+// Feature cards hover effects
+.feature-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+// Step cards
+.step-card {
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 24px;
+        left: calc(100% + 1rem);
+        width: 2rem;
+        height: 2px;
+        background: #3b82f6;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        &::after {
+            display: block;
+        }
+
+        &:last-child::after {
+            display: none;
+        }
+    }
+}
+
+// User type cards
+.user-type-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+
+        li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #f3f4f6;
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+// CTA section
+.cta-section {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="1" fill="white" opacity="0.1"/><circle cx="60" cy="30" r="0.5" fill="white" opacity="0.05"/></svg>');
+        pointer-events: none;
+    }
+}
+
+// Footer
+.footer {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 4rem 1rem;
+
+        h1 {
+            font-size: 2.5rem !important;
+        }
+
+        p {
+            font-size: 1.125rem !important;
+        }
+    }
+
+    .features-section,
+    .how-it-works-section,
+    .user-types-section {
+        padding: 3rem 1rem;
+    }
+
+    .step-card::after {
+        display: none !important;
+    }
+}
+
+// Apply Montserrat font to all paragraphs in home
+p {
+    font-family: 'Montserrat', sans-serif;
+}

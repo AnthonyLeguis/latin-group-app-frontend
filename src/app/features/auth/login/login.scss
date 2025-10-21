@@ -1,0 +1,44 @@
+.login-container {
+    background-attachment: fixed;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 1;
+    }
+}
+
+.login-card {
+    position: relative;
+    z-index: 2;
+    animation: slideIn 0.5s ease-out;
+    border: 3px solid #ffd2d2;
+    border-radius: 12px;
+
+    @media (max-width: 768px) {
+        border-width: 2px;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Remover focus outline por defecto
+input:focus {
+    outline: none;
+}

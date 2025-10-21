@@ -1,0 +1,62 @@
+<!-- Services Section -->
+<section id="services" class="services-section bg-gray-50">
+    <div class="w-full bg-gradient-to-r from-gray-300 to-red-600 py-6 mb-12">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl lg:text-3xl font-bold text-black font-montserrat letter-spacing">Nuestros Servicios</h2>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 pb-20">
+        <!-- Carousel with navigation -->
+        <div class="carousel-section">
+            <button class="carousel-nav carousel-nav-prev" (click)="prevSlide()" type="button">
+                <span class="nav-arrow">‹</span>
+            </button>
+
+            <!-- Carousel Container -->
+            <div class="carousel-container">
+                <div class="carousel-track-wrapper">
+                    <div class="carousel-track" [class.no-transition]="isTransitioning"
+                        [style.transform]="'translateX(-' + (currentIndex * getCardWidth()) + '%)'">
+                        <div *ngFor="let card of allCards; let i = index" class="carousel-slide">
+                            <div class="service-card-mini">
+                                <img [src]="card.image" [alt]="card.title" class="service-image">
+                                <h3 class="service-title">{{ card.title }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="carousel-nav carousel-nav-next" (click)="nextSlide()" type="button">
+                <span class="nav-arrow">›</span>
+            </button>
+        </div>
+
+        <!-- Pagination indicator -->
+        <div class="carousel-pagination">
+            <span class="pagination-text">{{ getDisplayIndex() }} / {{ serviceCards.length }}</span>
+        </div>
+
+        <!-- CTA Section (Call To Action) -->
+        <div class="cta-section mt-16">
+            <div class="cta-content">
+                <!-- CTA Image -->
+                <div class="cta-image-wrapper">
+                    <img src="images/services/family.jpg" alt="Familia protegida" class="cta-image">
+                </div>
+
+                <!-- CTA Text and Button -->
+                <div class="cta-text-wrapper">
+                    <h3 class="cta-title">¡Todavía estás a tiempo!</h3>
+                    <p class="cta-description">
+                        Si aún no estas asegurado en los Estados Unidos, y te sientes desprotegido y no sabes que hace,
+                        tranquilo, entendemos esa sensación, lo bueno es que aún estas a tiempo! Contacta a uno de
+                        nuestros agentes y dale al botón de !INSCRÍBETE YA!
+                    </p>
+                    <a href="#" class="cta-button">¡Inscríbete ya!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

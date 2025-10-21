@@ -1,0 +1,14 @@
+// About section
+.about-section {
+    animation: fadeInUp 1s ease-out;
+}
+
+@media (max-width: 768px) {
+    .about-section {
+        padding: 3rem 1rem;
+
+        h2 {
+            font-size: 2rem !important;
+        }
+    }
+}
