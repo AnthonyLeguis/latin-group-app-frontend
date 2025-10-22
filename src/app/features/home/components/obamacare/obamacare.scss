@@ -1,1 +1,14 @@
+// Animación de aparición para las tarjetas de Obamacare
+
+.obamacare-card {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in-up {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
 // Obamacare section styles

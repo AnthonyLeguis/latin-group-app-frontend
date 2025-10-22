@@ -13,7 +13,10 @@ import { ServicesComponent } from '../components/services/services';
 import { OurTeamComponent } from '../components/our-team/our-team';
 import { TestimonialsComponent } from '../components/testimonials/testimonials';
 import { InsuranceCompanyComponent } from '../components/insurance-company/insurance-company';
-import { CTAComponent } from '../components/cta/cta';
+import { ContactComponent } from '../components/contact/contact';
+import { WhatsappButtonComponent } from '../components/whatsapp/whatsapp-button.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 @Component({
   selector: 'app-home',
@@ -29,12 +32,16 @@ import { CTAComponent } from '../components/cta/cta';
     OurTeamComponent,
     TestimonialsComponent,
     InsuranceCompanyComponent,
-    CTAComponent
+    ContactComponent,
+    WhatsappButtonComponent,
+    FontAwesomeModule
   ],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
 export class HomeComponent {
+
+  faWhatsapp = faWhatsapp;
 
   showMobileMenu = false;
 

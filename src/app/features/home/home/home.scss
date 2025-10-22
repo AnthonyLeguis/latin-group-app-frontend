@@ -266,7 +266,12 @@ nav {
 
 // Footer
 .footer {
-    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    background-color: #f3f4f6;
+    border-top: 1px solid #e5e7eb;
+
+    svg {
+        transition: color 0.3s ease;
+    }
 }
 
 // Responsive adjustments

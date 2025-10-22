@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { ContactModalService } from '../../../../core/services/contact-modal.service';
 
 interface ServiceCard {
     id: number;
@@ -36,7 +37,10 @@ export class ServicesComponent implements OnInit, OnDestroy {
     carouselInterval: any;
     isTransitioning: boolean = false;
 
-    constructor(private cdr: ChangeDetectorRef) {
+    constructor(
+        private cdr: ChangeDetectorRef,
+        private contactModalService: ContactModalService
+    ) {
         // Crear array infinito: agregamos las primeras 3 al final para loop continuo
         this.allCards = [
             ...this.serviceCards,
@@ -137,5 +141,9 @@ export class ServicesComponent implements OnInit, OnDestroy {
             cards.push(this.serviceCards[index]);
         }
         return cards;
+    }
+
+    openContactModal(): void {
+        this.contactModalService.openModal();
     }
 }

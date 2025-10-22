@@ -1,8 +1,10 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, AfterViewInit, ViewChildren, QueryList, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { InfoModalComponent, CardInfo } from './components/info-modal/info-modal';
+
 
 @Component({
     selector: 'app-obamacare',
@@ -11,13 +13,37 @@ import { InfoModalComponent, CardInfo } from './components/info-modal/info-modal
     templateUrl: './obamacare.html',
     styleUrl: './obamacare.scss'
 })
-export class ObamacareComponent {
+export class ObamacareComponent implements AfterViewInit {
     @Output()
     scrollToSection = new EventEmitter<string>();
 
-    constructor(private dialog: MatDialog) { }
+    @ViewChildren('obamacareCard') cards!: QueryList<ElementRef>;
 
-    openInfoModal(cardType: string) {
+    constructor(private dialog: MatDialog, @Inject(PLATFORM_ID) private platformId: Object) { }
+
+    ngAfterViewInit() {
+        if (isPlatformBrowser(this.platformId)) {
+            // Pequeño delay para asegurar que Angular ha renderizado todo
+            setTimeout(() => {
+                if (this.cards && this.cards.length > 0) {
+                    const observer = new (window as any).IntersectionObserver((entries: any) => {
+                        entries.forEach((entry: any) => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('fade-in-up');
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.2 });
+
+                    this.cards.forEach(card => {
+                        observer.observe(card.nativeElement);
+                    });
+                } else {
+                    console.warn('Obamacare cards not found');
+                }
+            }, 100);
+        }
+    } openInfoModal(cardType: string) {
         const data = this.getCardData(cardType);
         this.dialog.open(InfoModalComponent, {
             data,
