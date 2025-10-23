@@ -1,6 +1,8 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { SectionTitleComponent } from '../section-title/section-title.component';
 import { ContactModalService } from '../../../../core/services/contact-modal.service';
 
 interface ServiceCard {
@@ -12,11 +14,15 @@ interface ServiceCard {
 @Component({
     selector: 'app-services',
     standalone: true,
-    imports: [CommonModule, MatIconModule],
+    imports: [CommonModule, MatIconModule, SectionTitleComponent],
     templateUrl: './services.html',
     styleUrl: './services.scss'
 })
-export class ServicesComponent implements OnInit, OnDestroy {
+export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
+    autoZoom = false;
+    @ViewChild('ctaSection', { static: false }) ctaSection!: ElementRef<HTMLDivElement>;
+    private ctaObserver?: IntersectionObserver;
+    isBrowser: boolean;
     serviceCards: ServiceCard[] = [
         { id: 1, image: '/images/services/01.jpg', title: 'Atención preventiva' },
         { id: 2, image: '/images/services/02.jpg', title: 'Chequeos generales' },
@@ -39,13 +45,40 @@ export class ServicesComponent implements OnInit, OnDestroy {
 
     constructor(
         private cdr: ChangeDetectorRef,
-        private contactModalService: ContactModalService
+        private contactModalService: ContactModalService,
+        @Inject(PLATFORM_ID) private platformId: Object
     ) {
         // Crear array infinito: agregamos las primeras 3 al final para loop continuo
         this.allCards = [
             ...this.serviceCards,
             ...this.serviceCards.slice(0, 3) // Duplicamos las primeras 3
         ];
+        this.isBrowser = isPlatformBrowser(this.platformId);
+    }
+    ngAfterViewInit(): void {
+        if (this.isBrowser && this.ctaSection) {
+            // Inicialmente oculto
+            this.ctaSection.nativeElement.classList.remove('show');
+            this.ctaSection.nativeElement.classList.add('fade-in-down');
+            this.ctaObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.ctaSection.nativeElement.classList.add('show');
+                        // Zoom automático 1s después de la animación de entrada
+                        setTimeout(() => {
+                            this.autoZoom = true;
+                            this.cdr.markForCheck();
+                            setTimeout(() => {
+                                this.autoZoom = false;
+                                this.cdr.markForCheck();
+                            }, 800); // Duración del zoom automático
+                        }, 1000);
+                        this.ctaObserver?.disconnect();
+                    }
+                });
+            }, { threshold: 0.2 });
+            this.ctaObserver.observe(this.ctaSection.nativeElement);
+        }
     }
 
     ngOnInit(): void {
@@ -55,6 +88,9 @@ export class ServicesComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         if (this.carouselInterval) {
             clearInterval(this.carouselInterval);
+        }
+        if (this.ctaObserver) {
+            this.ctaObserver.disconnect();
         }
     }
 

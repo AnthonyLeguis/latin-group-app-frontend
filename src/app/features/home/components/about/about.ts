@@ -2,11 +2,12 @@ import { Component, ElementRef, EventEmitter, Output, AfterViewInit, ViewChild, 
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { SectionTitleComponent } from '../section-title/section-title.component';
 
 @Component({
     selector: 'app-about',
     standalone: true,
-    imports: [CommonModule, MatIconModule],
+    imports: [CommonModule, MatIconModule, SectionTitleComponent],
     templateUrl: './about.html',
     styleUrl: './about.scss'
 })

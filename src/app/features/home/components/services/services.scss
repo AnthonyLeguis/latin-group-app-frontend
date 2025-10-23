@@ -1,3 +1,15 @@
+// Animación de aparición para CTA (desde arriba)
+.fade-in-down {
+    opacity: 0;
+    transform: translateY(-40px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in-down.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 // Services section
 .services-section {
     animation: fadeInUp 1s ease-out;
@@ -165,6 +177,11 @@
     cursor: pointer;
 
     &:hover {
+        transform: scale(1.08);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    &.auto-zoom {
         transform: scale(1.08);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }

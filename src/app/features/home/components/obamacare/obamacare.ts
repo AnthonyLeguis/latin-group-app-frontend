@@ -4,12 +4,13 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { InfoModalComponent, CardInfo } from './components/info-modal/info-modal';
+import { SectionTitleComponent } from '../section-title/section-title.component';
 
 
 @Component({
     selector: 'app-obamacare',
     standalone: true,
-    imports: [CommonModule, MatIconModule, MatDialogModule],
+    imports: [CommonModule, MatIconModule, MatDialogModule, SectionTitleComponent],
     templateUrl: './obamacare.html',
     styleUrl: './obamacare.scss'
 })

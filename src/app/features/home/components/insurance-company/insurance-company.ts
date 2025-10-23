@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SectionTitleComponent } from '../section-title/section-title.component';
 
 interface InsuranceCompany {
     image: string;
@@ -8,7 +9,7 @@ interface InsuranceCompany {
 @Component({
     selector: 'app-insurance-company',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, SectionTitleComponent],
     templateUrl: './insurance-company.html',
     styleUrl: './insurance-company.scss'
 })

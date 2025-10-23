@@ -2,13 +2,14 @@ import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgxIntlTelInputModule, CountryISO, SearchCountryField, PhoneNumberFormat } from 'ngx-intl-tel-input';
+import { SectionTitleComponent } from '../section-title/section-title.component';
 import { ContactModalService } from '../../../../core/services/contact-modal.service';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-contact',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, NgxIntlTelInputModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxIntlTelInputModule, SectionTitleComponent],
     styleUrls: ['./contact.scss'],
     templateUrl: './contact.html',
 })
