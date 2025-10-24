@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { environment } from '../../core/config/environment';
-import { User, AuthResponse, LoginRequest, RegisterRequest } from '../../shared/interfaces/api.interface';
+import { User, AuthResponse, LoginRequest, RegisterRequest, GoogleLoginRequest } from '../../shared/interfaces/api.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -41,6 +41,31 @@ export class AuthService {
                     this.currentUserSubject.next(response.user);
                 })
             );
+    }
+
+    loginWithGoogle(googleData: GoogleLoginRequest): Observable<AuthResponse> {
+        return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/google-login`, googleData)
+            .pipe(
+                tap(response => {
+                    if (isPlatformBrowser(this.platformId)) {
+                        localStorage.setItem('auth_token', response.token);
+                        localStorage.setItem('user', JSON.stringify(response.user));
+                    }
+                    this.currentUserSubject.next(response.user);
+                })
+            );
+    }
+
+    getGoogleAuthUrl(): string {
+        return `${environment.apiUrl}/auth/google`;
+    }
+
+    handleGoogleCallback(token: string, user: any): void {
+        if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+        this.currentUserSubject.next(user);
     }
 
     register(userData: RegisterRequest): Observable<AuthResponse> {

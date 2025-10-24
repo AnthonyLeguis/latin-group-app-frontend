@@ -1,1 +1,6 @@
+<!-- Route Loading Overlay -->
+<app-route-loading *ngIf="routeLoadingService.loading$ | async" [isHiding]="routeLoadingService.hiding$ | async">
+</app-route-loading>
+
+<!-- Main Content -->
 <router-outlet />

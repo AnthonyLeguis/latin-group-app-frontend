@@ -10,6 +10,10 @@ export const authRoutes: Routes = [
         loadComponent: () => import('./register/register').then(m => m.RegisterComponent)
     },
     {
+        path: 'access-denied',
+        loadComponent: () => import('./access-denied/access-denied').then(m => m.AccessDeniedComponent)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

@@ -16,10 +16,13 @@
             <div class="relative">
                 <input type="email" id="email" formControlName="email"
                     class="w-full px-0 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-b-red-600 transition-all duration-300 placeholder-transparent peer"
-                    placeholder="Ingrese su correo"
+                    placeholder="Ingrese su correo" autocomplete="email"
                     [class.border-b-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-                <label for="email"
-                    class="absolute left-0 top-2 text-gray-500 transition-all duration-300 cursor-text peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-sm peer-focus:font-medium peer-focus:text-gray-700"
+                <label for="email" class="absolute left-0 transition-all duration-300 cursor-text"
+                    [class.top-2]="!loginForm.get('email')?.value" [class.-top-6]="loginForm.get('email')?.value"
+                    [class.text-sm]="loginForm.get('email')?.value" [class.font-medium]="loginForm.get('email')?.value"
+                    [class.text-gray-700]="loginForm.get('email')?.value && !(loginForm.get('email')?.invalid && loginForm.get('email')?.touched)"
+                    [class.text-gray-400]="!loginForm.get('email')?.value"
                     [class.text-red-600]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
                     Correo
                 </label>
@@ -35,8 +38,12 @@
                     class="w-full px-0 py-2 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-b-red-600 transition-all duration-300 placeholder-transparent peer pr-8"
                     placeholder="Ingrese su contraseña"
                     [class.border-b-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-                <label for="password"
-                    class="absolute left-0 top-2 text-gray-500 transition-all duration-300 cursor-text peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-sm peer-focus:font-medium peer-focus:text-gray-700"
+                <label for="password" class="absolute left-0 transition-all duration-300 cursor-text"
+                    [class.top-2]="!loginForm.get('password')?.value" [class.-top-6]="loginForm.get('password')?.value"
+                    [class.text-sm]="loginForm.get('password')?.value"
+                    [class.font-medium]="loginForm.get('password')?.value"
+                    [class.text-gray-700]="loginForm.get('password')?.value && !(loginForm.get('password')?.invalid && loginForm.get('password')?.touched)"
+                    [class.text-gray-400]="!loginForm.get('password')?.value"
                     [class.text-red-600]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
                     Contraseña
                 </label>
@@ -48,12 +55,17 @@
                     class="text-red-600 text-sm mt-1">
                     La contraseña debe tener al menos 8 caracteres
                 </div>
+                <!-- Error Message from Login Attempt -->
+                <div *ngIf="errorMessage" class="text-red-600 text-sm mt-2 font-medium animate-shake">
+                    {{ errorMessage }}
+                </div>
             </div>
 
             <!-- Submit Button -->
             <button type="submit" [disabled]="loginForm.invalid || isLoading"
-                class="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ isLoading ? 'Ingresando...' : 'Entrar' }}
+                class="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                <app-spinner-global *ngIf="isLoading" size="small" color="white"></app-spinner-global>
+                <span *ngIf="!isLoading">Entrar</span>
             </button>
 
             <!-- Google Login Button -->

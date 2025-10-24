@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
+import { SpinnerGlobalComponent } from '../../../shared/components/spinner-global/spinner-global';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +19,8 @@ import { Router } from '@angular/router';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
+    SpinnerGlobalComponent
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss'
@@ -26,10 +29,12 @@ export class LoginComponent {
   loginForm: FormGroup;
   showPassword = false;
   isLoading = false;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -44,21 +49,75 @@ export class LoginComponent {
   onLogin(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      // Aquí iría la lógica de autenticación con el backend
-      console.log('Formulario de login:', this.loginForm.value);
+      this.errorMessage = ''; // Limpiar mensaje de error previo
 
-      // Simulación de llamada al backend
-      setTimeout(() => {
-        this.isLoading = false;
-        // this.router.navigate(['/dashboard']);
-      }, 2000);
+      const credentials = {
+        email: this.loginForm.value.email,
+        password: this.loginForm.value.password
+      };
+
+      console.log('🔐 Enviando credenciales de login:', credentials);
+
+      this.authService.login(credentials).subscribe({
+        next: (response) => {
+          console.log('✅ Login exitoso:', response);
+          console.log('👤 Usuario:', response.user);
+          console.log('🔑 Token:', response.token);
+          console.log('🔒 Token Type:', response.token_type);
+
+          this.isLoading = false;
+
+          // Redirigir al dashboard
+          console.log('🚀 Redirigiendo al dashboard...');
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error) => {
+          console.error('❌ Error en login:', error);
+          console.error('📋 Detalles del error:', {
+            status: error.status,
+            statusText: error.statusText,
+            message: error.error?.error || error.message,
+            errors: error.error?.errors || {}
+          });
+
+          this.isLoading = false;
+
+          // Determinar el tipo de error basado en el mensaje del backend
+          const errorMsg = error.error?.error || '';
+
+          if (errorMsg.toLowerCase().includes('contraseña inválida')) {
+            // Error de contraseña incorrecta
+            this.errorMessage = 'Contraseña inválida.';
+
+            // Resetear solo la contraseña
+            this.loginForm.patchValue({ password: '' });
+          } else if (errorMsg.toLowerCase().includes('usuario no encontrado') ||
+            errorMsg.toLowerCase().includes('no autorizado')) {
+            // Error de usuario no encontrado
+            this.errorMessage = 'Usuario no encontrado o no autorizado.';
+
+            // Resetear todo el formulario
+            this.loginForm.reset();
+          } else {
+            // Error genérico
+            this.errorMessage = 'Error al iniciar sesión. Intente nuevamente.';
+          }
+        }
+      });
     }
   }
 
   onLoginWithGoogle(): void {
-    // Aquí iría la lógica de autenticación con Google
-    console.log('Ingresando con Google...');
-    // this.router.navigate(['/dashboard']);
+    console.log('🔍 Iniciando login con Google...');
+    console.log('🌐 Redirigiendo a Google OAuth...');
+
+    // Obtener la URL de autenticación de Google desde el backend
+    const googleAuthUrl = this.authService.getGoogleAuthUrl();
+    console.log('� URL de Google Auth:', googleAuthUrl);
+
+    // Redirigir al usuario a Google para autenticación
+    // El backend manejará el callback y redirigirá de vuelta al frontend
+    window.location.href = googleAuthUrl;
   }
 
   onForgotPassword(): void {
