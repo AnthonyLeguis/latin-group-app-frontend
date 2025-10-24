@@ -1,0 +1,132 @@
+.sidebar {
+    transition: all 0.3s ease-in-out;
+    border-right: 1px solid #e5e7eb;
+}
+
+.sidebar-header {
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.user-info {
+    animation: fadeIn 0.7s ease-out;
+}
+
+.sidebar-menu {
+    scrollbar-width: thin;
+    scrollbar-color: #dc2626 #f3f4f6;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+    background: #dc2626;
+    border-radius: 3px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: #991b1b;
+}
+
+.menu-item-parent {
+    animation: fadeInLeft 0.5s ease-out;
+}
+
+.menu-item-parent a.active {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.active-submenu {
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.submenu {
+    border-left: 2px solid #fee2e2;
+    padding-left: 0.5rem;
+}
+
+// Animaciones
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        max-height: 500px;
+        transform: translateY(0);
+    }
+}
+
+.animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+}
+
+// Efectos hover
+.menu-item-parent a:hover mat-icon {
+    transform: scale(1.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+// Responsive
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 20rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+}

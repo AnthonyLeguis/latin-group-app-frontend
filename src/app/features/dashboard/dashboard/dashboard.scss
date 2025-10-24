@@ -1,0 +1,26 @@
+.dashboard-container {
+    min-height: 100vh;
+}
+
+.dashboard-content {
+    transition: margin-left 0.3s ease-in-out;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .dashboard-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+}

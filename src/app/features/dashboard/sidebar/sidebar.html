@@ -1,0 +1,64 @@
+<aside class="sidebar h-screen bg-white shadow-2xl flex flex-col justify-between py-6 px-4 w-64 fixed left-0 top-0">
+    <!-- Div 1: Logo y Usuario -->
+    <div class="sidebar-header">
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+            <img src="images/logo.png" alt="LatinGroup Insurance" class="h-16 w-auto">
+        </div>
+
+        <!-- Usuario Info -->
+        <div class="user-info text-center mb-8 pb-6 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-800 mb-1">{{ userName }}</h3>
+            <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ userTypeLabel }}</span>
+        </div>
+    </div>
+
+    <!-- Div 2: Menú Principal -->
+    <nav class="sidebar-menu flex-1 overflow-y-auto">
+        <ul class="space-y-2">
+            <li *ngFor="let item of menuItems">
+                <!-- Elemento padre -->
+                <div class="menu-item-parent">
+                    <a (click)="toggleMenuItem(item)"
+                        class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 cursor-pointer group"
+                        [class.active]="item.expanded">
+                        <div class="flex items-center gap-3">
+                            <mat-icon class="text-xl">{{ item.icon }}</mat-icon>
+                            <span class="font-medium text-sm">{{ item.label }}</span>
+                        </div>
+                        <mat-icon *ngIf="item.children" class="text-lg transition-transform duration-300"
+                            [class.rotate-180]="item.expanded">
+                            expand_more
+                        </mat-icon>
+                    </a>
+
+                    <!-- Submenú -->
+                    <ul *ngIf="item.children && item.expanded" class="submenu mt-2 ml-8 space-y-1 animate-slideDown">
+                        <li *ngFor="let child of item.children">
+                            <a [routerLink]="child.route" routerLinkActive="active-submenu"
+                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                                <mat-icon class="text-base">{{ child.icon }}</mat-icon>
+                                <span>{{ child.label }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Div 3: Configuración y Logout -->
+    <div class="sidebar-footer border-t border-gray-200 pt-4 space-y-2">
+        <a (click)="onProfile()"
+            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-300 cursor-pointer">
+            <mat-icon class="text-xl">settings</mat-icon>
+            <span class="font-medium text-sm">Configuración de perfil</span>
+        </a>
+
+        <a (click)="onLogout()"
+            class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer">
+            <mat-icon class="text-xl">logout</mat-icon>
+            <span class="font-medium text-sm">Cerrar sesión</span>
+        </a>
+    </div>
+</aside>
