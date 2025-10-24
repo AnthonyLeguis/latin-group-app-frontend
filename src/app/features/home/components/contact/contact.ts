@@ -7,6 +7,8 @@ import { SectionTitleComponent } from '../section-title/section-title.component'
 import { ContactModalService } from '../../../../core/services/contact-modal.service';
 import { ContactService } from '../../../../core/services/contact.service';
 import { Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, DialogData } from '../../../../shared/components/notification-dialog/confirm-dialog.component';
 
 declare const grecaptcha: any;
 
@@ -32,6 +34,7 @@ export class ContactComponent implements OnInit, OnDestroy {
         private fb: FormBuilder,
         private contactModalService: ContactModalService,
         private contactService: ContactService,
+        private dialog: MatDialog,
         @Inject(PLATFORM_ID) private platformId: Object
     ) {
         this.contactForm = this.fb.group({
@@ -111,12 +114,27 @@ export class ContactComponent implements OnInit, OnDestroy {
                         this.contactService.sendContactForm(formData).subscribe({
                             next: (response) => {
                                 console.log('Respuesta exitosa del backend:', response);
-                                alert('Mensaje enviado correctamente');
+                                this.dialog.open(ConfirmDialogComponent, {
+                                    data: {
+                                        type: 'success',
+                                        title: '¡Mensaje enviado!',
+                                        message: 'Tu mensaje fue enviado correctamente. Nos pondremos en contacto contigo pronto.',
+                                        autoClose: true,
+                                        autoCloseDuration: 3000
+                                    } as DialogData
+                                });
                                 this.contactForm.reset();
                             },
                             error: (err) => {
                                 console.error('Error del backend al enviar contacto:', err);
-                                alert('Error al enviar el mensaje. Intenta de nuevo.');
+                                this.dialog.open(ConfirmDialogComponent, {
+                                    data: {
+                                        type: 'error',
+                                        title: 'Error',
+                                        message: 'Hubo un problema al enviar tu mensaje. Por favor, intenta de nuevo.',
+                                        cancelButtonText: 'Cerrar'
+                                    } as DialogData
+                                });
                             }
                         });
                     });
@@ -131,7 +149,7 @@ export class ContactComponent implements OnInit, OnDestroy {
         if (this.modalForm.valid) {
             if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
                 grecaptcha.enterprise.ready(() => {
-                    grecaptcha.enterprise.execute(this.recaptchaSiteKey, { action: 'submit_contact_modal' }).then((token: string) => {
+                    grecaptcha.enterprise.execute(this.recaptchaSiteKey, { action: 'submit_contact' }).then((token: string) => {
                         const phoneValue = this.modalForm.get('phone')?.value;
                         const phoneString = phoneValue && typeof phoneValue === 'object' && phoneValue.number
                             ? phoneValue.number
@@ -145,13 +163,28 @@ export class ContactComponent implements OnInit, OnDestroy {
                         this.contactService.sendContactForm(formData).subscribe({
                             next: (response) => {
                                 console.log('Respuesta exitosa del backend (modal):', response);
-                                alert('Mensaje enviado correctamente');
+                                this.dialog.open(ConfirmDialogComponent, {
+                                    data: {
+                                        type: 'success',
+                                        title: '¡Mensaje enviado!',
+                                        message: 'Tu mensaje fue enviado correctamente. Nos pondremos en contacto contigo pronto.',
+                                        autoClose: true,
+                                        autoCloseDuration: 3000
+                                    } as DialogData
+                                });
                                 this.modalForm.reset();
                                 this.closeModal();
                             },
                             error: (err) => {
                                 console.error('Error del backend al enviar contacto (modal):', err);
-                                alert('Error al enviar el mensaje. Intenta de nuevo.');
+                                this.dialog.open(ConfirmDialogComponent, {
+                                    data: {
+                                        type: 'error',
+                                        title: 'Error',
+                                        message: 'Hubo un problema al enviar tu mensaje. Por favor, intenta de nuevo.',
+                                        cancelButtonText: 'Cerrar'
+                                    } as DialogData
+                                });
                             }
                         });
                     });

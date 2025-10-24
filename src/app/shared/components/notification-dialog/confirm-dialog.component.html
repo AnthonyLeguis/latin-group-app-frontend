@@ -1,0 +1,27 @@
+<div class="custom-dialog-container">
+    <!-- Icono animado -->
+    <div class="icon-container" *ngIf="data.type">
+        <div class="icon-circle" [ngClass]="'icon-' + data.type">
+            <mat-icon class="icon-main">{{ getIcon() }}</mat-icon>
+        </div>
+    </div>
+
+    <!-- Título -->
+    <h1 mat-dialog-title *ngIf="data.title" class="dialog-title">{{ data.title }}</h1>
+
+    <!-- Contenido -->
+    <div mat-dialog-content class="dialog-content">
+        <p *ngIf="data.message" class="dialog-message">{{ data.message }}</p>
+    </div>
+
+    <!-- Botones -->
+    <div mat-dialog-actions class="dialog-actions">
+        <button mat-stroked-button *ngIf="data.cancelButtonText" (click)="onCancel()" class="cancel-btn">
+            {{ data.cancelButtonText }}
+        </button>
+        <button mat-flat-button *ngIf="data.confirmButtonText" (click)="onConfirm()"
+            [ngClass]="'confirm-btn-' + data.type">
+            {{ data.confirmButtonText }}
+        </button>
+    </div>
+</div>

@@ -41,7 +41,7 @@
                                 [enablePlaceholder]="true" [searchCountryFlag]="true"
                                 [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
                                 [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.UnitedStates"
-                                [maxLength]="15" [phoneValidation]="true" [inputId]="'phone-input'" name="phone"
+                                [maxLength]="15" [phoneValidation]="false" [inputId]="'phone-input'" name="phone"
                                 formControlName="phone">
                             </ngx-intl-tel-input>
                         </div>
@@ -158,7 +158,7 @@
                             [enablePlaceholder]="true" [searchCountryFlag]="true"
                             [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
                             [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.UnitedStates" [maxLength]="15"
-                            [phoneValidation]="true" [inputId]="'phone-input-modal'" name="phone"
+                            [phoneValidation]="false" [inputId]="'phone-input-modal'" name="phone"
                             formControlName="phone">
                         </ngx-intl-tel-input>
                     </div>
