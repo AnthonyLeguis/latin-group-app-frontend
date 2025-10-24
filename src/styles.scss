@@ -28,6 +28,7 @@ html,
 body {
     height: 100%;
     font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+    overflow-x: hidden;
 }
 
 body {
@@ -55,4 +56,9 @@ body {
 
 .desktop-hidden {
     @apply block md:hidden;
+}
+
+/* Ocultar badge de reCAPTCHA (permitido si se muestran los terminos) */
+.grecaptcha-badge {
+    visibility: hidden !important;
 }

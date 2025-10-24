@@ -113,7 +113,7 @@ export class ContactComponent implements OnInit, OnDestroy {
                         };
                         this.contactService.sendContactForm(formData).subscribe({
                             next: (response) => {
-                                console.log('Respuesta exitosa del backend:', response);
+                                //console.log('Respuesta exitosa del backend:', response);
                                 this.dialog.open(ConfirmDialogComponent, {
                                     data: {
                                         type: 'success',
