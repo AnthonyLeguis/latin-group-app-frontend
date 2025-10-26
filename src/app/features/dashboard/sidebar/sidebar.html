@@ -1,47 +1,96 @@
-<aside class="sidebar h-screen bg-white shadow-2xl flex flex-col justify-between py-6 px-4 w-64 fixed left-0 top-0">
+<aside
+    class="sidebar h-screen bg-white shadow-2xl flex flex-col justify-between py-6 fixed left-0 top-0 transition-all duration-300"
+    [ngClass]="isExpanded ? 'w-64 px-4' : 'w-20 px-2'">
+
+    <!-- Toggle Button -->
+    <button (click)="toggleSidebar()"
+        class="toggle-btn absolute -right-3 top-20 bg-white border-2 border-gray-200 rounded-full w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center hover:bg-red-50 hover:border-red-600 transition-all duration-300 z-10">
+        <mat-icon class="text-sm text-gray-600 m-auto hover:text-red-600">
+            {{ isExpanded ? 'chevron_left' : 'chevron_right' }}
+        </mat-icon>
+    </button>
+
     <!-- Div 1: Logo y Usuario -->
     <div class="sidebar-header">
         <!-- Logo -->
-        <div class="flex justify-center mb-6">
-            <img src="images/logo.png" alt="LatinGroup Insurance" class="h-16 w-auto">
+        <div class="flex justify-center mb-6 relative h-16">
+            <!-- Logo expandido -->
+            <img src="images/logo.png" alt="LatinGroup Insurance"
+                class="absolute inset-0 m-auto h-16 w-auto transition-all duration-500"
+                [ngClass]="isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-75'">
+
+            <!-- Logo contraído -->
+            <div class="absolute inset-0 m-auto h-12 w-12 overflow-hidden rounded-full transition-all duration-500"
+                [ngClass]="!isExpanded ? 'opacity-100' : 'opacity-0'">
+                <img src="images/logo_xs.ico" alt="LatinGroup Insurance" class="h-full w-full object-cover scale-110">
+            </div>
         </div>
 
         <!-- Usuario Info -->
         <div class="user-info text-center mb-8 pb-6 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800 mb-1">{{ userName }}</h3>
-            <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ userTypeLabel }}</span>
+            <!-- Expandido: Nombre completo -->
+            <div *ngIf="isExpanded">
+                <h3 class="text-lg font-bold text-gray-800 mb-1">{{ userName }}</h3>
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ userTypeLabel }}</span>
+            </div>
+
+            <!-- Contraído: Iniciales en círculo -->
+            <div *ngIf="!isExpanded" class="flex flex-col items-center gap-2">
+                <div
+                    class="user-avatar w-12 h-12 rounded-full border-2 border-red-600 bg-white flex items-center justify-center">
+                    <span class="text-red-600 font-bold text-sm">{{ userInitials }}</span>
+                </div>
+                <span class="text-xs font-medium text-gray-500 uppercase">{{ userTypeLabel }}</span>
+            </div>
         </div>
     </div>
 
     <!-- Div 2: Menú Principal -->
     <nav class="sidebar-menu flex-1 overflow-y-auto">
         <ul class="space-y-2">
-            <li *ngFor="let item of menuItems">
+            <li *ngFor="let item of visibleMenuItems" class="relative">
                 <!-- Elemento padre -->
                 <div class="menu-item-parent">
-                    <a (click)="toggleMenuItem(item)"
-                        class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 cursor-pointer group"
-                        [class.active]="item.expanded">
+                    <a (click)="toggleMenuItem(item)" [ngClass]="{
+                            'justify-center': !isExpanded,
+                            'justify-between': isExpanded
+                        }"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 cursor-pointer group"
+                        [class.active]="item.expanded" [matTooltip]="!isExpanded ? item.label : ''"
+                        matTooltipPosition="right" matTooltipClass="custom-tooltip">
                         <div class="flex items-center gap-3">
-                            <mat-icon class="text-xl">{{ item.icon }}</mat-icon>
-                            <span class="font-medium text-sm">{{ item.label }}</span>
+                            <mat-icon class="text-2xl">{{ item.icon }}</mat-icon>
+                            <span *ngIf="isExpanded" class="font-medium text-sm">{{ item.label }}</span>
                         </div>
-                        <mat-icon *ngIf="item.children" class="text-lg transition-transform duration-300"
+                        <mat-icon *ngIf="isExpanded && item.children" class="text-xl transition-transform duration-300"
                             [class.rotate-180]="item.expanded">
                             expand_more
                         </mat-icon>
                     </a>
 
-                    <!-- Submenú -->
-                    <ul *ngIf="item.children && item.expanded" class="submenu mt-2 ml-8 space-y-1 animate-slideDown">
+                    <!-- Submenú vertical (expandido) -->
+                    <ul *ngIf="isExpanded && item.children && item.expanded"
+                        class="submenu mt-2 ml-8 space-y-1 animate-slideDown">
                         <li *ngFor="let child of item.children">
                             <a [routerLink]="child.route" routerLinkActive="active-submenu"
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
-                                <mat-icon class="text-base">{{ child.icon }}</mat-icon>
+                                <mat-icon class="text-lg">{{ child.icon }}</mat-icon>
                                 <span>{{ child.label }}</span>
                             </a>
                         </li>
                     </ul>
+
+                    <!-- Submenú horizontal (contraído) -->
+                    <div *ngIf="!isExpanded && item.children && item.expanded"
+                        class="submenu-horizontal absolute left-full top-0 ml-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 min-w-[220px] animate-slideRight">
+                        <div *ngFor="let child of item.children">
+                            <a [routerLink]="child.route" routerLinkActive="active-submenu"
+                                class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
+                                <mat-icon class="text-lg">{{ child.icon }}</mat-icon>
+                                <span>{{ child.label }}</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -49,16 +98,20 @@
 
     <!-- Div 3: Configuración y Logout -->
     <div class="sidebar-footer border-t border-gray-200 pt-4 space-y-2">
-        <a (click)="onProfile()"
-            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-300 cursor-pointer">
-            <mat-icon class="text-xl">settings</mat-icon>
-            <span class="font-medium text-sm">Configuración de perfil</span>
+        <a (click)="onProfile()" [ngClass]="!isExpanded ? 'justify-center' : ''"
+            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-300 cursor-pointer"
+            [matTooltip]="!isExpanded ? 'Configuración de perfil' : ''" matTooltipPosition="right"
+            matTooltipClass="custom-tooltip">
+            <mat-icon class="text-2xl">settings</mat-icon>
+            <span *ngIf="isExpanded" class="font-medium text-sm">Configuración de perfil</span>
         </a>
 
-        <a (click)="onLogout()"
-            class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer">
-            <mat-icon class="text-xl">logout</mat-icon>
-            <span class="font-medium text-sm">Cerrar sesión</span>
+        <a (click)="onLogout()" [ngClass]="!isExpanded ? 'justify-center' : ''"
+            class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
+            [matTooltip]="!isExpanded ? 'Cerrar sesión' : ''" matTooltipPosition="right"
+            matTooltipClass="custom-tooltip">
+            <mat-icon class="text-2xl">logout</mat-icon>
+            <span *ngIf="isExpanded" class="font-medium text-sm">Cerrar sesión</span>
         </a>
     </div>
 </aside>

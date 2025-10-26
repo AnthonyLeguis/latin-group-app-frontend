@@ -1,14 +1,54 @@
 .sidebar {
     transition: all 0.3s ease-in-out;
     border-right: 1px solid #e5e7eb;
+
+    // Estado contraído
+    &.w-20 {
+        .sidebar-menu {
+            overflow: visible; // Permitir que los submenús horizontales se muestren fuera
+        }
+    }
+}
+
+// Toggle button
+.toggle-btn {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        transform: scale(1.1);
+    }
+
+    mat-icon {
+        transition: color 0.3s ease-in-out;
+    }
 }
 
 .sidebar-header {
     animation: fadeInDown 0.5s ease-out;
+
+    // Transición suave de logos
+    img {
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        will-change: opacity, transform;
+    }
 }
 
 .user-info {
     animation: fadeIn 0.7s ease-out;
+    transition: all 0.3s ease-in-out;
+}
+
+// Avatar de usuario (estado contraído)
+.user-avatar {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        transform: scale(1.05);
+    }
 }
 
 .sidebar-menu {
@@ -52,6 +92,24 @@
 .submenu {
     border-left: 2px solid #fee2e2;
     padding-left: 0.5rem;
+}
+
+// Submenú horizontal (estado contraído)
+.submenu-horizontal {
+    animation: slideRight 0.3s ease-out;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+    a {
+        white-space: nowrap;
+
+        &:first-child {
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        &:last-child {
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+    }
 }
 
 // Animaciones
@@ -107,26 +165,35 @@
     animation: slideDown 0.3s ease-out;
 }
 
+@keyframes slideRight {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-slideRight {
+    animation: slideRight 0.3s ease-out;
+}
+
 // Efectos hover
 .menu-item-parent a:hover mat-icon {
     transform: scale(1.1);
     transition: transform 0.2s ease-in-out;
 }
 
-// Responsive
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 20rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        z-index: 1000;
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
-    }
+// Tooltips personalizados (Angular Material)
+::ng-deep .custom-tooltip {
+    background-color: #1f2937 !important;
+    color: white !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    margin-left: 0.5rem !important;
 }

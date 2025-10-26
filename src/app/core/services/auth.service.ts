@@ -90,11 +90,21 @@ export class AuthService {
     }
 
     logout(): void {
+        console.log('🔓 Cerrando sesión y limpiando localStorage...');
+
         if (isPlatformBrowser(this.platformId)) {
+            // Limpiar tokens y datos de usuario
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
+
+            console.log('✅ localStorage limpiado');
+            console.log('📋 auth_token:', localStorage.getItem('auth_token'));
+            console.log('📋 user:', localStorage.getItem('user'));
         }
+
+        // Limpiar el usuario actual del observable
         this.currentUserSubject.next(null);
+        console.log('✅ Usuario deslogueado correctamente');
     }
 
     isLoggedIn(): boolean {
@@ -119,5 +129,31 @@ export class AuthService {
 
     isClient(): boolean {
         return this.hasRole('client');
+    }
+
+    /**
+     * Obtiene la ruta del dashboard específica según el tipo de usuario
+     * @returns Ruta del dashboard correspondiente al tipo de usuario
+     */
+    getDashboardRoute(): string {
+        // Por ahora todos van a /dashboard hasta que se creen las rutas hijas
+        // TODO: Implementar rutas específicas cuando estén creadas
+        // const user = this.currentUser;
+        // if (!user) {
+        //     return '/dashboard';
+        // }
+
+        // switch (user.type) {
+        //     case 'admin':
+        //         return '/dashboard/agent-management/reports';
+        //     case 'agent':
+        //         return '/dashboard/clients/all';
+        //     case 'client':
+        //         return '/dashboard/my-policy/view';
+        //     default:
+        //         return '/dashboard';
+        // }
+
+        return '/dashboard';
     }
 }

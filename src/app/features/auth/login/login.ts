@@ -67,9 +67,11 @@ export class LoginComponent {
 
           this.isLoading = false;
 
-          // Redirigir al dashboard
-          console.log('🚀 Redirigiendo al dashboard...');
-          this.router.navigate(['/dashboard']);
+          // Redirigir según el tipo de usuario usando el servicio
+          const redirectUrl = this.authService.getDashboardRoute();
+          console.log(`🚀 Redirigiendo ${response.user.type} a: ${redirectUrl}`);
+
+          this.router.navigate([redirectUrl]);
         },
         error: (error) => {
           console.error('❌ Error en login:', error);
