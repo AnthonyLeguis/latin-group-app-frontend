@@ -136,24 +136,20 @@ export class AuthService {
      * @returns Ruta del dashboard correspondiente al tipo de usuario
      */
     getDashboardRoute(): string {
-        // Por ahora todos van a /dashboard hasta que se creen las rutas hijas
-        // TODO: Implementar rutas específicas cuando estén creadas
-        // const user = this.currentUser;
-        // if (!user) {
-        //     return '/dashboard';
-        // }
+        const user = this.currentUser;
+        if (!user) {
+            return '/dashboard';
+        }
 
-        // switch (user.type) {
-        //     case 'admin':
-        //         return '/dashboard/agent-management/reports';
-        //     case 'agent':
-        //         return '/dashboard/clients/all';
-        //     case 'client':
-        //         return '/dashboard/my-policy/view';
-        //     default:
-        //         return '/dashboard';
-        // }
-
-        return '/dashboard';
+        switch (user.type) {
+            case 'admin':
+                return '/dashboard/agents-report';
+            case 'agent':
+                return '/dashboard/all-clients';
+            case 'client':
+                return '/dashboard/my-policy';
+            default:
+                return '/dashboard';
+        }
     }
 }

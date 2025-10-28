@@ -49,8 +49,7 @@ export class SidebarComponent implements OnInit {
             route: '/dashboard/agent-management',
             allowedRoles: ['admin'], // Solo admin puede ver esta opción
             children: [
-                { label: 'Lista de agentes', icon: 'list', route: '/dashboard/agent-management/list' },
-                { label: 'Reportes de agentes', icon: 'assessment', route: '/dashboard/agent-management/reports' }
+                { label: 'Reporte de agentes', icon: 'assessment', route: '/dashboard/agents-report' }
             ],
             expanded: false
         },
@@ -60,7 +59,7 @@ export class SidebarComponent implements OnInit {
             route: '/dashboard/clients',
             allowedRoles: ['admin', 'agent'], // Admin y Agent pueden ver esta opción
             children: [
-                { label: 'Todos los clientes', icon: 'groups', route: '/dashboard/clients/all' },
+                { label: 'Todos los clientes', icon: 'groups', route: '/dashboard/all-clients' },
                 { label: 'Clientes activos', icon: 'verified_user', route: '/dashboard/clients/active' }
             ],
             expanded: false
@@ -94,7 +93,7 @@ export class SidebarComponent implements OnInit {
             route: '/dashboard/my-policy',
             allowedRoles: ['client'], // Solo clientes pueden ver sus pólizas
             children: [
-                { label: 'Ver póliza', icon: 'visibility', route: '/dashboard/my-policy/view' },
+                { label: 'Ver póliza', icon: 'visibility', route: '/dashboard/my-policy' },
                 { label: 'Documentos', icon: 'folder', route: '/dashboard/my-policy/documents' }
             ],
             expanded: false

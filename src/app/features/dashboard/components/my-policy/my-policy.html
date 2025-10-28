@@ -1,0 +1,25 @@
+<div class="my-policy-container">
+    <!-- Skeleton durante carga -->
+    <app-form-skeleton *ngIf="isLoading"></app-form-skeleton>
+
+    <!-- Contenido principal -->
+    <mat-card class="my-policy-card" *ngIf="!isLoading">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>description</mat-icon>
+                Mi Póliza
+            </mat-card-title>
+            <mat-card-subtitle>
+                Información detallada de tu póliza
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <div class="coming-soon">
+                <mat-icon>construction</mat-icon>
+                <h2>Próximamente</h2>
+                <p>Esta sección está en desarrollo</p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

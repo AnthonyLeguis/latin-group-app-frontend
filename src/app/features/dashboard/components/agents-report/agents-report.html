@@ -1,0 +1,159 @@
+<div class="agents-report-container">
+    <!-- Skeleton durante carga -->
+    <app-form-skeleton *ngIf="isLoading"></app-form-skeleton>
+
+    <!-- Contenido principal -->
+    <div *ngIf="!isLoading">
+        <!-- Estadísticas Generales -->
+        <mat-card class="stats-card" *ngIf="stats">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>bar_chart</mat-icon>
+                    Estadísticas Generales
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <mat-icon>people</mat-icon>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ stats.total_users }}</span>
+                            <span class="stat-label">Total Usuarios</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <mat-icon>admin_panel_settings</mat-icon>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ stats.total_admins }}</span>
+                            <span class="stat-label">Administradores</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <mat-icon>support_agent</mat-icon>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ stats.total_agents }}</span>
+                            <span class="stat-label">Agentes</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <mat-icon>person</mat-icon>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ stats.total_clients }}</span>
+                            <span class="stat-label">Clientes</span>
+                        </div>
+                    </div>
+                    <div class="stat-item warn">
+                        <mat-icon>schedule</mat-icon>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ stats.pending_forms }}</span>
+                            <span class="stat-label">Planillas Pendientes</span>
+                        </div>
+                    </div>
+                    <div class="stat-item success">
+                        <mat-icon>check_circle</mat-icon>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ stats.active_forms }}</span>
+                            <span class="stat-label">Planillas Activas</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Reporte de Agentes -->
+        <mat-card class="agents-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>support_agent</mat-icon>
+                    Reporte de Agentes
+                </mat-card-title>
+                <mat-card-subtitle>
+                    {{ totalAgents }} agentes con {{ totalClients }} clientes en total
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                <!-- Lista de Agentes con Expansión -->
+                <mat-accordion class="agents-accordion">
+                    <mat-expansion-panel *ngFor="let agent of agents" class="agent-panel">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <div class="agent-header">
+                                    <mat-icon class="agent-icon">support_agent</mat-icon>
+                                    <div class="agent-info">
+                                        <span class="agent-name">{{ agent.name }}</span>
+                                        <span class="agent-email">{{ agent.email }}</span>
+                                    </div>
+                                </div>
+                            </mat-panel-title>
+                            <mat-panel-description>
+                                <mat-chip class="clients-chip">
+                                    <mat-icon>person</mat-icon>
+                                    {{ agent.clients_count }} {{ agent.clients_count === 1 ? 'cliente' : 'clientes' }}
+                                </mat-chip>
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+
+                        <!-- Clientes del Agente -->
+                        <div class="clients-list"
+                            *ngIf="agent.created_users && agent.created_users.length > 0; else noClients">
+                            <h4 class="clients-title">Clientes Asignados</h4>
+                            <div class="client-card" *ngFor="let client of agent.created_users">
+                                <div class="client-header">
+                                    <mat-icon class="client-icon">person</mat-icon>
+                                    <div class="client-info">
+                                        <span class="client-name">{{ client.name }}</span>
+                                        <span class="client-email">{{ client.email }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Planillas del Cliente -->
+                                <div class="forms-section"
+                                    *ngIf="client.application_forms_as_client && client.application_forms_as_client.length > 0">
+                                    <h5 class="forms-title">Planillas de Aplicación</h5>
+                                    <div class="forms-list">
+                                        <div class="form-item" *ngFor="let form of client.application_forms_as_client">
+                                            <mat-icon [class]="'form-icon ' + form.status">
+                                                {{ getStatusIcon(form.status) }}
+                                            </mat-icon>
+                                            <div class="form-details">
+                                                <span class="form-id">Planilla #{{ form.id }}</span>
+                                                <span class="form-date">{{ form.created_at | date: 'dd/MM/yyyy'
+                                                    }}</span>
+                                            </div>
+                                            <mat-chip [class]="'status-chip ' + form.status">
+                                                {{ form.status }}
+                                            </mat-chip>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sin planillas -->
+                                <div class="no-forms"
+                                    *ngIf="!client.application_forms_as_client || client.application_forms_as_client.length === 0">
+                                    <mat-icon>info</mat-icon>
+                                    <span>Sin planillas de aplicación</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No hay clientes -->
+                        <ng-template #noClients>
+                            <div class="no-clients">
+                                <mat-icon>info</mat-icon>
+                                <p>Este agente aún no tiene clientes asignados</p>
+                            </div>
+                        </ng-template>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+                <!-- Sin agentes -->
+                <div class="no-data" *ngIf="agents.length === 0">
+                    <mat-icon>inbox</mat-icon>
+                    <h3>No hay agentes registrados</h3>
+                    <p>Aún no se han creado agentes en el sistema</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
