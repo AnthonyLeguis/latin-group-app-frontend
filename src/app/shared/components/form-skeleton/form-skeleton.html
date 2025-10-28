@@ -1,0 +1,32 @@
+<div class="form-skeleton-container">
+    <div class="form-skeleton-card">
+        <!-- Header Skeleton -->
+        <div class="form-skeleton-header">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-subtitle"></div>
+        </div>
+
+        <!-- Content Skeleton -->
+        <div class="form-skeleton-content">
+            <!-- Form Fields -->
+            <app-skeleton-loader type="form-field" [count]="3" spacing="1.5rem">
+            </app-skeleton-loader>
+
+            <!-- Info Box -->
+            <div class="skeleton-info-box">
+                <div class="skeleton-info-icon"></div>
+                <div class="skeleton-info-lines">
+                    <app-skeleton-loader type="text" width="80%" height="14px"></app-skeleton-loader>
+                    <app-skeleton-loader type="text" width="60%" height="12px"></app-skeleton-loader>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="skeleton-actions">
+                <div class="skeleton-button"></div>
+                <div class="skeleton-button primary"></div>
+            </div>
+        </div>
+    </div>
+</div>

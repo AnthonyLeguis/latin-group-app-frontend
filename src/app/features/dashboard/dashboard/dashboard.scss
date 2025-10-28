@@ -1,10 +1,30 @@
-.dashboard-container {
+:host {
+    display: block;
     min-height: 100vh;
 }
 
+.dashboard-container {
+    min-height: 100vh;
+    display: flex;
+    background-color: #f9fafb;
+}
+
 .dashboard-content {
+    flex: 1;
+    min-height: 100vh;
+    padding: 2rem;
     transition: margin-left 0.3s ease-in-out;
     animation: fadeIn 0.5s ease-out;
+}
+
+// Estado expandido del sidebar (por defecto en desktop)
+:host.sidebar-expanded .dashboard-content {
+    margin-left: 16rem; // 256px (w-64)
+}
+
+// Estado contraído del sidebar (desktop)
+:host.sidebar-collapsed .dashboard-content {
+    margin-left: 5rem; // 80px (w-20)
 }
 
 @keyframes fadeIn {
@@ -17,10 +37,28 @@
     }
 }
 
-// Responsive
-@media (max-width: 768px) {
+// Responsive - En móviles, sin margin porque el sidebar está oculto
+@media (max-width: 1024px) {
+
+    // En tablets y móviles, contenido ocupa todo el ancho
+    :host.sidebar-expanded .dashboard-content,
+    :host.sidebar-collapsed .dashboard-content {
+        margin-left: 0 !important; // Sin margen, sidebar está oculto
+    }
+
     .dashboard-content {
-        margin-left: 0;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-content {
         padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-content {
+        padding: 0.75rem;
     }
 }

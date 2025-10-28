@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -11,10 +11,19 @@ export class AuthGuard implements CanActivate {
         private router: Router
     ) { }
 
-    canActivate(): boolean {
+    canActivate(route: ActivatedRouteSnapshot): boolean {
+        // Permitir acceso si hay parámetros de Google callback en la URL
+        const queryParams = route.queryParams;
+        if (queryParams['token'] && queryParams['user_id'] && queryParams['user_type']) {
+            console.log('🔓 AuthGuard: Permitiendo acceso por callback de Google');
+            return true;
+        }
+
+        // Verificación normal de autenticación
         if (this.authService.isLoggedIn()) {
             return true;
         } else {
+            console.log('🔒 AuthGuard: Usuario no autenticado, redirigiendo a login');
             this.router.navigate(['/auth/login']);
             return false;
         }

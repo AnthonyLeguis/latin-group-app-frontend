@@ -1,6 +1,15 @@
+<!-- Overlay para cerrar sidebar en móviles -->
+<div class="sidebar-overlay" *ngIf="isMobileView && isMobileOpen" (click)="closeMobileSidebar()">
+</div>
+
 <aside
     class="sidebar h-screen bg-white shadow-2xl flex flex-col justify-between py-6 fixed left-0 top-0 transition-all duration-300"
-    [ngClass]="isExpanded ? 'w-64 px-4' : 'w-20 px-2'">
+    [ngClass]="{
+        'w-64 px-4': isExpanded && !isMobileView,
+        'w-20 px-2': !isExpanded && !isMobileView,
+        'mobile-open': isMobileView && isMobileOpen,
+        'mobile-closed': isMobileView && !isMobileOpen
+    }">
 
     <!-- Toggle Button -->
     <button (click)="toggleSidebar()"
@@ -73,6 +82,7 @@
                         class="submenu mt-2 ml-8 space-y-1 animate-slideDown">
                         <li *ngFor="let child of item.children">
                             <a [routerLink]="child.route" routerLinkActive="active-submenu"
+                                (click)="isMobileView && closeMobileSidebar()"
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
                                 <mat-icon class="text-lg">{{ child.icon }}</mat-icon>
                                 <span>{{ child.label }}</span>
@@ -85,6 +95,7 @@
                         class="submenu-horizontal absolute left-full top-0 ml-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 min-w-[220px] animate-slideRight">
                         <div *ngFor="let child of item.children">
                             <a [routerLink]="child.route" routerLinkActive="active-submenu"
+                                (click)="isMobileView && closeMobileSidebar()"
                                 class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
                                 <mat-icon class="text-lg">{{ child.icon }}</mat-icon>
                                 <span>{{ child.label }}</span>

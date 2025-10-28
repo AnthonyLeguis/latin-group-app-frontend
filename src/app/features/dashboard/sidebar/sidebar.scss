@@ -1,12 +1,70 @@
 .sidebar {
     transition: all 0.3s ease-in-out;
     border-right: 1px solid #e5e7eb;
+    z-index: 1000; // Asegurar que esté por encima del contenido
 
     // Estado contraído
     &.w-20 {
         .sidebar-menu {
             overflow: visible; // Permitir que los submenús horizontales se muestren fuera
         }
+    }
+}
+
+// Overlay para móviles - solo en pantallas pequeñas
+@media (max-width: 1023px) {
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999; // Justo debajo del sidebar
+        backdrop-filter: blur(2px);
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    // Estados móviles
+    .sidebar.mobile-closed {
+        transform: translateX(-100%); // Ocultar completamente
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0); // Mostrar
+        width: 16rem !important; // 256px - siempre expandido en móvil
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        z-index: 1000; // Por encima del overlay
+    }
+
+    .sidebar {
+
+        // En tablets y móviles, preparar para hamburger menu
+        &:not(.mobile-open) {
+            transform: translateX(-100%);
+        }
+    }
+}
+
+// En pantallas grandes (desktop), comportamiento normal sin clases mobile-*
+@media (min-width: 1024px) {
+    .sidebar {
+        // Resetear transforms de móvil
+        transform: none !important;
+
+        // No aplicar estilos mobile-* en desktop
+        &.mobile-closed,
+        &.mobile-open {
+            transform: none !important;
+            width: auto !important;
+            padding: auto !important;
+        }
+    }
+
+    // No mostrar overlay en desktop
+    .sidebar-overlay {
+        display: none !important;
     }
 }
 
@@ -22,6 +80,55 @@
 
     mat-icon {
         transition: color 0.3s ease-in-out;
+    }
+}
+
+// Toggle button en MÓVILES SOLAMENTE - más visible y accesible cuando sidebar está cerrado
+@media (max-width: 1023px) {
+    .sidebar.mobile-closed .toggle-btn {
+        // Mantener el botón visible aunque el sidebar esté oculto
+        transform: translateX(30%) translateX(0.5rem);
+        z-index: 60; // Por encima del sidebar y overlay
+        background-color: #dc2626; // Rojo para que destaque
+        border-color: white;
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.5);
+
+        mat-icon {
+            color: white;
+        }
+
+        &:hover {
+            background-color: #991b1b;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+            transform: translateX(30%) translateX(0.5rem) scale(1.15);
+        }
+    }
+
+    // Cuando el sidebar está abierto, mantener estilo normal
+    .sidebar.mobile-open .toggle-btn {
+        background-color: white;
+        border-color: #e5e7eb;
+
+        mat-icon {
+            color: #6b7280;
+
+            &:hover {
+                color: #dc2626;
+            }
+        }
+    }
+}
+
+// Toggle button en DESKTOP - comportamiento normal sin estilos especiales
+@media (min-width: 1024px) {
+    .toggle-btn {
+        // Resetear cualquier transform de móvil
+        transform: none !important;
+
+        &:hover {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            transform: scale(1.1) !important;
+        }
     }
 }
 

@@ -1,0 +1,170 @@
+.skeleton-container {
+    width: 100%;
+}
+
+.skeleton-wrapper {
+    width: 100%;
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            #f0f0f0 0%,
+            #e0e0e0 20%,
+            #f0f0f0 40%,
+            #f0f0f0 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// Skeleton de texto
+.skeleton-text {
+    display: block;
+    border-radius: 4px;
+}
+
+// Skeleton de círculo
+.skeleton-circle {
+    border-radius: 50%;
+}
+
+// Skeleton de rectángulo
+.skeleton-rectangle {
+    border-radius: 8px;
+}
+
+// Skeleton de campo de formulario
+.skeleton-form-field {
+    .skeleton-label {
+        width: 30%;
+        height: 14px;
+        margin-bottom: 8px;
+        background: linear-gradient(90deg,
+                #f0f0f0 0%,
+                #e0e0e0 20%,
+                #f0f0f0 40%,
+                #f0f0f0 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        border-radius: 4px;
+    }
+
+    .skeleton-input {
+        width: 100%;
+        height: 56px;
+        background: linear-gradient(90deg,
+                #f0f0f0 0%,
+                #e0e0e0 20%,
+                #f0f0f0 40%,
+                #f0f0f0 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+    }
+}
+
+// Skeleton de card
+.skeleton-card {
+    width: 100%;
+    padding: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .skeleton-card-header {
+        height: 120px;
+        background: linear-gradient(90deg,
+                #e0e0e0 0%,
+                #d0d0d0 20%,
+                #e0e0e0 40%,
+                #e0e0e0 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-card-content {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .skeleton-card-line {
+            height: 16px;
+            background: linear-gradient(90deg,
+                    #f0f0f0 0%,
+                    #e0e0e0 20%,
+                    #f0f0f0 40%,
+                    #f0f0f0 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease-in-out infinite;
+            border-radius: 4px;
+
+            &.short {
+                width: 60%;
+            }
+        }
+    }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+    .skeleton {
+        background: linear-gradient(90deg,
+                #2a2a2a 0%,
+                #3a3a3a 20%,
+                #2a2a2a 40%,
+                #2a2a2a 100%);
+        background-size: 200% 100%;
+    }
+
+    .skeleton-form-field {
+
+        .skeleton-label,
+        .skeleton-input {
+            background: linear-gradient(90deg,
+                    #2a2a2a 0%,
+                    #3a3a3a 20%,
+                    #2a2a2a 40%,
+                    #2a2a2a 100%);
+            background-size: 200% 100%;
+        }
+
+        .skeleton-input {
+            border-color: #3a3a3a;
+        }
+    }
+
+    .skeleton-card {
+        background: #1a1a1a;
+
+        .skeleton-card-header {
+            background: linear-gradient(90deg,
+                    #2a2a2a 0%,
+                    #3a3a3a 20%,
+                    #2a2a2a 40%,
+                    #2a2a2a 100%);
+            background-size: 200% 100%;
+        }
+
+        .skeleton-card-content .skeleton-card-line {
+            background: linear-gradient(90deg,
+                    #2a2a2a 0%,
+                    #3a3a3a 20%,
+                    #2a2a2a 40%,
+                    #2a2a2a 100%);
+            background-size: 200% 100%;
+        }
+    }
+}

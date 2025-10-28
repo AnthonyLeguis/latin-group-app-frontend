@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../../core/services/auth.service';
+import { SidebarService } from '../services/sidebar.service';
 import { ConfirmDialogComponent } from '../../../shared/components/notification-dialog/confirm-dialog.component';
 
 interface MenuItem {
@@ -36,6 +37,8 @@ export class SidebarComponent implements OnInit {
     userTypeLabel = '';
     userInitials = '';
     isExpanded = true;
+    isMobileOpen = false; // Estado de apertura en móviles
+    isMobileView = false; // Detectar si estamos en vista móvil
     visibleMenuItems: MenuItem[] = []; // Items filtrados según el rol del usuario
 
     // Todos los items del menú con sus roles permitidos
@@ -69,7 +72,7 @@ export class SidebarComponent implements OnInit {
             allowedRoles: ['admin', 'agent'], // Admin y Agent pueden cotizar
             children: [
                 { label: 'Nueva cotización', icon: 'add_circle', route: '/dashboard/quotes/new' },
-                { label: 'Ingresar Cliente', icon: 'person_add', route: '/dashboard/quotes/add-client' },
+                { label: 'Ingresar Cliente', icon: 'person_add', route: '/dashboard/create-client' },
                 { label: 'Historial de cotizaciones', icon: 'history', route: '/dashboard/quotes/history' }
             ],
             expanded: false
@@ -81,7 +84,7 @@ export class SidebarComponent implements OnInit {
             allowedRoles: ['admin'], // Solo admin puede gestionar usuarios
             children: [
                 { label: 'Lista de usuarios', icon: 'group', route: '/dashboard/users/list' },
-                { label: 'Crear usuario', icon: 'person_add', route: '/dashboard/users/create' }
+                { label: 'Crear usuario', icon: 'person_add', route: '/dashboard/create-user' }
             ],
             expanded: false
         },
@@ -101,7 +104,8 @@ export class SidebarComponent implements OnInit {
     constructor(
         private authService: AuthService,
         private router: Router,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private sidebarService: SidebarService
     ) { }
 
     ngOnInit(): void {
@@ -115,6 +119,32 @@ export class SidebarComponent implements OnInit {
 
             // Filtrar los items del menú según el rol del usuario
             this.filterMenuByRole(currentUser.type);
+        }
+
+        // Detectar si estamos en vista móvil
+        this.checkMobileView();
+
+        // Sincronizar estado inicial con el servicio
+        this.sidebarService.setExpanded(this.isExpanded);
+
+        // Escuchar cambios de tamaño de ventana
+        window.addEventListener('resize', () => this.checkMobileView());
+    }
+
+    checkMobileView(): void {
+        const wasMobile = this.isMobileView;
+        this.isMobileView = window.innerWidth < 1024;
+
+        // Si cambió de desktop a móvil, cerrar el sidebar
+        if (!wasMobile && this.isMobileView) {
+            this.isMobileOpen = false;
+            this.sidebarService.setMobileOpen(false);
+        }
+
+        // Si cambió de móvil a desktop, restaurar estado expandido
+        if (wasMobile && !this.isMobileView) {
+            this.isExpanded = true;
+            this.sidebarService.setExpanded(true);
         }
     }
 
@@ -158,10 +188,25 @@ export class SidebarComponent implements OnInit {
     }
 
     toggleSidebar(): void {
-        this.isExpanded = !this.isExpanded;
-        // Cerrar todos los submenús al contraer
-        if (!this.isExpanded) {
-            this.visibleMenuItems.forEach((item: MenuItem) => item.expanded = false);
+        // En móvil, alternar apertura del sidebar con overlay
+        if (this.isMobileView) {
+            this.isMobileOpen = !this.isMobileOpen;
+            this.sidebarService.toggleMobileSidebar();
+        } else {
+            // En desktop, alternar expandido/contraído
+            this.isExpanded = !this.isExpanded;
+            this.sidebarService.toggleSidebar();
+            // Cerrar todos los submenús al contraer
+            if (!this.isExpanded) {
+                this.visibleMenuItems.forEach((item: MenuItem) => item.expanded = false);
+            }
+        }
+    }
+
+    closeMobileSidebar(): void {
+        if (this.isMobileView) {
+            this.isMobileOpen = false;
+            this.sidebarService.closeMobileSidebar();
         }
     }
 
@@ -173,6 +218,11 @@ export class SidebarComponent implements OnInit {
         if (item.children) {
             // Siempre invertir el estado expanded
             item.expanded = !item.expanded;
+        } else if (item.route) {
+            // Si tiene ruta y estamos en móvil, cerrar el sidebar al navegar
+            if (this.isMobileView) {
+                this.closeMobileSidebar();
+            }
         }
     }
 

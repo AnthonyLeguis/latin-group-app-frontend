@@ -1,0 +1,43 @@
+<div class="skeleton-container">
+    <ng-container [ngSwitch]="type">
+        <!-- Skeleton de texto -->
+        <div *ngSwitchCase="'text'" class="skeleton-wrapper">
+            <div *ngFor="let i of [].constructor(count)" class="skeleton skeleton-text" [style.width]="width"
+                [style.height]="height" [style.margin-bottom]="spacing">
+            </div>
+        </div>
+
+        <!-- Skeleton de círculo (para avatares) -->
+        <div *ngSwitchCase="'circle'" class="skeleton-wrapper">
+            <div class="skeleton skeleton-circle" [style.width]="width" [style.height]="height">
+            </div>
+        </div>
+
+        <!-- Skeleton de rectángulo (para imágenes/cards) -->
+        <div *ngSwitchCase="'rectangle'" class="skeleton-wrapper">
+            <div class="skeleton skeleton-rectangle" [style.width]="width" [style.height]="height">
+            </div>
+        </div>
+
+        <!-- Skeleton de campo de formulario -->
+        <div *ngSwitchCase="'form-field'" class="skeleton-wrapper">
+            <div *ngFor="let i of [].constructor(count)" class="skeleton skeleton-form-field"
+                [style.margin-bottom]="spacing">
+                <div class="skeleton-label"></div>
+                <div class="skeleton-input"></div>
+            </div>
+        </div>
+
+        <!-- Skeleton de card completa -->
+        <div *ngSwitchCase="'card'" class="skeleton-wrapper">
+            <div class="skeleton skeleton-card">
+                <div class="skeleton-card-header"></div>
+                <div class="skeleton-card-content">
+                    <div class="skeleton-card-line"></div>
+                    <div class="skeleton-card-line"></div>
+                    <div class="skeleton-card-line short"></div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

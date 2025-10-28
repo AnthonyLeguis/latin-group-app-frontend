@@ -1,0 +1,99 @@
+<div class="create-user-container">
+    <!-- Skeleton durante inicialización -->
+    <app-form-skeleton *ngIf="isInitializing"></app-form-skeleton>
+
+    <!-- Formulario real después de inicialización -->
+    <mat-card class="create-user-card" *ngIf="!isInitializing">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>group_add</mat-icon>
+                Crear Nuevo Usuario
+            </mat-card-title>
+            <mat-card-subtitle>
+                Complete el formulario para registrar un nuevo administrador o agente
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+
+                <!-- Tipo de Usuario -->
+                <div class="user-type-section">
+                    <label class="section-label">Tipo de Usuario</label>
+                    <mat-radio-group formControlName="type" class="user-type-radio-group">
+                        <mat-radio-button *ngFor="let userType of userTypes" [value]="userType.value"
+                            class="user-type-option">
+                            <div class="user-type-content">
+                                <mat-icon>{{ userType.icon }}</mat-icon>
+                                <div class="user-type-info">
+                                    <span class="user-type-label">{{ userType.label }}</span>
+                                    <span class="user-type-description">{{ userType.description }}</span>
+                                </div>
+                            </div>
+                        </mat-radio-button>
+                    </mat-radio-group>
+                </div>
+
+                <!-- Información del Usuario -->
+                <div class="form-section">
+                    <label class="section-label">Información del Usuario</label>
+
+                    <!-- Nombre completo -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Nombre Completo</mat-label>
+                        <input matInput formControlName="name" placeholder="Ej: Juan Pérez" required
+                            (input)="onNameInput()">
+                        <mat-icon matPrefix>person</mat-icon>
+                        <mat-error *ngIf="userForm.get('name')?.invalid">
+                            {{ getErrorMessage('name') }}
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Email -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Correo Electrónico</mat-label>
+                        <input matInput type="email" formControlName="email" placeholder="usuario@ejemplo.com" required
+                            (input)="onEmailInput()">
+                        <mat-icon matPrefix>email</mat-icon>
+                        <mat-error *ngIf="userForm.get('email')?.invalid">
+                            {{ getErrorMessage('email') }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Info de contraseña por defecto -->
+                <div class="password-info">
+                    <mat-icon>lock</mat-icon>
+                    <span>
+                        La contraseña por defecto será: <strong>latin1234*</strong>
+                        <br>
+                        <small>El usuario podrá cambiarla después de su primer acceso</small>
+                    </span>
+                </div>
+
+                <!-- Preview del tipo seleccionado -->
+                <div class="user-preview" *ngIf="getSelectedUserType() as selectedType">
+                    <mat-icon [class]="'type-icon ' + selectedType.value">{{ selectedType.icon }}</mat-icon>
+                    <div class="preview-info">
+                        <span class="preview-label">Se creará un usuario tipo:</span>
+                        <span class="preview-type">{{ selectedType.label }}</span>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="form-actions">
+                    <button mat-raised-button type="button" (click)="userForm.reset(); initForm()" [disabled]="loading">
+                        <mat-icon>clear</mat-icon>
+                        Limpiar
+                    </button>
+
+                    <button mat-raised-button color="primary" type="submit" [disabled]="loading || userForm.invalid">
+                        <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+                        <mat-icon *ngIf="!loading">save</mat-icon>
+                        <span *ngIf="!loading">Crear Usuario</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
