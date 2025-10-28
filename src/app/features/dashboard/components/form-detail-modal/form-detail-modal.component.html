@@ -1,0 +1,247 @@
+<div class="modal-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+        <app-form-skeleton></app-form-skeleton>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!loading && error && !form" class="error-container">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h3>Error al cargar la planilla</h3>
+        <p>{{ error }}</p>
+        <div class="error-actions">
+            <button mat-flat-button color="primary" (click)="loadFormData()">
+                <mat-icon>refresh</mat-icon>
+                Reintentar
+            </button>
+            <button mat-stroked-button (click)="onClose()">
+                <mat-icon>close</mat-icon>
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div *ngIf="!loading && form" class="modal-content">
+        <!-- Header -->
+        <div class="modal-header">
+            <div class="header-content">
+                <mat-icon class="header-icon">description</mat-icon>
+                <div>
+                    <h2>Planilla #{{ form.id }}</h2>
+                    <p class="header-subtitle">{{ form.applicant_name }}</p>
+                </div>
+            </div>
+            <button mat-icon-button (click)="onClose()" class="close-button">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="status-badge" [ngClass]="form.status">
+            <mat-icon>{{ getCurrentStatus()?.icon }}</mat-icon>
+            <span>{{ getCurrentStatus()?.label }}</span>
+        </div>
+
+        <!-- Form Details -->
+        <div class="details-section">
+            <h3>
+                <mat-icon>person</mat-icon>
+                Información del Aplicante
+            </h3>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <label>Nombre Completo</label>
+                    <span>{{ form.applicant_name }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Fecha de Nacimiento</label>
+                    <span>{{ formatDate(form.dob) }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Género</label>
+                    <span>{{ form.gender }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>SSN</label>
+                    <span>{{ form.ssn || 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Email</label>
+                    <span>{{ form.email }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Teléfono</label>
+                    <span>{{ form.phone }}</span>
+                </div>
+
+                <div class="detail-item full-width">
+                    <label>Dirección</label>
+                    <span>{{ form.address }}, {{ form.city }}, {{ form.state }} {{ form.zip_code }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insurance Information -->
+        <div class="details-section">
+            <h3>
+                <mat-icon>health_and_safety</mat-icon>
+                Información del Seguro
+            </h3>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <label>Compañía</label>
+                    <span>{{ form.insurance_company }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Plan</label>
+                    <span>{{ form.insurance_plan }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Subsidio</label>
+                    <span>{{ formatCurrency(form.subsidy) }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Costo Final</label>
+                    <span class="highlight">{{ formatCurrency(form.final_cost) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policy Information (if exists) -->
+        <div class="details-section" *ngIf="form.poliza_number">
+            <h3>
+                <mat-icon>policy</mat-icon>
+                Información de Póliza
+            </h3>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <label>Número de Póliza</label>
+                    <span>{{ form.poliza_number }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Categoría</label>
+                    <span>{{ form.poliza_category || 'N/A' }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Monto</label>
+                    <span>{{ formatCurrency(form.poliza_amount) }}</span>
+                </div>
+
+                <div class="detail-item">
+                    <label>Beneficiario</label>
+                    <span>{{ form.poliza_beneficiary || 'N/A' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Information -->
+        <div class="details-section">
+            <h3>
+                <mat-icon>support_agent</mat-icon>
+                Agente Asignado
+            </h3>
+
+            <div class="agent-info">
+                <mat-icon class="agent-avatar">account_circle</mat-icon>
+                <div>
+                    <p class="agent-name">{{ form.agent?.name || form.agent_name }}</p>
+                    <p class="agent-email">{{ form.agent?.email }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Update Form -->
+        <div class="status-update-section">
+            <h3>
+                <mat-icon>edit_note</mat-icon>
+                Actualizar Estado
+            </h3>
+
+            <form [formGroup]="statusForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nuevo Estado</mat-label>
+                    <mat-select formControlName="status">
+                        <mat-option *ngFor="let status of statuses" [value]="status.value">
+                            <div class="status-option">
+                                <mat-icon [style.color]="status.color">{{ status.icon }}</mat-icon>
+                                <span>{{ status.label }}</span>
+                            </div>
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>flag</mat-icon>
+                    <mat-error *ngIf="statusForm.get('status')?.hasError('required')">
+                        El estado es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Comentario / Motivo</mat-label>
+                    <textarea matInput formControlName="status_comment" rows="4"
+                        placeholder="Explica el motivo del cambio de estado..." maxlength="1000"></textarea>
+                    <mat-icon matPrefix>comment</mat-icon>
+                    <mat-hint align="end">
+                        {{ statusForm.get('status_comment')?.value?.length || 0 }} / 1000
+                    </mat-hint>
+                    <mat-error *ngIf="statusForm.get('status_comment')?.hasError('required')">
+                        El comentario es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <div class="form-actions">
+                    <button mat-stroked-button type="button" (click)="onClose()" [disabled]="submitting">
+                        <mat-icon>close</mat-icon>
+                        Cancelar
+                    </button>
+
+                    <button mat-flat-button color="primary" type="submit" [disabled]="statusForm.invalid || submitting">
+                        <mat-icon *ngIf="!submitting">save</mat-icon>
+                        <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+                        {{ submitting ? 'Guardando...' : 'Actualizar Estado' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Status History (if available) -->
+        <div class="history-section" *ngIf="form.status_comment">
+            <h3>
+                <mat-icon>history</mat-icon>
+                Último Cambio
+            </h3>
+
+            <div class="history-item">
+                <p class="history-comment">{{ form.status_comment }}</p>
+                <p class="history-meta" *ngIf="form.reviewed_at">
+                    <mat-icon>schedule</mat-icon>
+                    {{ formatDate(form.reviewed_at) }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="metadata">
+            <div class="meta-item">
+                <mat-icon>event</mat-icon>
+                <span>Creada: {{ formatDate(form.created_at) }}</span>
+            </div>
+            <div class="meta-item">
+                <mat-icon>update</mat-icon>
+                <span>Actualizada: {{ formatDate(form.updated_at) }}</span>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,327 @@
+.modal-container {
+    min-width: 700px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+
+    @media (max-width: 768px) {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+// Header
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+
+        .header-icon {
+            font-size: 2rem;
+            width: 2rem;
+            height: 2rem;
+            color: #dc2626;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .header-subtitle {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+    }
+
+    .close-button {
+        mat-icon {
+            color: #6b7280;
+        }
+
+        &:hover mat-icon {
+            color: #374151;
+        }
+    }
+}
+
+// Loading
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    min-height: 300px;
+    width: 100%;
+}
+
+// Forms List
+.forms-list {
+    padding: 1rem 1.5rem 1.5rem;
+
+    ::ng-deep {
+        .mat-expansion-panel {
+            box-shadow: none;
+        }
+
+        .mat-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+    }
+}
+
+.form-panel {
+    background-color: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+
+    &:hover {
+        border-color: #d1d5db;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    ::ng-deep {
+        .mat-expansion-panel-header {
+            padding: 1rem 1.25rem;
+            background-color: #fafafa;
+            min-height: 64px;
+
+            &:hover {
+                background-color: #f5f5f5 !important;
+            }
+
+            &.mat-expanded {
+                background-color: #f9fafb;
+                border-bottom: 1px solid #e5e7eb;
+            }
+        }
+
+        .mat-expansion-panel-body {
+            padding: 1.25rem;
+            background-color: white;
+        }
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        width: 100%;
+
+        .form-icon {
+            font-size: 1.75rem;
+            width: 1.75rem;
+            height: 1.75rem;
+            color: #374151;
+            flex-shrink: 0;
+        }
+
+        .form-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 0;
+
+            .form-title {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #111827;
+            }
+
+            .form-meta {
+                font-size: 0.8125rem;
+                color: #6b7280;
+            }
+        }
+    }
+
+    .status-chip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.375rem;
+        border-radius: 6px;
+        margin-right: 0.5rem;
+
+        mat-icon {
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        &.pendiente {
+            background-color: #fef3c7;
+            border: 1px solid #fde68a;
+
+            mat-icon {
+                color: #f59e0b;
+            }
+        }
+
+        &.activo {
+            background-color: #d1fae5;
+            border: 1px solid #a7f3d0;
+
+            mat-icon {
+                color: #10b981;
+            }
+        }
+
+        &.inactivo {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+
+            mat-icon {
+                color: #6b7280;
+            }
+        }
+
+        &.rechazado {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+
+            mat-icon {
+                color: #ef4444;
+            }
+        }
+    }
+}
+
+// Form Details
+.form-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.details-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-group {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.875rem;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+
+        &.full {
+            grid-column: 1 / -1;
+        }
+
+        mat-icon {
+            font-size: 1.375rem;
+            width: 1.375rem;
+            height: 1.375rem;
+            color: #6b7280;
+            flex-shrink: 0;
+        }
+
+        div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 0;
+
+            label {
+                font-size: 0.6875rem;
+                font-weight: 600;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            span {
+                font-size: 0.875rem;
+                color: #111827;
+                font-weight: 500;
+
+                &.highlight {
+                    color: #dc2626;
+                    font-weight: 700;
+                    font-size: 1rem;
+                }
+            }
+        }
+    }
+}
+
+.action-row {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+
+// Empty State
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+
+    mat-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #374151;
+        margin: 0 0 0.5rem 0;
+    }
+
+    p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+}
+
+// Material Overrides
+::ng-deep {
+    .mat-primary .mat-mdc-button.mat-mdc-button-base {
+        background-color: #dc2626;
+
+        &:hover {
+            background-color: #b91c1c;
+        }
+    }
+}

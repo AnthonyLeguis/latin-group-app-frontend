@@ -1,12 +1,10 @@
 import { Routes } from '@angular/router';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
 import { CreateClientComponent } from './components/create-client/create-client';
 import { CreateUserComponent } from './components/create-user/create-user';
 import { AgentsReportComponent } from './components/agents-report/agents-report';
 import { AllClientsComponent } from './components/all-clients/all-clients';
 import { MyPolicyComponent } from './components/my-policy/my-policy';
+import { NewQuoteComponent } from './components/new-quote/new-quote';
 
 export const dashboardRoutes: Routes = [
     {
@@ -38,16 +36,10 @@ export const dashboardRoutes: Routes = [
                 component: MyPolicyComponent,
                 title: 'Mi Póliza - LatinGroup'
             },
-            // Redirección por defecto según tipo de usuario
             {
-                path: '',
-                canActivate: [() => {
-                    const authService = inject(AuthService);
-                    const router = inject(Router);
-                    const redirectUrl = authService.getDashboardRoute();
-                    return router.parseUrl(redirectUrl);
-                }],
-                children: []
+                path: 'new-quote',
+                component: NewQuoteComponent,
+                title: 'Nueva Cotización - LatinGroup'
             }
         ]
     }

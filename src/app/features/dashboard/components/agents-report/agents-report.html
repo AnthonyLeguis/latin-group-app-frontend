@@ -42,18 +42,34 @@
                             <span class="stat-label">Clientes</span>
                         </div>
                     </div>
-                    <div class="stat-item warn">
+                    <div class="stat-item warn clickable group relative" (click)="openPendingForms()">
                         <mat-icon>schedule</mat-icon>
                         <div class="stat-info">
                             <span class="stat-value">{{ stats.pending_forms }}</span>
                             <span class="stat-label">Planillas Pendientes</span>
                         </div>
+                        <!-- Tooltip Tailwind -->
+                        <div
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                            Click para ver planillas pendientes
+                            <div
+                                class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-item success">
+                    <div class="stat-item success clickable group relative" (click)="openActiveForms()">
                         <mat-icon>check_circle</mat-icon>
                         <div class="stat-info">
                             <span class="stat-value">{{ stats.active_forms }}</span>
                             <span class="stat-label">Planillas Activas</span>
+                        </div>
+                        <!-- Tooltip Tailwind -->
+                        <div
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                            Click para ver planillas activas
+                            <div
+                                class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -73,9 +89,23 @@
             </mat-card-header>
 
             <mat-card-content>
+                <!-- Buscador -->
+                <div class="search-container">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label>Buscar agente o cliente</mat-label>
+                        <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
+                            placeholder="Escribe un nombre o email...">
+                        <mat-icon matPrefix>search</mat-icon>
+                        <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="clearSearch()" type="button">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                        <mat-hint>Filtra por nombre o email de agente o cliente</mat-hint>
+                    </mat-form-field>
+                </div>
+
                 <!-- Lista de Agentes con Expansión -->
                 <mat-accordion class="agents-accordion">
-                    <mat-expansion-panel *ngFor="let agent of agents" class="agent-panel">
+                    <mat-expansion-panel *ngFor="let agent of filteredAgents" class="agent-panel">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <div class="agent-header">
@@ -112,7 +142,9 @@
                                     *ngIf="client.application_forms_as_client && client.application_forms_as_client.length > 0">
                                     <h5 class="forms-title">Planillas de Aplicación</h5>
                                     <div class="forms-list">
-                                        <div class="form-item" *ngFor="let form of client.application_forms_as_client">
+                                        <div class="form-item clickable group relative"
+                                            *ngFor="let form of client.application_forms_as_client"
+                                            (click)="openFormDetail(form.id)">
                                             <mat-icon [class]="'form-icon ' + form.status">
                                                 {{ getStatusIcon(form.status) }}
                                             </mat-icon>
@@ -124,6 +156,14 @@
                                             <mat-chip [class]="'status-chip ' + form.status">
                                                 {{ form.status }}
                                             </mat-chip>
+                                            <!-- Tooltip Tailwind -->
+                                            <div
+                                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                                Click para ver detalles y modificar estado
+                                                <div
+                                                    class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -148,10 +188,11 @@
                 </mat-accordion>
 
                 <!-- Sin agentes -->
-                <div class="no-data" *ngIf="agents.length === 0">
+                <div class="no-data" *ngIf="filteredAgents.length === 0">
                     <mat-icon>inbox</mat-icon>
-                    <h3>No hay agentes registrados</h3>
-                    <p>Aún no se han creado agentes en el sistema</p>
+                    <h3>No hay agentes {{ searchTerm ? 'que coincidan con la búsqueda' : 'registrados' }}</h3>
+                    <p>{{ searchTerm ? 'Intenta con otro término de búsqueda' : 'Aún no se han creado agentes en el
+                        sistema' }}</p>
                 </div>
             </mat-card-content>
         </mat-card>

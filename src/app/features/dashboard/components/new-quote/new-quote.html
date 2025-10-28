@@ -1,0 +1,558 @@
+<div class="new-quote-container">
+    <div class="header">
+        <div class="title-section">
+            <mat-icon class="title-icon">request_quote</mat-icon>
+            <div>
+                <h1>Nueva Cotización</h1>
+                <p class="subtitle">Crea una nueva planilla de aplicación para un cliente</p>
+            </div>
+        </div>
+        <button mat-stroked-button color="warn" (click)="cancel()" class="cancel-btn">
+            <mat-icon>close</mat-icon>
+            Cancelar
+        </button>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoadingClients" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando clientes disponibles...</p>
+    </div>
+
+    <!-- Main form -->
+    <div *ngIf="!isLoadingClients" class="stepper-container">
+        <mat-stepper linear #stepper>
+            <!-- Paso 0: Selección de Cliente -->
+            <mat-step [stepControl]="clientSelectionForm" label="Cliente">
+                <form [formGroup]="clientSelectionForm">
+                    <div class="step-content">
+                        <h2>Seleccionar Cliente</h2>
+                        <p class="step-description">Elige el cliente para el cual crear la planilla de aplicación</p>
+
+                        <div class="client-selection-box">
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Buscar cliente</mat-label>
+                                <input matInput formControlName="clientSearch"
+                                    placeholder="Escribe el nombre o email del cliente" [matAutocomplete]="auto">
+                                <mat-icon matPrefix>search</mat-icon>
+                                <button mat-icon-button matSuffix *ngIf="selectedClient"
+                                    (click)="clearClientSelection()" type="button">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                                <mat-autocomplete #auto="matAutocomplete"
+                                    (optionSelected)="selectClient($event.option.value)">
+                                    <mat-option *ngFor="let client of filteredClients" [value]="client">
+                                        <div class="client-option">
+                                            <mat-icon>person</mat-icon>
+                                            <div class="client-info">
+                                                <span class="client-name">{{ client.name }}</span>
+                                                <span class="client-email">{{ client.email }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <mat-error *ngIf="clientSelectionForm.get('clientSearch')?.hasError('required')">
+                                    Debe seleccionar un cliente
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Cliente seleccionado -->
+                            <div *ngIf="selectedClient" class="selected-client-card">
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                <div class="client-details">
+                                    <h3>{{ selectedClient.name }}</h3>
+                                    <p>{{ selectedClient.email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Sin clientes disponibles -->
+                            <div *ngIf="availableClients.length === 0" class="no-clients">
+                                <mat-icon>info</mat-icon>
+                                <p>No hay clientes disponibles sin planilla de aplicación</p>
+                                <button mat-raised-button color="primary" routerLink="/dashboard/create-client">
+                                    <mat-icon>person_add</mat-icon>
+                                    Crear nuevo cliente
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious disabled>Anterior</button>
+                            <button mat-raised-button matStepperNext color="primary"
+                                [disabled]="!clientSelectionForm.valid">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 1: Datos del Aplicante -->
+            <mat-step [stepControl]="applicantForm" label="Datos del Aplicante">
+                <form [formGroup]="applicantForm">
+                    <div class="step-content">
+                        <h2>Información del Aplicante</h2>
+                        <p class="step-description">Completa los datos personales del aplicante</p>
+
+                        <div class="form-grid">
+                            <!-- Nombre completo -->
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Nombre Completo</mat-label>
+                                <input matInput formControlName="applicant_name" placeholder="Ej: Juan Pérez">
+                                <mat-icon matPrefix>person</mat-icon>
+                                <mat-error>Nombre requerido (máx. 255 caracteres)</mat-error>
+                            </mat-form-field>
+
+                            <!-- Fecha de nacimiento -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Fecha de Nacimiento</mat-label>
+                                <input matInput [matDatepicker]="dobPicker" formControlName="dob">
+                                <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #dobPicker></mat-datepicker>
+                                <mat-error>Fecha de nacimiento requerida</mat-error>
+                            </mat-form-field>
+
+                            <!-- Género -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Género</mat-label>
+                                <mat-select formControlName="gender">
+                                    <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
+                                        {{ gender.label }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>wc</mat-icon>
+                                <mat-error>Género requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- SSN -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>SSN</mat-label>
+                                <input matInput formControlName="ssn" placeholder="XXX-XX-XXXX">
+                                <mat-icon matPrefix>badge</mat-icon>
+                                <mat-error>SSN requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Dirección -->
+                            <mat-form-field appearance="outline" class="span-2">
+                                <mat-label>Dirección</mat-label>
+                                <input matInput formControlName="address" placeholder="Calle, número">
+                                <mat-icon matPrefix>home</mat-icon>
+                                <mat-error>Dirección requerida</mat-error>
+                            </mat-form-field>
+
+                            <!-- Unidad/Apt -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Unidad/Apt (Opcional)</mat-label>
+                                <input matInput formControlName="unit_apt" placeholder="Apt 123">
+                                <mat-icon matPrefix>apartment</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Ciudad -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Ciudad</mat-label>
+                                <input matInput formControlName="city" placeholder="Miami">
+                                <mat-icon matPrefix>location_city</mat-icon>
+                                <mat-error>Ciudad requerida</mat-error>
+                            </mat-form-field>
+
+                            <!-- Estado -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Estado</mat-label>
+                                <input matInput formControlName="state" placeholder="FL">
+                                <mat-icon matPrefix>map</mat-icon>
+                                <mat-error>Estado requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Zip Code -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Código Postal</mat-label>
+                                <input matInput formControlName="zip_code" placeholder="33101">
+                                <mat-icon matPrefix>local_post_office</mat-icon>
+                                <mat-error>Código postal requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Teléfono -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Teléfono</mat-label>
+                                <input matInput formControlName="phone" placeholder="(305) 123-4567">
+                                <mat-icon matPrefix>phone</mat-icon>
+                                <mat-error>Teléfono requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Teléfono 2 -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Teléfono Alterno (Opcional)</mat-label>
+                                <input matInput formControlName="phone2" placeholder="(305) 987-6543">
+                                <mat-icon matPrefix>phone</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Email -->
+                            <mat-form-field appearance="outline" class="span-2">
+                                <mat-label>Email</mat-label>
+                                <input matInput formControlName="email" type="email" placeholder="ejemplo@email.com">
+                                <mat-icon matPrefix>email</mat-icon>
+                                <mat-error>Email válido requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Estatus Legal -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Estatus Legal</mat-label>
+                                <mat-select formControlName="legal_status">
+                                    <mat-option *ngFor="let status of legalStatusOptions" [value]="status.value">
+                                        {{ status.label }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>gavel</mat-icon>
+                                <mat-error>Estatus legal requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Número de Documento -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Número de Documento</mat-label>
+                                <input matInput formControlName="document_number" placeholder="A123456789">
+                                <mat-icon matPrefix>credit_card</mat-icon>
+                                <mat-error>Número de documento requerido</mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary" [disabled]="!applicantForm.valid">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 2: Información de Empleo -->
+            <mat-step [stepControl]="employmentForm" label="Empleo">
+                <form [formGroup]="employmentForm">
+                    <div class="step-content">
+                        <h2>Información de Empleo</h2>
+                        <p class="step-description">Datos laborales del aplicante (Opcional)</p>
+
+                        <div class="form-grid">
+                            <!-- Tipo de empleo -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Tipo de Empleo</mat-label>
+                                <mat-select formControlName="employment_type">
+                                    <mat-option *ngFor="let type of employmentTypeOptions" [value]="type.value">
+                                        {{ type.label }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>work</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Nombre de la empresa -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Nombre de la Empresa</mat-label>
+                                <input matInput formControlName="employment_company_name" placeholder="ABC Corp">
+                                <mat-icon matPrefix>business</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Teléfono del trabajo -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Teléfono del Trabajo</mat-label>
+                                <input matInput formControlName="work_phone" placeholder="(305) 555-1234">
+                                <mat-icon matPrefix>phone</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Salario -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Salario</mat-label>
+                                <input matInput type="number" formControlName="wages" placeholder="0.00">
+                                <mat-icon matPrefix>attach_money</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Frecuencia de pago -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Frecuencia de Pago</mat-label>
+                                <mat-select formControlName="wages_frequency">
+                                    <mat-option *ngFor="let freq of wagesFrequencyOptions" [value]="freq.value">
+                                        {{ freq.label }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>schedule</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 3: Póliza y Seguro -->
+            <mat-step [stepControl]="policyForm" label="Póliza">
+                <form [formGroup]="policyForm">
+                    <div class="step-content">
+                        <h2>Información de Póliza y Seguro</h2>
+                        <p class="step-description">Detalles del seguro y póliza (Opcional)</p>
+
+                        <div class="form-grid">
+                            <!-- Compañía de Seguro -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Compañía de Seguro</mat-label>
+                                <input matInput formControlName="insurance_company" placeholder="Ej: Blue Cross">
+                                <mat-icon matPrefix>shield</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Plan de Seguro -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Plan de Seguro</mat-label>
+                                <input matInput formControlName="insurance_plan" placeholder="Plan Gold">
+                                <mat-icon matPrefix>description</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Subsidio -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Subsidio</mat-label>
+                                <input matInput type="number" formControlName="subsidy" placeholder="0.00">
+                                <mat-icon matPrefix>attach_money</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Costo Final -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Costo Final</mat-label>
+                                <input matInput type="number" formControlName="final_cost" placeholder="0.00">
+                                <mat-icon matPrefix>attach_money</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Número de Póliza -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Número de Póliza</mat-label>
+                                <input matInput formControlName="poliza_number" placeholder="POL-123456">
+                                <mat-icon matPrefix>confirmation_number</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Categoría de Póliza -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Categoría de Póliza</mat-label>
+                                <input matInput formControlName="poliza_category" placeholder="Salud">
+                                <mat-icon matPrefix>category</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Monto de Póliza -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Monto de Póliza</mat-label>
+                                <input matInput type="number" formControlName="poliza_amount" placeholder="0.00">
+                                <mat-icon matPrefix>attach_money</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Día de Pago -->
+                            <mat-form-field appearance="outline">
+                                <mat-label>Día de Pago</mat-label>
+                                <input matInput type="number" formControlName="poliza_payment_day" placeholder="1-31">
+                                <mat-icon matPrefix>event</mat-icon>
+                            </mat-form-field>
+
+                            <!-- Beneficiario -->
+                            <mat-form-field appearance="outline" class="span-2">
+                                <mat-label>Beneficiario</mat-label>
+                                <input matInput formControlName="poliza_beneficiary"
+                                    placeholder="Nombre del beneficiario">
+                                <mat-icon matPrefix>person</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 4: Personas Adicionales -->
+            <mat-step [stepControl]="additionalPersonsForm" label="Personas Adicionales">
+                <form [formGroup]="additionalPersonsForm">
+                    <div class="step-content">
+                        <h2>Personas Adicionales</h2>
+                        <p class="step-description">Agrega hasta 4 personas adicionales (Opcional)</p>
+
+                        <!-- Persona 1 -->
+                        <mat-card class="person-card">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <mat-icon>person_add</mat-icon>
+                                    Persona 1
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="form-grid">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre Completo</mat-label>
+                                        <input matInput formControlName="person1_name">
+                                        <mat-icon matPrefix>person</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Relación</mat-label>
+                                        <mat-select formControlName="person1_relation">
+                                            <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
+                                                {{ rel.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-icon matPrefix>family_restroom</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Fecha de Nacimiento</mat-label>
+                                        <input matInput [matDatepicker]="person1DobPicker"
+                                            formControlName="person1_dob">
+                                        <mat-icon matPrefix>cake</mat-icon>
+                                        <mat-datepicker-toggle matSuffix
+                                            [for]="person1DobPicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #person1DobPicker></mat-datepicker>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Género</mat-label>
+                                        <mat-select formControlName="person1_gender">
+                                            <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
+                                                {{ gender.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-icon matPrefix>wc</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>SSN</mat-label>
+                                        <input matInput formControlName="person1_ssn">
+                                        <mat-icon matPrefix>badge</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Número de Documento</mat-label>
+                                        <input matInput formControlName="person1_document_number">
+                                        <mat-icon matPrefix>credit_card</mat-icon>
+                                    </mat-form-field>
+                                    <mat-checkbox formControlName="person1_is_applicant" class="span-2">
+                                        Es el aplicante principal
+                                    </mat-checkbox>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <!-- Las demás personas siguen el mismo patrón, pero simplificado para el ejemplo -->
+                        <div class="more-persons-hint">
+                            <mat-icon>info</mat-icon>
+                            <p>Puedes agregar hasta 3 personas más si es necesario (Persona 2, 3 y 4)</p>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 5: Método de Pago -->
+            <mat-step [stepControl]="paymentForm" label="Método de Pago">
+                <form [formGroup]="paymentForm">
+                    <div class="step-content">
+                        <h2>Método de Pago</h2>
+                        <p class="step-description">Información de pago (Opcional)</p>
+
+                        <div class="payment-sections">
+                            <!-- Tarjeta de Crédito/Débito -->
+                            <div class="payment-section">
+                                <h3>
+                                    <mat-icon>credit_card</mat-icon>
+                                    Tarjeta de Crédito/Débito
+                                </h3>
+                                <div class="form-grid">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Tipo de Tarjeta</mat-label>
+                                        <mat-select formControlName="card_type">
+                                            <mat-option *ngFor="let type of cardTypeOptions" [value]="type.value">
+                                                {{ type.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-icon matPrefix>credit_card</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Número de Tarjeta</mat-label>
+                                        <input matInput formControlName="card_number" placeholder="XXXX XXXX XXXX XXXX">
+                                        <mat-icon matPrefix>payment</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Fecha de Expiración</mat-label>
+                                        <input matInput formControlName="card_expiration" placeholder="MM/YY">
+                                        <mat-icon matPrefix>event</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>CVV</mat-label>
+                                        <input matInput formControlName="card_cvv" placeholder="XXX">
+                                        <mat-icon matPrefix>lock</mat-icon>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Cuenta Bancaria -->
+                            <div class="payment-section">
+                                <h3>
+                                    <mat-icon>account_balance</mat-icon>
+                                    Cuenta Bancaria
+                                </h3>
+                                <div class="form-grid">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre del Banco</mat-label>
+                                        <input matInput formControlName="bank_name" placeholder="Bank of America">
+                                        <mat-icon matPrefix>account_balance</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Routing Number</mat-label>
+                                        <input matInput formControlName="bank_routing" placeholder="123456789">
+                                        <mat-icon matPrefix>tag</mat-icon>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="span-2">
+                                        <mat-label>Número de Cuenta</mat-label>
+                                        <input matInput formControlName="bank_account" placeholder="1234567890">
+                                        <mat-icon matPrefix>numbers</mat-icon>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="isSubmitting">
+                                <mat-spinner *ngIf="isSubmitting" diameter="20" class="button-spinner"></mat-spinner>
+                                <span *ngIf="!isSubmitting">
+                                    <mat-icon>check_circle</mat-icon>
+                                    Crear Planilla
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+        </mat-stepper>
+    </div>
+</div>

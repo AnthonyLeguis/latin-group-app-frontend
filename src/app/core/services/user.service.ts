@@ -73,4 +73,17 @@ export class UserService {
             { headers: this.getHeaders() }
         );
     }
+
+    /**
+     * Obtener lista de usuarios con filtros opcionales
+     */
+    getUsers(filters?: { type?: string }): Observable<any> {
+        let url = `${environment.apiUrl}/users`;
+
+        if (filters?.type) {
+            url += `?type=${filters.type}`;
+        }
+
+        return this.http.get<any>(url, { headers: this.getHeaders() });
+    }
 }

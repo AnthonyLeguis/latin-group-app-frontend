@@ -1,0 +1,122 @@
+<div class="modal-container">
+    <!-- Header -->
+    <div class="modal-header">
+        <div class="header-content">
+            <mat-icon class="header-icon">folder_open</mat-icon>
+            <div>
+                <h2>{{ title }}</h2>
+                <p class="header-subtitle">{{ forms.length }} planilla(s) encontrada(s)</p>
+            </div>
+        </div>
+        <button mat-icon-button (click)="onClose()" class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+        <app-form-skeleton></app-form-skeleton>
+    </div> <!-- Forms List -->
+    <div *ngIf="!loading && forms.length > 0" class="forms-list">
+        <mat-accordion>
+            <mat-expansion-panel *ngFor="let form of forms" class="form-panel">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <div class="form-header">
+                            <mat-icon class="form-icon">description</mat-icon>
+                            <div class="form-info">
+                                <span class="form-title">Planilla #{{ form.id }} - {{ form.applicant_name }}</span>
+                                <span class="form-meta">Cliente: {{ form.client?.name }} | Agente: {{ form.agent_name
+                                    }}</span>
+                            </div>
+                        </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                        <div class="status-chip" [ngClass]="form.status">
+                            <mat-icon>{{ getStatusIcon(form.status) }}</mat-icon>
+                        </div>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <!-- Form Details Preview -->
+                <div class="form-details">
+                    <div class="details-row">
+                        <div class="detail-group">
+                            <mat-icon>event</mat-icon>
+                            <div>
+                                <label>Fecha de Creación</label>
+                                <span>{{ formatDate(form.created_at) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <mat-icon>health_and_safety</mat-icon>
+                            <div>
+                                <label>Compañía de Seguro</label>
+                                <span>{{ form.insurance_company }}</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <mat-icon>attach_money</mat-icon>
+                            <div>
+                                <label>Costo Final</label>
+                                <span class="highlight">{{ formatCurrency(form.final_cost) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-row">
+                        <div class="detail-group full">
+                            <mat-icon>location_on</mat-icon>
+                            <div>
+                                <label>Dirección</label>
+                                <span>{{ form.address }}, {{ form.city }}, {{ form.state }} {{ form.zip_code }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="details-row">
+                        <div class="detail-group">
+                            <mat-icon>phone</mat-icon>
+                            <div>
+                                <label>Teléfono</label>
+                                <span>{{ form.phone }}</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <mat-icon>email</mat-icon>
+                            <div>
+                                <label>Email</label>
+                                <span>{{ form.email }}</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <mat-icon>cake</mat-icon>
+                            <div>
+                                <label>Fecha de Nacimiento</label>
+                                <span>{{ formatDate(form.dob) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button mat-flat-button color="primary" (click)="openFormDetail(form.id)">
+                            <mat-icon>visibility</mat-icon>
+                            Ver Detalles Completos
+                        </button>
+                    </div>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && forms.length === 0" class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <h3>No hay planillas {{ filterStatus }}s</h3>
+        <p>No se encontraron planillas con este estado.</p>
+    </div>
+</div>

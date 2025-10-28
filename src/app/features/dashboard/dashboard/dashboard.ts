@@ -48,20 +48,34 @@ export class DashboardComponent implements OnInit {
         // Guardar el token y usuario en localStorage
         this.authService.handleGoogleCallback(params['token'], user);
 
-        // Limpiar los parámetros de la URL
-        this.router.navigate([], {
-          queryParams: {},
-          replaceUrl: true
-        });
-
         console.log('✅ Sesión establecida correctamente con Google');
         console.log('📋 Usuario guardado:', user);
+
+        // Obtener la ruta específica para el tipo de usuario y redirigir
+        const redirectUrl = this.authService.getDashboardRoute();
+        console.log('🚀 Redirigiendo a:', redirectUrl);
+
+        this.router.navigate([redirectUrl], {
+          replaceUrl: true
+        });
       } else if (params['error']) {
         console.error('❌ Error en Google login:', params['error']);
         console.error('📋 Mensaje:', params['message']);
 
         // Redirigir al login con mensaje de error
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
+      } else {
+        // Si no hay parámetros de Google, verificar si estamos en la ruta raíz del dashboard
+        // y redirigir según el tipo de usuario
+        this.router.events.subscribe(() => {
+          const currentUrl = this.router.url;
+          // Si estamos exactamente en /dashboard sin rutas hijas, redirigir
+          if (currentUrl === '/dashboard' || currentUrl === '/dashboard/') {
+            const redirectUrl = this.authService.getDashboardRoute();
+            console.log('🔀 Redirigiendo desde dashboard raíz a:', redirectUrl);
+            this.router.navigate([redirectUrl], { replaceUrl: true });
+          }
+        });
       }
     });
   }
