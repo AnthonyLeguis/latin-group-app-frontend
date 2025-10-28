@@ -104,6 +104,12 @@ export interface ApplicationForm {
     reviewed_by?: number;
     reviewed_at?: string;
 
+    // Pending Changes (for Active forms edited by agents)
+    pending_changes?: any;
+    has_pending_changes?: boolean;
+    pending_changes_at?: string;
+    pending_changes_by?: number;
+
     // Timestamps
     created_at: string;
     updated_at: string;
@@ -122,6 +128,11 @@ export interface ApplicationForm {
         type: string;
     };
     reviewed_by_user?: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    pending_changes_by_user?: {
         id: number;
         name: string;
         email: string;

@@ -1,0 +1,453 @@
+.documents-container {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+// ========== Estados de carga y vacío ==========
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1.5rem;
+
+    p {
+        font-size: 1rem;
+        color: #666;
+        margin: 0;
+    }
+}
+
+.no-policy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    gap: 1rem;
+
+    mat-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #ccc;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 0;
+    }
+
+    p {
+        font-size: 1rem;
+        color: #666;
+        margin: 0;
+        max-width: 500px;
+    }
+
+    .hint {
+        color: #999;
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+}
+
+.no-documents {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    gap: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+
+    mat-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+        color: #adb5bd;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+        color: #495057;
+        margin: 0;
+    }
+
+    p {
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin: 0;
+        max-width: 400px;
+    }
+}
+
+// ========== Contenido ==========
+.documents-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+// ========== Tarjetas ==========
+mat-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+
+    mat-card-header {
+        margin-bottom: 0;
+    }
+
+    mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+
+        mat-icon {
+            color: #4a90e2;
+        }
+    }
+
+    mat-card-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+    }
+}
+
+// ========== Encabezado ==========
+.header-card {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+
+    mat-card-title,
+    mat-card-subtitle {
+        color: white;
+    }
+
+    mat-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+        color: white;
+        opacity: 0.9;
+    }
+
+    .header-text {
+        flex: 1;
+    }
+}
+
+// ========== Área de subida ==========
+.upload-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px dashed #4a90e2;
+}
+
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    gap: 1rem;
+    text-align: center;
+
+    .upload-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #4a90e2;
+        opacity: 0.7;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+        color: #333;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    p {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0;
+    }
+
+    .upload-button {
+        margin-top: 0.5rem;
+        padding: 0.5rem 2rem;
+        font-size: 1rem;
+
+        mat-icon {
+            margin-right: 0.5rem;
+        }
+    }
+
+    .upload-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        color: #4a90e2;
+        font-size: 0.95rem;
+    }
+}
+
+// ========== Grid de documentos ==========
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.document-card {
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .document-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1rem 0.5rem;
+
+        .file-icon {
+            font-size: 3rem;
+            width: 3rem;
+            height: 3rem;
+
+            &.pdf {
+                color: #dc3545;
+            }
+
+            &.image {
+                color: #28a745;
+            }
+
+            &.file {
+                color: #6c757d;
+            }
+        }
+
+        .file-type-chip {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            height: auto;
+            font-weight: 600;
+        }
+    }
+
+    .document-body {
+        flex: 1;
+        padding: 0 1rem 1rem;
+
+        .document-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 1rem 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .document-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .info-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.85rem;
+                color: #666;
+
+                mat-icon {
+                    font-size: 1rem;
+                    width: 1rem;
+                    height: 1rem;
+                    color: #999;
+                }
+            }
+        }
+    }
+
+    .document-actions {
+        display: flex;
+        justify-content: space-around;
+        padding: 0.5rem;
+        border-top: 1px solid #e9ecef;
+        background: #f8f9fa;
+
+        button {
+            transition: transform 0.2s ease;
+
+            &:hover {
+                transform: scale(1.1);
+            }
+        }
+    }
+}
+
+// ========== Tarjeta de información ==========
+.info-card {
+    background: #e7f3ff;
+    border-left: 4px solid #4a90e2;
+
+    mat-card-content {
+        padding: 1.5rem;
+    }
+
+    .info-section {
+        display: flex;
+        gap: 1rem;
+
+        >mat-icon {
+            font-size: 2rem;
+            width: 2rem;
+            height: 2rem;
+            color: #4a90e2;
+            flex-shrink: 0;
+        }
+
+        .info-text {
+            flex: 1;
+
+            h4 {
+                font-size: 1.1rem;
+                color: #333;
+                margin: 0 0 0.75rem 0;
+                font-weight: 600;
+            }
+
+            ul {
+                margin: 0;
+                padding-left: 1.5rem;
+                color: #495057;
+                font-size: 0.9rem;
+                line-height: 1.8;
+
+                li {
+                    margin-bottom: 0.35rem;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ========== Snackbar personalizado ==========
+::ng-deep {
+    .snackbar-success {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+
+    .snackbar-error {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+}
+
+// ========== Responsive ==========
+@media (max-width: 768px) {
+    .documents-container {
+        padding: 1rem;
+    }
+
+    .documents-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .upload-area {
+        padding: 1.5rem 1rem;
+
+        .upload-icon {
+            font-size: 3rem;
+            width: 3rem;
+            height: 3rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+        }
+
+        p {
+            font-size: 0.85rem;
+        }
+    }
+
+    .header-card {
+        mat-card-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .header-text {
+            text-align: center;
+        }
+    }
+
+    .info-section {
+        flex-direction: column;
+
+        >mat-icon {
+            align-self: center;
+        }
+
+        .info-text {
+            text-align: center;
+
+            ul {
+                text-align: left;
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .header-card .header-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .document-card {
+        .document-header .file-icon {
+            font-size: 2.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+    }
+
+    .upload-button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,115 @@
+<div class="documents-container">
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando tus documentos...</p>
+    </div>
+
+    <!-- Sin póliza -->
+    <div *ngIf="!isLoading && !applicationForm" class="no-policy">
+        <mat-icon>folder_off</mat-icon>
+        <h2>No tienes una póliza activa</h2>
+        <p>Necesitas tener una planilla de aplicación para gestionar documentos.</p>
+        <p class="hint">Contacta con tu agente para más información.</p>
+    </div>
+
+    <!-- Con póliza -->
+    <div *ngIf="!isLoading && applicationForm" class="documents-content">
+        <!-- Encabezado -->
+        <mat-card class="header-card">
+            <mat-card-header>
+                <mat-icon class="header-icon">folder</mat-icon>
+                <div class="header-text">
+                    <mat-card-title>Mis Documentos</mat-card-title>
+                    <mat-card-subtitle>Gestiona tus documentos de seguro</mat-card-subtitle>
+                </div>
+            </mat-card-header>
+        </mat-card>
+
+        <!-- Botón de subida -->
+        <mat-card class="upload-card">
+            <div class="upload-area">
+                <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                <h3>Sube un nuevo documento</h3>
+                <p>Formatos permitidos: PDF, JPG, PNG (Máximo 10MB)</p>
+
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png"
+                    style="display: none" [disabled]="isUploading">
+
+                <button mat-raised-button color="primary" (click)="fileInput.click()" [disabled]="isUploading"
+                    class="upload-button">
+                    <mat-icon>add</mat-icon>
+                    {{ isUploading ? 'Subiendo...' : 'Seleccionar Archivo' }}
+                </button>
+
+                <div *ngIf="isUploading" class="upload-progress">
+                    <mat-spinner diameter="24"></mat-spinner>
+                    <span>Subiendo documento...</span>
+                </div>
+            </div>
+        </mat-card>
+
+        <!-- Lista de documentos -->
+        <div *ngIf="documents.length === 0 && !isUploading" class="no-documents">
+            <mat-icon>description</mat-icon>
+            <h3>No hay documentos</h3>
+            <p>Aún no has subido ningún documento. Usa el botón de arriba para comenzar.</p>
+        </div>
+
+        <div *ngIf="documents.length > 0" class="documents-grid">
+            <mat-card *ngFor="let doc of documents" class="document-card">
+                <div class="document-header">
+                    <mat-icon [class]="'file-icon ' + (doc.is_pdf ? 'pdf' : doc.is_image ? 'image' : 'file')">
+                        {{ getFileIcon(doc) }}
+                    </mat-icon>
+                    <mat-chip class="file-type-chip">{{ getFileTypeLabel(doc) }}</mat-chip>
+                </div>
+
+                <div class="document-body">
+                    <h3 class="document-name" [title]="doc.file_name">{{ doc.file_name }}</h3>
+
+                    <div class="document-info">
+                        <div class="info-item">
+                            <mat-icon>insert_drive_file</mat-icon>
+                            <span>{{ doc.file_size_formatted }}</span>
+                        </div>
+                        <div class="info-item">
+                            <mat-icon>calendar_today</mat-icon>
+                            <span>{{ formatDate(doc.uploaded_at) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="document-actions">
+                    <button mat-icon-button color="primary" (click)="viewDocument(doc)" matTooltip="Ver documento">
+                        <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent" (click)="downloadDocument(doc)" matTooltip="Descargar">
+                        <mat-icon>download</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteDocument(doc.id)" matTooltip="Eliminar">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </mat-card>
+        </div>
+
+        <!-- Información adicional -->
+        <mat-card class="info-card">
+            <mat-card-content>
+                <div class="info-section">
+                    <mat-icon>info</mat-icon>
+                    <div class="info-text">
+                        <h4>Recomendaciones</h4>
+                        <ul>
+                            <li>Sube documentos claros y legibles</li>
+                            <li>Los documentos deben estar relacionados con tu póliza de seguro</li>
+                            <li>Puedes subir identificaciones, comprobantes, formularios médicos, etc.</li>
+                            <li>Tus documentos están seguros y solo tu agente puede verlos</li>
+                        </ul>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

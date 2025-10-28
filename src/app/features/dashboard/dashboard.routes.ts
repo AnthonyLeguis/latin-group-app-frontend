@@ -3,7 +3,8 @@ import { CreateClientComponent } from './components/create-client/create-client'
 import { CreateUserComponent } from './components/create-user/create-user';
 import { AgentsReportComponent } from './components/agents-report/agents-report';
 import { AllClientsComponent } from './components/all-clients/all-clients';
-import { MyPolicyComponent } from './components/my-policy/my-policy';
+import { ClientPolicyComponent } from './components/client-policy/client-policy';
+import { ClientDocumentsComponent } from './components/client-documents/client-documents';
 import { NewQuoteComponent } from './components/new-quote/new-quote';
 
 export const dashboardRoutes: Routes = [
@@ -33,8 +34,13 @@ export const dashboardRoutes: Routes = [
             },
             {
                 path: 'my-policy',
-                component: MyPolicyComponent,
+                component: ClientPolicyComponent,
                 title: 'Mi Póliza - LatinGroup'
+            },
+            {
+                path: 'my-documents',
+                component: ClientDocumentsComponent,
+                title: 'Mis Documentos - LatinGroup'
             },
             {
                 path: 'new-quote',

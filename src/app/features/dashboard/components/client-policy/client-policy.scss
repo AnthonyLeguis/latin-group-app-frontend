@@ -1,0 +1,364 @@
+.policy-container {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+// ========== Estados de carga y vacío ==========
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1.5rem;
+
+    p {
+        font-size: 1rem;
+        color: #666;
+        margin: 0;
+    }
+}
+
+.no-policy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    gap: 1rem;
+
+    mat-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #ccc;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 0;
+    }
+
+    p {
+        font-size: 1rem;
+        color: #666;
+        margin: 0;
+        max-width: 500px;
+    }
+
+    .hint {
+        color: #999;
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+}
+
+// ========== Contenido de la póliza ==========
+.policy-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+// ========== Tarjetas ==========
+mat-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    mat-card-header {
+        margin-bottom: 1rem;
+    }
+
+    mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+
+        mat-icon {
+            color: #4a90e2;
+        }
+    }
+
+    mat-card-subtitle {
+        color: #666;
+        font-size: 0.9rem;
+    }
+}
+
+// ========== Encabezado de la póliza ==========
+.policy-header-card {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+
+    mat-card-title,
+    mat-card-subtitle {
+        color: white;
+    }
+
+    mat-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .policy-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+        color: white;
+        opacity: 0.9;
+    }
+
+    .header-text {
+        flex: 1;
+    }
+}
+
+// ========== Tarjeta de estado ==========
+.status-card {
+    background: #f8f9fa;
+    border-left: 4px solid #4a90e2;
+
+    .status-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .status-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+
+        &.activo {
+            color: #28a745;
+        }
+
+        &.pendiente {
+            color: #ffc107;
+        }
+
+        &.rechazado {
+            color: #dc3545;
+        }
+
+        &.inactivo {
+            color: #6c757d;
+        }
+    }
+
+    .status-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .status-label {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .status-chip {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+
+        &.activo {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        &.pendiente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        &.rechazado {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        &.inactivo {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+    }
+
+    .status-comment {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        color: #495057;
+        font-size: 0.9rem;
+        line-height: 1.5;
+
+        mat-icon {
+            color: #4a90e2;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+        }
+    }
+}
+
+// ========== Tarjetas de información ==========
+.info-card {
+    mat-card-content {
+        padding-top: 0.5rem;
+    }
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    &.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .label {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .value {
+        font-size: 1rem;
+        color: #333;
+        font-weight: 400;
+
+        &.highlight {
+            color: #4a90e2;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+    }
+}
+
+// ========== Información del agente ==========
+.agent-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    .agent-avatar {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: #4a90e2;
+    }
+
+    .agent-details {
+        flex: 1;
+
+        h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+    }
+}
+
+// ========== Responsive ==========
+@media (max-width: 768px) {
+    .policy-container {
+        padding: 1rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+
+        .info-item.full-width {
+            grid-column: 1;
+        }
+    }
+
+    .status-content {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .agent-info {
+        flex-direction: column;
+        text-align: center;
+
+        .agent-details {
+            text-align: center;
+        }
+    }
+
+    .policy-header-card {
+        mat-card-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .header-text {
+            text-align: center;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .policy-header-card .policy-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    mat-card {
+        mat-card-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    .status-icon {
+        font-size: 2.5rem !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+    }
+}

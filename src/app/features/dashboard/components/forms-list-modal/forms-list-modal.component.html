@@ -26,8 +26,16 @@
                             <mat-icon class="form-icon">description</mat-icon>
                             <div class="form-info">
                                 <span class="form-title">Planilla #{{ form.id }} - {{ form.applicant_name }}</span>
-                                <span class="form-meta">Cliente: {{ form.client?.name }} | Agente: {{ form.agent_name
-                                    }}</span>
+                                <div class="form-meta-row">
+                                    <span class="meta-item">
+                                        <mat-icon class="meta-icon">person</mat-icon>
+                                        {{ form.client?.name }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <mat-icon class="meta-icon">support_agent</mat-icon>
+                                        {{ form.agent?.name || form.agent_name }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </mat-panel-title>

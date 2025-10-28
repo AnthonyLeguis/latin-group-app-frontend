@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit } from '@angular/core';
+import { Component, inject, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -37,11 +37,17 @@ export class FormDetailModalComponent implements OnInit {
     private formService = inject(ApplicationFormService);
     private snackBar = inject(MatSnackBar);
 
+    private cdr = inject(ChangeDetectorRef);
+
     form!: ApplicationForm;
     statusForm: FormGroup;
+    rejectionForm: FormGroup;
     loading = true;
     submitting = false;
     error: string | null = null;
+    showRejectionForm = false;
+    viewingPendingChanges = false;
+    currentStatus: { value: string; label: string; icon: string; color: string } | undefined;
 
     statuses = [
         { value: 'pendiente', label: 'Pendiente', icon: 'schedule', color: '#f59e0b' },
@@ -58,13 +64,19 @@ export class FormDetailModalComponent implements OnInit {
             status: ['', Validators.required],
             status_comment: ['', [Validators.required, Validators.maxLength(1000)]]
         });
+
+        this.rejectionForm = this.fb.group({
+            rejection_reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+        });
+
+        // Actualizar currentStatus cuando cambie el status
+        this.statusForm.get('status')?.valueChanges.subscribe(value => {
+            this.currentStatus = this.statuses.find(s => s.value === value);
+        });
     }
 
     ngOnInit(): void {
-        // Cargar datos después de que la vista se inicialice
-        setTimeout(() => {
-            this.loadFormData();
-        }, 0);
+        this.loadFormData();
     }
 
     loadFormData(): void {
@@ -72,18 +84,21 @@ export class FormDetailModalComponent implements OnInit {
         this.error = null;
         this.formService.getApplicationForm(this.data.formId).subscribe({
             next: (form) => {
-                console.log('Form data loaded:', form);
+                //console.log('Form data loaded:', form);
                 this.form = form;
+                this.currentStatus = this.statuses.find(s => s.value === form.status);
                 this.statusForm.patchValue({
                     status: form.status,
                     status_comment: form.status_comment || ''
                 });
                 this.loading = false;
+                this.cdr.detectChanges();
             },
             error: (error) => {
                 console.error('Error loading form:', error);
                 this.error = error.error?.message || error.error?.error || 'Error al cargar la planilla. Por favor intenta de nuevo.';
                 this.loading = false;
+                this.cdr.detectChanges();
                 this.snackBar.open(this.error!, 'Cerrar', {
                     duration: 5000,
                     panelClass: ['error-snackbar']
@@ -109,22 +124,110 @@ export class FormDetailModalComponent implements OnInit {
                     duration: 3000,
                     panelClass: ['success-snackbar']
                 });
-                this.dialogRef.close({ updated: true, form: response.form });
+                setTimeout(() => {
+                    this.dialogRef.close({ updated: true, form: response.form });
+                });
             },
             error: (error) => {
+                this.submitting = false;
                 console.error('Error updating status:', error);
                 const errorMsg = error.error?.message || error.error?.error || 'Error al actualizar el estado';
                 this.snackBar.open(errorMsg, 'Cerrar', {
                     duration: 5000,
                     panelClass: ['error-snackbar']
                 });
-                this.submitting = false;
             }
         });
     }
 
     onClose(): void {
         this.dialogRef.close();
+    }
+
+    // Ver/comparar cambios pendientes
+    togglePendingChangesView(): void {
+        this.viewingPendingChanges = !this.viewingPendingChanges;
+    }
+
+    // Aprobar cambios pendientes
+    onApprovePendingChanges(): void {
+        if (!this.form?.has_pending_changes) return;
+
+        this.submitting = true;
+        this.formService.approvePendingChanges(this.form.id).subscribe({
+            next: (response) => {
+                this.submitting = false;
+                this.snackBar.open('Cambios aprobados y aplicados exitosamente', 'Cerrar', {
+                    duration: 3000,
+                    panelClass: ['success-snackbar']
+                });
+                setTimeout(() => {
+                    this.dialogRef.close({ updated: true, form: response.form });
+                });
+            },
+            error: (error) => {
+                this.submitting = false;
+                console.error('Error approving changes:', error);
+                const errorMsg = error.error?.message || error.error?.error || 'Error al aprobar los cambios';
+                this.snackBar.open(errorMsg, 'Cerrar', {
+                    duration: 5000,
+                    panelClass: ['error-snackbar']
+                });
+            }
+        });
+    }
+
+    // Mostrar formulario de rechazo
+    onShowRejectionForm(): void {
+        this.showRejectionForm = true;
+    }
+
+    // Cancelar rechazo
+    onCancelRejection(): void {
+        this.showRejectionForm = false;
+        this.rejectionForm.reset();
+    }
+
+    // Rechazar cambios pendientes
+    onRejectPendingChanges(): void {
+        if (this.rejectionForm.invalid || !this.form?.has_pending_changes) return;
+
+        this.submitting = true;
+        const reason = this.rejectionForm.value.rejection_reason;
+
+        this.formService.rejectPendingChanges(this.form.id, reason).subscribe({
+            next: (response) => {
+                this.submitting = false;
+                this.snackBar.open('Cambios rechazados exitosamente', 'Cerrar', {
+                    duration: 3000,
+                    panelClass: ['success-snackbar']
+                });
+                setTimeout(() => {
+                    this.dialogRef.close({ updated: true, form: response.form });
+                });
+            },
+            error: (error) => {
+                this.submitting = false;
+                console.error('Error rejecting changes:', error);
+                const errorMsg = error.error?.message || error.error?.error || 'Error al rechazar los cambios';
+                this.snackBar.open(errorMsg, 'Cerrar', {
+                    duration: 5000,
+                    panelClass: ['error-snackbar']
+                });
+            }
+        });
+    }
+
+    // Obtener el valor del campo en cambios pendientes
+    getPendingValue(field: string): any {
+        return this.form?.pending_changes?.[field];
+    }
+
+    // Verificar si un campo tiene cambios pendientes
+    hasPendingChange(field: string): boolean {
+        return this.form?.has_pending_changes &&
+            this.form?.pending_changes?.hasOwnProperty(field) &&
+            this.getPendingValue(field) !== (this.form as any)[field];
     }
 
     formatDate(date: string | undefined): string {

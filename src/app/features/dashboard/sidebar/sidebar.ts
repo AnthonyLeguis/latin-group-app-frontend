@@ -93,8 +93,8 @@ export class SidebarComponent implements OnInit {
             route: '/dashboard/my-policy',
             allowedRoles: ['client'], // Solo clientes pueden ver sus pólizas
             children: [
-                { label: 'Ver póliza', icon: 'visibility', route: '/dashboard/my-policy' },
-                { label: 'Documentos', icon: 'folder', route: '/dashboard/my-policy/documents' }
+                { label: 'Póliza', icon: 'verified_user', route: '/dashboard/my-policy' },
+                { label: 'Documentos', icon: 'folder', route: '/dashboard/my-documents' }
             ],
             expanded: false
         }

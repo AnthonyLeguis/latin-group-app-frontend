@@ -1,24 +1,134 @@
-<div class="all-clients-container">
+<div class="all-clients-container overflow-visible">
     <!-- Skeleton durante carga -->
     <app-form-skeleton *ngIf="isLoading"></app-form-skeleton>
 
     <!-- Contenido principal -->
-    <mat-card class="all-clients-card" *ngIf="!isLoading">
+    <mat-card class="all-clients-card overflow-visible" *ngIf="!isLoading">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon>groups</mat-icon>
-                Todos los Clientes
+                {{ isAdmin ? 'Todos los Clientes' : 'Mis Clientes' }}
             </mat-card-title>
             <mat-card-subtitle>
-                Gestión completa de clientes
+                {{ totalClients }} cliente(s) registrado(s)
             </mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
-            <div class="coming-soon">
-                <mat-icon>construction</mat-icon>
-                <h2>Próximamente</h2>
-                <p>Esta sección está en desarrollo</p>
+            <!-- Buscador -->
+            <div class="search-container">
+                <mat-form-field appearance="outline" class="search-field">
+                    <mat-label>Buscar cliente</mat-label>
+                    <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
+                        placeholder="Buscar cliente o email...">
+                    <mat-icon matPrefix>search</mat-icon>
+                    <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="clearSearch()" type="button">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                    <mat-hint>Filtra por nombre o email de cliente</mat-hint>
+                </mat-form-field>
+            </div>
+
+            <!-- Tabla de clientes -->
+            <div class="table-container" *ngIf="filteredClients.length > 0">
+                <table mat-table [dataSource]="filteredClients" class="clients-table">
+                    <!-- Columna Nombre -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                        <td mat-cell *matCellDef="let client">
+                            <div class="client-cell">
+                                <mat-icon class="client-icon">person</mat-icon>
+                                <span class="client-name">{{ client.name }}</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Email -->
+                    <ng-container matColumnDef="email">
+                        <th mat-header-cell *matHeaderCellDef>Email</th>
+                        <td mat-cell *matCellDef="let client">
+                            <span class="client-email">{{ client.email }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Agente (solo admin) -->
+                    <ng-container matColumnDef="agent">
+                        <th mat-header-cell *matHeaderCellDef>Agente</th>
+                        <td mat-cell *matCellDef="let client">
+                            <div class="agent-cell" *ngIf="client.created_by">
+                                <mat-icon class="agent-icon">support_agent</mat-icon>
+                                <span class="agent-name">{{ client.created_by.name }}</span>
+                            </div>
+                            <span *ngIf="!client.created_by" class="no-agent">Sin agente</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Fecha de Registro -->
+                    <ng-container matColumnDef="created_at">
+                        <th mat-header-cell *matHeaderCellDef>Fecha de Registro</th>
+                        <td mat-cell *matCellDef="let client">
+                            <span class="date">{{ formatDate(client.created_at) }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Acciones -->
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef class="actions-header">Acciones</th>
+                        <td mat-cell *matCellDef="let client" class="actions-cell">
+
+                            <div class="inline-block relative group" (click)="viewClient(client)">
+                                <button mat-icon-button color="primary">
+                                    <mat-icon>visibility</mat-icon>
+                                </button>
+
+                                <div
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                                    Ver más detalles
+                                    <div
+                                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="inline-block relative group" (click)="editClient(client)">
+                                <button mat-icon-button color="accent">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+
+                                <div
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                                    Editar
+                                    <div
+                                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="client-row"></tr>
+                </table>
+
+                <!-- Paginación -->
+                <mat-paginator [length]="totalClients" [pageSize]="pageSize" [pageIndex]="currentPage - 1"
+                    [pageSizeOptions]="[10, 15, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+
+            <!-- Estado vacío -->
+            <div class="no-data" *ngIf="filteredClients.length === 0 && !searchTerm">
+                <mat-icon>inbox</mat-icon>
+                <h3>No hay clientes registrados</h3>
+                <p>{{ isAdmin ? 'Aún no se han registrado clientes en el sistema' : 'Aún no has registrado clientes' }}
+                </p>
+            </div>
+
+            <!-- Sin resultados de búsqueda -->
+            <div class="no-data" *ngIf="filteredClients.length === 0 && searchTerm">
+                <mat-icon>search_off</mat-icon>
+                <h3>No se encontraron resultados</h3>
+                <p>No hay clientes que coincidan con "{{ searchTerm }}"</p>
             </div>
         </mat-card-content>
     </mat-card>

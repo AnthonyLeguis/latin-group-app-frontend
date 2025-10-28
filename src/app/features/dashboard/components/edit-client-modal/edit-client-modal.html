@@ -1,0 +1,179 @@
+<div class="edit-client-modal">
+    <div class="modal-header">
+        <h2 mat-dialog-title>
+            <mat-icon>edit</mat-icon>
+            Editar Cliente
+        </h2>
+        <button mat-icon-button (click)="onCancel()" class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content class="modal-content">
+        <mat-tab-group animationDuration="300ms">
+            <!-- Tab: Información del Cliente -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">person</mat-icon>
+                    Información
+                </ng-template>
+
+                <div class="tab-content">
+                    <form [formGroup]="clientForm" class="client-form">
+                        <!-- Nombre -->
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Nombre Completo</mat-label>
+                            <input matInput formControlName="name" placeholder="Nombre completo del cliente">
+                            <mat-icon matPrefix>person</mat-icon>
+                            <mat-error *ngIf="clientForm.get('name')?.hasError('required')">
+                                El nombre es requerido
+                            </mat-error>
+                            <mat-error *ngIf="clientForm.get('name')?.hasError('minlength')">
+                                El nombre debe tener al menos 3 caracteres
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Email -->
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Email</mat-label>
+                            <input matInput type="email" formControlName="email" placeholder="correo@ejemplo.com">
+                            <mat-icon matPrefix>email</mat-icon>
+                            <mat-error *ngIf="clientForm.get('email')?.hasError('required')">
+                                El email es requerido
+                            </mat-error>
+                            <mat-error *ngIf="clientForm.get('email')?.hasError('email')">
+                                Ingresa un email válido
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Teléfono -->
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Teléfono</mat-label>
+                            <input matInput formControlName="phone" placeholder="(123) 456-7890">
+                            <mat-icon matPrefix>phone</mat-icon>
+                        </mat-form-field>
+
+                        <!-- Dirección -->
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Dirección</mat-label>
+                            <textarea matInput formControlName="address" placeholder="Dirección completa" rows="3">
+                            </textarea>
+                            <mat-icon matPrefix>location_on</mat-icon>
+                        </mat-form-field>
+
+                        <!-- Información adicional -->
+                        <div class="info-section">
+                            <div class="info-item">
+                                <mat-icon>calendar_today</mat-icon>
+                                <div class="info-text">
+                                    <span class="label">Fecha de registro:</span>
+                                    <span class="value">{{ formatDate(data.client.created_at) }}</span>
+                                </div>
+                            </div>
+                            <div class="info-item" *ngIf="data.client.agent">
+                                <mat-icon>support_agent</mat-icon>
+                                <div class="info-text">
+                                    <span class="label">Agente asignado:</span>
+                                    <span class="value">{{ data.client.agent.name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </mat-tab>
+
+            <!-- Tab: Documentos -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">folder</mat-icon>
+                    Documentos
+                    <span class="badge" *ngIf="documents.length > 0">{{ documents.length }}</span>
+                </ng-template>
+
+                <div class="tab-content">
+                    <!-- Sin planilla de aplicación -->
+                    <div *ngIf="!data.client.application_form" class="no-application">
+                        <mat-icon>info</mat-icon>
+                        <p>Este cliente no tiene una planilla de aplicación.</p>
+                        <p class="hint">Los documentos solo pueden agregarse a clientes con planilla activa.</p>
+                    </div>
+
+                    <!-- Con planilla de aplicación -->
+                    <div *ngIf="data.client.application_form" class="documents-section">
+                        <!-- Botón de subida -->
+                        <div class="upload-area">
+                            <input type="file" #fileInput (change)="onFileSelected($event)"
+                                accept=".pdf,.jpg,.jpeg,.png" style="display: none" [disabled]="isUploading">
+
+                            <button mat-raised-button color="primary" (click)="fileInput.click()"
+                                [disabled]="isUploading" class="upload-button">
+                                <mat-icon>cloud_upload</mat-icon>
+                                {{ isUploading ? 'Subiendo...' : 'Subir Documento' }}
+                            </button>
+
+                            <p class="upload-hint">PDF, JPG, PNG - Máximo 10MB</p>
+
+                            <div *ngIf="isUploading" class="upload-progress">
+                                <mat-spinner diameter="24"></mat-spinner>
+                                <span>Subiendo documento...</span>
+                            </div>
+                        </div>
+
+                        <!-- Loading documentos -->
+                        <div *ngIf="isLoadingDocuments" class="loading-documents">
+                            <mat-spinner diameter="40"></mat-spinner>
+                            <p>Cargando documentos...</p>
+                        </div>
+
+                        <!-- Sin documentos -->
+                        <div *ngIf="!isLoadingDocuments && documents.length === 0" class="no-documents">
+                            <mat-icon>description</mat-icon>
+                            <p>No hay documentos agregados</p>
+                        </div>
+
+                        <!-- Lista de documentos -->
+                        <div *ngIf="!isLoadingDocuments && documents.length > 0" class="documents-list">
+                            <div *ngFor="let doc of documents" class="document-item">
+                                <div class="document-info">
+                                    <mat-icon
+                                        [class]="'file-icon ' + (doc.is_pdf ? 'pdf' : doc.is_image ? 'image' : 'file')">
+                                        {{ getFileIcon(doc) }}
+                                    </mat-icon>
+                                    <div class="document-details">
+                                        <span class="document-name">{{ doc.file_name }}</span>
+                                        <span class="document-meta">
+                                            {{ doc.file_size_formatted }} • {{ formatDate(doc.uploaded_at) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="document-actions">
+                                    <button mat-icon-button (click)="viewDocument(doc)" matTooltip="Ver">
+                                        <mat-icon>visibility</mat-icon>
+                                    </button>
+                                    <button mat-icon-button (click)="downloadDocument(doc)" matTooltip="Descargar">
+                                        <mat-icon>download</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="deleteDocument(doc.id)"
+                                        matTooltip="Eliminar">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="modal-actions">
+        <button mat-button (click)="onCancel()" [disabled]="isSaving">
+            Cancelar
+        </button>
+        <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isSaving || clientForm.invalid">
+            <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
+            <span *ngIf="!isSaving">Guardar Cambios</span>
+            <span *ngIf="isSaving">Guardando...</span>
+        </button>
+    </mat-dialog-actions>
+</div>

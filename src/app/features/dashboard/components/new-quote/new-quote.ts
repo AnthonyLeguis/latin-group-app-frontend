@@ -311,36 +311,40 @@ export class NewQuoteComponent implements OnInit {
             return;
         }
 
-        // Obtener todos los clientes
+        console.log('🔍 Cargando clientes disponibles...');
+        console.log('👤 Usuario actual:', currentUser);
+
+        // Obtener todos los clientes (el backend ya filtra por agente si corresponde)
         this.userService.getUsers({ type: 'client' }).subscribe({
             next: (response: any) => {
                 const allClients = response.data || response;
+                console.log('📋 Total de clientes obtenidos:', allClients.length);
+                console.log('📋 Clientes:', allClients);
 
-                // Filtrar clientes que ya tienen application form
-                this.applicationFormService.getApplicationForms().subscribe({
-                    next: (forms: any) => {
-                        const formsData = forms.data || forms;
-                        const clientsWithForms = formsData.map((f: any) => f.client_id);
+                // Obtener IDs de clientes que ya tienen application form
+                this.applicationFormService.getClientsWithForms().subscribe({
+                    next: (clientsWithFormsResponse) => {
+                        const clientsWithForms = clientsWithFormsResponse.client_ids || [];
+                        console.log('🚫 Clientes con forms (IDs):', clientsWithForms);
+                        console.log('🚫 Total de clientes con forms:', clientsWithForms.length);
 
-                        // Si es agent, filtrar solo sus clientes sin application form
-                        if (currentUser.type === 'agent') {
-                            this.availableClients = allClients.filter((client: any) =>
-                                !clientsWithForms.includes(client.id) &&
-                                client.created_by === currentUser.id
-                            );
-                        } else {
-                            // Admin ve todos los clientes sin application form
-                            this.availableClients = allClients.filter((client: any) =>
-                                !clientsWithForms.includes(client.id)
-                            );
-                        }
+                        // Mostrar solo clientes sin application form
+                        // El backend ya filtró los clientes según el rol (admin ve todos, agent ve sus clientes)
+                        this.availableClients = allClients.filter((client: any) => {
+                            const hasForm = clientsWithForms.includes(client.id);
+                            //console.log(`   Cliente ${client.id} (${client.name}): ${hasForm ? '❌ tiene form' : '✅ disponible'}`);
+                            return !hasForm;
+                        });
 
                         this.filteredClients = [...this.availableClients];
                         this.isLoadingClients = false;
+
+                        console.log('✅ Clientes disponibles para application form:', this.availableClients.length);
+                        console.log('✅ Lista final:', this.availableClients);
                     },
                     error: (error) => {
-                        console.error('Error al cargar application forms:', error);
-                        // Si hay error, mostrar todos los clientes
+                        console.error('❌ Error al cargar clientes con application forms:', error);
+                        // Si hay error, mostrar todos los clientes que el backend devolvió
                         this.availableClients = allClients;
                         this.filteredClients = [...this.availableClients];
                         this.isLoadingClients = false;
@@ -348,7 +352,7 @@ export class NewQuoteComponent implements OnInit {
                 });
             },
             error: (error) => {
-                console.error('Error al cargar clientes:', error);
+                console.error('❌ Error al cargar clientes:', error);
                 this.showError('Error al cargar los clientes disponibles');
                 this.isLoadingClients = false;
             }

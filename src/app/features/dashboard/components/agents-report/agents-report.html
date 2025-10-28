@@ -117,10 +117,22 @@
                                 </div>
                             </mat-panel-title>
                             <mat-panel-description>
-                                <mat-chip class="clients-chip">
-                                    <mat-icon>person</mat-icon>
-                                    {{ agent.clients_count }} {{ agent.clients_count === 1 ? 'cliente' : 'clientes' }}
-                                </mat-chip>
+                                <div class="badges-container">
+                                    <mat-chip class="clients-chip">
+                                        <mat-icon>person</mat-icon>
+                                        {{ agent.clients_count }} {{ agent.clients_count === 1 ? 'cliente' : 'clientes'
+                                        }}
+                                    </mat-chip>
+
+                                    <!-- Píldora de cambios pendientes con efecto pulse -->
+                                    <mat-chip *ngIf="agent.pending_changes_count && agent.pending_changes_count > 0"
+                                        class="pending-changes-chip pulse-chip">
+                                        <mat-icon class="pulse-icon">warning</mat-icon>
+                                        {{ agent.pending_changes_count }}
+                                        {{ agent.pending_changes_count === 1 ? 'planilla por aprobar modificación' :
+                                        'planillas por aprobar modificaciones' }}
+                                    </mat-chip>
+                                </div>
                             </mat-panel-description>
                         </mat-expansion-panel-header>
 
@@ -134,6 +146,12 @@
                                     <div class="client-info">
                                         <span class="client-name">{{ client.name }}</span>
                                         <span class="client-email">{{ client.email }}</span>
+                                        <!-- Indicador de creación por admin -->
+                                        <span class="created-by-admin"
+                                            *ngIf="client.created_by_admin && client.created_by_admin.name">
+                                            <mat-icon class="admin-icon">admin_panel_settings</mat-icon>
+                                            Creado por: {{ client.created_by_admin.name }}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -143,6 +161,7 @@
                                     <h5 class="forms-title">Planillas de Aplicación</h5>
                                     <div class="forms-list">
                                         <div class="form-item clickable group relative"
+                                            [class.has-pending-changes]="form.has_pending_changes"
                                             *ngFor="let form of client.application_forms_as_client"
                                             (click)="openFormDetail(form.id)">
                                             <mat-icon [class]="'form-icon ' + form.status">
@@ -156,10 +175,18 @@
                                             <mat-chip [class]="'status-chip ' + form.status">
                                                 {{ form.status }}
                                             </mat-chip>
+
+                                            <!-- Indicador de cambios pendientes -->
+                                            <div *ngIf="form.has_pending_changes" class="pending-indicator">
+                                                <mat-icon class="pulse-icon-small">edit_note</mat-icon>
+                                                <span>Cambios pendientes</span>
+                                            </div>
+
                                             <!-- Tooltip Tailwind -->
                                             <div
                                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                                                Click para ver detalles y modificar estado
+                                                {{ form.has_pending_changes ? 'Click para revisar y aprobar cambios' :
+                                                'Click para ver detalles y modificar estado' }}
                                                 <div
                                                     class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
                                                 </div>

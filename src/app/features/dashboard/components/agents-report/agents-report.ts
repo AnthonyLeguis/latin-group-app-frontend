@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -43,11 +43,13 @@ export class AgentsReportComponent implements OnInit {
     stats: UserStats | null = null;
     totalAgents = 0;
     totalClients = 0;
+    totalPendingChanges = 0;
     searchTerm = '';
 
     constructor(
         private userService: UserService,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -70,10 +72,25 @@ export class AgentsReportComponent implements OnInit {
         // Cargar reporte de agentes
         this.userService.getAgentsReport().subscribe({
             next: (response) => {
-                this.agents = response.agents;
-                this.filteredAgents = response.agents;
+                // Calcular cantidad de planillas con cambios pendientes por agente
+                this.agents = response.agents.map(agent => {
+                    const pendingCount = agent.created_users?.reduce((count, client) => {
+                        const clientPendingForms = client.application_forms_as_client?.filter(
+                            form => form.has_pending_changes === true
+                        ).length || 0;
+                        return count + clientPendingForms;
+                    }, 0) || 0;
+
+                    return {
+                        ...agent,
+                        pending_changes_count: pendingCount
+                    };
+                });
+
+                this.filteredAgents = this.agents;
                 this.totalAgents = response.total_agents;
                 this.totalClients = response.total_clients;
+                this.totalPendingChanges = response.total_pending_changes || 0;
                 this.isLoading = false;
             },
             error: (error) => {
@@ -133,8 +150,42 @@ export class AgentsReportComponent implements OnInit {
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            if (result?.updated) {
-                this.loadData(); // Recargar datos si hubo actualización
+            if (result?.updated && result.form) {
+                // Envolver en setTimeout para evitar ExpressionChangedAfterItHasBeenCheckedError
+                setTimeout(() => {
+                    // Buscar y actualizar solo el formulario modificado en memoria
+                    let agentUpdated: Agent | null = null;
+                    for (const agent of this.agents) {
+                        if (!agent.created_users) continue;
+                        for (const client of agent.created_users) {
+                            if (!client.application_forms_as_client) continue;
+                            const formIndex = client.application_forms_as_client.findIndex((f: any) => f.id === result.form.id);
+                            if (formIndex !== -1) {
+                                client.application_forms_as_client[formIndex] = result.form;
+                                agentUpdated = agent;
+                                break;
+                            }
+                        }
+                        if (agentUpdated) break;
+                    }
+
+                    // Recalcular el contador de cambios pendientes para el agente
+                    if (agentUpdated) {
+                        const pendingCount = agentUpdated.created_users?.reduce((count, client) => {
+                            const clientPendingForms = client.application_forms_as_client?.filter(
+                                form => form.has_pending_changes === true
+                            ).length || 0;
+                            return count + clientPendingForms;
+                        }, 0) || 0;
+                        agentUpdated.pending_changes_count = pendingCount;
+                    }
+
+                    // Reflejar cambios en la lista filtrada
+                    this.filteredAgents = [...this.agents];
+
+                    // Forzar detección de cambios
+                    this.cdr.detectChanges();
+                });
             }
         });
     }

@@ -39,8 +39,71 @@
 
         <!-- Status Badge -->
         <div class="status-badge" [ngClass]="form.status">
-            <mat-icon>{{ getCurrentStatus()?.icon }}</mat-icon>
-            <span>{{ getCurrentStatus()?.label }}</span>
+            <mat-icon>{{ currentStatus?.icon }}</mat-icon>
+            <span>{{ currentStatus?.label }}</span>
+        </div>
+
+        <!-- Pending Changes Alert -->
+        <div *ngIf="form.has_pending_changes" class="pending-changes-alert">
+            <div class="alert-header">
+                <mat-icon class="pulse-icon">warning</mat-icon>
+                <div class="alert-content">
+                    <h4>Cambios Pendientes de Aprobación</h4>
+                    <p>El agente {{ form.agent?.name }} ha propuesto modificaciones a esta planilla activa.</p>
+                    <p class="alert-date">
+                        <mat-icon>schedule</mat-icon>
+                        {{ formatDate(form.pending_changes_at) }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Acciones de aprobación/rechazo -->
+            <div class="pending-actions" *ngIf="!showRejectionForm">
+                <button mat-flat-button color="primary" (click)="togglePendingChangesView()" [disabled]="submitting">
+                    <mat-icon>{{ viewingPendingChanges ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    {{ viewingPendingChanges ? 'Ocultar Cambios' : 'Ver Cambios Propuestos' }}
+                </button>
+                <button mat-flat-button class="approve-btn" (click)="onApprovePendingChanges()" [disabled]="submitting">
+                    <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+                    <mat-icon *ngIf="!submitting">check_circle</mat-icon>
+                    Aprobar Cambios
+                </button>
+                <button mat-stroked-button color="warn" (click)="onShowRejectionForm()" [disabled]="submitting">
+                    <mat-icon>cancel</mat-icon>
+                    Rechazar
+                </button>
+            </div>
+
+            <!-- Formulario de rechazo -->
+            <div class="rejection-form" *ngIf="showRejectionForm">
+                <form [formGroup]="rejectionForm">
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Motivo del rechazo</mat-label>
+                        <textarea matInput formControlName="rejection_reason" rows="4"
+                            placeholder="Explica por qué rechazas estos cambios..." maxlength="500"></textarea>
+                        <mat-hint align="end">{{ rejectionForm.get('rejection_reason')?.value?.length || 0
+                            }}/500</mat-hint>
+                        <mat-error *ngIf="rejectionForm.get('rejection_reason')?.hasError('required')">
+                            El motivo es requerido
+                        </mat-error>
+                        <mat-error *ngIf="rejectionForm.get('rejection_reason')?.hasError('minlength')">
+                            Mínimo 10 caracteres
+                        </mat-error>
+                    </mat-form-field>
+                    <div class="rejection-actions">
+                        <button mat-flat-button color="warn" (click)="onRejectPendingChanges()"
+                            [disabled]="rejectionForm.invalid || submitting">
+                            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+                            <mat-icon *ngIf="!submitting">send</mat-icon>
+                            Confirmar Rechazo
+                        </button>
+                        <button mat-stroked-button (click)="onCancelRejection()" [disabled]="submitting">
+                            <mat-icon>close</mat-icon>
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Form Details -->
@@ -51,39 +114,128 @@
             </h3>
 
             <div class="details-grid">
-                <div class="detail-item">
+                <div class="detail-item"
+                    [class.has-changes]="viewingPendingChanges && hasPendingChange('applicant_name')">
                     <label>Nombre Completo</label>
-                    <span>{{ form.applicant_name }}</span>
+                    <span *ngIf="!viewingPendingChanges || !hasPendingChange('applicant_name')">{{ form.applicant_name
+                        }}</span>
+                    <div *ngIf="viewingPendingChanges && hasPendingChange('applicant_name')" class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ form.applicant_name }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>{{ getPendingValue('applicant_name') }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="detail-item">
+                <div class="detail-item" [class.has-changes]="viewingPendingChanges && hasPendingChange('dob')">
                     <label>Fecha de Nacimiento</label>
-                    <span>{{ formatDate(form.dob) }}</span>
+                    <span *ngIf="!viewingPendingChanges || !hasPendingChange('dob')">{{ formatDate(form.dob) }}</span>
+                    <div *ngIf="viewingPendingChanges && hasPendingChange('dob')" class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ formatDate(form.dob) }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>{{ formatDate(getPendingValue('dob')) }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="detail-item">
+                <div class="detail-item" [class.has-changes]="viewingPendingChanges && hasPendingChange('gender')">
                     <label>Género</label>
-                    <span>{{ form.gender }}</span>
+                    <span *ngIf="!viewingPendingChanges || !hasPendingChange('gender')">{{ form.gender }}</span>
+                    <div *ngIf="viewingPendingChanges && hasPendingChange('gender')" class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ form.gender }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>{{ getPendingValue('gender') }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="detail-item">
+                <div class="detail-item" [class.has-changes]="viewingPendingChanges && hasPendingChange('ssn')">
                     <label>SSN</label>
-                    <span>{{ form.ssn || 'N/A' }}</span>
+                    <span *ngIf="!viewingPendingChanges || !hasPendingChange('ssn')">{{ form.ssn || 'N/A' }}</span>
+                    <div *ngIf="viewingPendingChanges && hasPendingChange('ssn')" class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ form.ssn || 'N/A' }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>{{ getPendingValue('ssn') || 'N/A' }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="detail-item">
+                <div class="detail-item" [class.has-changes]="viewingPendingChanges && hasPendingChange('email')">
                     <label>Email</label>
-                    <span>{{ form.email }}</span>
+                    <span *ngIf="!viewingPendingChanges || !hasPendingChange('email')">{{ form.email }}</span>
+                    <div *ngIf="viewingPendingChanges && hasPendingChange('email')" class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ form.email }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>{{ getPendingValue('email') }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="detail-item">
+                <div class="detail-item" [class.has-changes]="viewingPendingChanges && hasPendingChange('phone')">
                     <label>Teléfono</label>
-                    <span>{{ form.phone }}</span>
+                    <span *ngIf="!viewingPendingChanges || !hasPendingChange('phone')">{{ form.phone }}</span>
+                    <div *ngIf="viewingPendingChanges && hasPendingChange('phone')" class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ form.phone }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>{{ getPendingValue('phone') }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="detail-item full-width">
+                <div class="detail-item full-width"
+                    [class.has-changes]="viewingPendingChanges && (hasPendingChange('address') || hasPendingChange('city') || hasPendingChange('state') || hasPendingChange('zip_code'))">
                     <label>Dirección</label>
-                    <span>{{ form.address }}, {{ form.city }}, {{ form.state }} {{ form.zip_code }}</span>
+                    <span
+                        *ngIf="!viewingPendingChanges || !(hasPendingChange('address') || hasPendingChange('city') || hasPendingChange('state') || hasPendingChange('zip_code'))">
+                        {{ form.address }}, {{ form.city }}, {{ form.state }} {{ form.zip_code }}
+                    </span>
+                    <div *ngIf="viewingPendingChanges && (hasPendingChange('address') || hasPendingChange('city') || hasPendingChange('state') || hasPendingChange('zip_code'))"
+                        class="value-comparison">
+                        <div class="old-value">
+                            <span class="label-small">Actual:</span>
+                            <span>{{ form.address }}, {{ form.city }}, {{ form.state }} {{ form.zip_code }}</span>
+                        </div>
+                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                        <div class="new-value">
+                            <span class="label-small">Propuesto:</span>
+                            <span>
+                                {{ getPendingValue('address') || form.address }},
+                                {{ getPendingValue('city') || form.city }},
+                                {{ getPendingValue('state') || form.state }}
+                                {{ getPendingValue('zip_code') || form.zip_code }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,6 +327,12 @@
                 <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Nuevo Estado</mat-label>
                     <mat-select formControlName="status">
+                        <mat-select-trigger>
+                            <div class="status-option" *ngIf="currentStatus">
+                                <mat-icon [style.color]="currentStatus.color">{{ currentStatus.icon }}</mat-icon>
+                                <span>{{ currentStatus.label }}</span>
+                            </div>
+                        </mat-select-trigger>
                         <mat-option *ngFor="let status of statuses" [value]="status.value">
                             <div class="status-option">
                                 <mat-icon [style.color]="status.color">{{ status.icon }}</mat-icon>

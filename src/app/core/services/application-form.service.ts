@@ -29,6 +29,14 @@ export class ApplicationFormService {
     }
 
     /**
+     * Obtener IDs de clientes que ya tienen application forms
+     * (sin paginación, para filtrar clientes disponibles)
+     */
+    getClientsWithForms(): Observable<{ client_ids: number[] }> {
+        return this.http.get<{ client_ids: number[] }>(`${this.apiUrl}/clients-with-forms`);
+    }
+
+    /**
      * Obtener una planilla específica por ID
      */
     getApplicationForm(id: number): Observable<ApplicationForm> {
@@ -50,6 +58,20 @@ export class ApplicationFormService {
     }
 
     /**
+     * Aprobar cambios pendientes (solo admin)
+     */
+    approvePendingChanges(id: number): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/${id}/approve-changes`, {});
+    }
+
+    /**
+     * Rechazar cambios pendientes (solo admin)
+     */
+    rejectPendingChanges(id: number, rejection_reason: string): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/${id}/reject-changes`, { rejection_reason });
+    }
+
+    /**
      * Actualizar planilla completa
      */
     updateForm(id: number, data: Partial<ApplicationForm>): Observable<any> {
@@ -68,5 +90,22 @@ export class ApplicationFormService {
      */
     deleteForm(id: number): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}/${id}`);
+    }
+
+    /**
+     * Subir documento a una planilla
+     */
+    uploadDocument(formId: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('document', file);
+
+        return this.http.post<any>(`${this.apiUrl}/${formId}/documents`, formData);
+    }
+
+    /**
+     * Eliminar documento de una planilla
+     */
+    deleteDocument(formId: number, documentId: number): Observable<any> {
+        return this.http.delete<any>(`${this.apiUrl}/${formId}/documents/${documentId}`);
     }
 }

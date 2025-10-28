@@ -476,6 +476,28 @@
                     font-size: 0.8125rem;
                     color: #6b7280;
                 }
+
+                .created-by-admin {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.375rem;
+                    font-size: 0.75rem;
+                    color: #7c3aed;
+                    font-weight: 500;
+                    margin-top: 0.25rem;
+                    padding: 0.25rem 0.5rem;
+                    background-color: #f5f3ff;
+                    border-radius: 4px;
+                    border: 1px solid #e9d5ff;
+                    width: fit-content;
+
+                    .admin-icon {
+                        font-size: 0.875rem;
+                        width: 0.875rem;
+                        height: 0.875rem;
+                        color: #7c3aed;
+                    }
+                }
             }
         }
 
@@ -1207,7 +1229,104 @@
     }
 }
 
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes pulseRing {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
 .agents-card,
 .stats-card {
     animation: fadeIn 0.4s ease-out;
+}
+
+// Contenedor de badges en el panel header
+.badges-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+// Píldora de cambios pendientes con efecto pulse
+.pending-changes-chip {
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 2px solid #dc2626 !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem !important;
+    animation: pulseRing 2s infinite !important;
+
+    mat-icon {
+        color: #dc2626 !important;
+        animation: pulse 2s infinite !important;
+    }
+}
+
+// Icono con efecto pulse
+.pulse-icon {
+    animation: pulse 2s infinite;
+}
+
+.pulse-icon-small {
+    font-size: 1.125rem !important;
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    animation: pulse 2s infinite;
+}
+
+// Indicador de cambios pendientes en planillas
+.pending-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid #fecaca;
+    margin-left: auto;
+
+    mat-icon {
+        color: #dc2626;
+    }
+}
+
+// Form item con cambios pendientes
+.form-item.has-pending-changes {
+    background-color: #fef2f2;
+    border-left: 4px solid #dc2626;
+
+    &:hover {
+        background-color: #fee2e2;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+    }
 }

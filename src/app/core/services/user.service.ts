@@ -19,6 +19,10 @@ export interface ApplicationForm {
     status: string;
     reviewed_by: number | null;
     created_at: string;
+    has_pending_changes?: boolean;
+    pending_changes?: any;
+    pending_changes_at?: string;
+    pending_changes_by?: number;
 }
 
 export interface Client {
@@ -26,6 +30,11 @@ export interface Client {
     name: string;
     email: string;
     application_forms_as_client: ApplicationForm[];
+    created_by_admin?: {
+        id: number;
+        name: string;
+        email: string;
+    };
 }
 
 export interface Agent {
@@ -33,6 +42,7 @@ export interface Agent {
     name: string;
     email: string;
     clients_count: number;
+    pending_changes_count?: number; // Nueva propiedad
     created_users: Client[];
 }
 
@@ -40,6 +50,8 @@ export interface AgentsReportResponse {
     agents: Agent[];
     total_agents: number;
     total_clients: number;
+    pending_changes_forms: ApplicationForm[]; // Nueva propiedad
+    total_pending_changes: number; // Nueva propiedad
 }
 
 @Injectable({
@@ -75,15 +87,32 @@ export class UserService {
     }
 
     /**
-     * Obtener lista de usuarios con filtros opcionales
+     * Obtener lista de usuarios con filtros opcionales y paginación
      */
-    getUsers(filters?: { type?: string }): Observable<any> {
-        let url = `${environment.apiUrl}/users`;
+    getUsers(filters?: { type?: string; page?: number }): Observable<any> {
+        const params = new URLSearchParams();
 
         if (filters?.type) {
-            url += `?type=${filters.type}`;
+            params.append('type', filters.type);
         }
 
+        if (filters?.page) {
+            params.append('page', filters.page.toString());
+        }
+
+        const url = `${environment.apiUrl}/users${params.toString() ? '?' + params.toString() : ''}`;
+
         return this.http.get<any>(url, { headers: this.getHeaders() });
+    }
+
+    /**
+     * Actualizar información de un usuario
+     */
+    updateUser(userId: number, data: any): Observable<any> {
+        return this.http.put<any>(
+            `${environment.apiUrl}/users/${userId}`,
+            data,
+            { headers: this.getHeaders() }
+        );
     }
 }

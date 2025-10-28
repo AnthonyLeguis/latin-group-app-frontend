@@ -1,0 +1,177 @@
+<div class="policy-container">
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Cargando información de tu póliza...</p>
+    </div>
+
+    <!-- Sin póliza -->
+    <div *ngIf="!isLoading && !applicationForm" class="no-policy">
+        <mat-icon>description</mat-icon>
+        <h2>No tienes una póliza activa</h2>
+        <p>Aún no se ha creado una planilla de aplicación para tu cuenta.</p>
+        <p class="hint">Contacta con tu agente para más información.</p>
+    </div>
+
+    <!-- Con póliza -->
+    <div *ngIf="!isLoading && applicationForm" class="policy-content">
+        <!-- Encabezado de la Póliza -->
+        <mat-card class="policy-header-card">
+            <mat-card-header>
+                <mat-icon class="policy-icon">verified_user</mat-icon>
+                <div class="header-text">
+                    <mat-card-title>Tu Póliza de Seguro</mat-card-title>
+                    <mat-card-subtitle>Información actualizada de tu cobertura</mat-card-subtitle>
+                </div>
+            </mat-card-header>
+        </mat-card>
+
+        <!-- Estado de la Póliza -->
+        <mat-card class="status-card">
+            <div class="status-content">
+                <mat-icon [class]="'status-icon ' + applicationForm.status">
+                    {{ getStatusIcon(applicationForm.status) }}
+                </mat-icon>
+                <div class="status-info">
+                    <span class="status-label">Estado Actual:</span>
+                    <mat-chip [class]="'status-chip ' + applicationForm.status">
+                        {{ applicationForm.status | uppercase }}
+                    </mat-chip>
+                </div>
+            </div>
+            <p *ngIf="applicationForm.status_comment" class="status-comment">
+                <mat-icon>info</mat-icon>
+                {{ applicationForm.status_comment }}
+            </p>
+        </mat-card>
+
+        <!-- Información Personal -->
+        <mat-card class="info-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>person</mat-icon>
+                    Información Personal
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Nombre Completo:</span>
+                        <span class="value">{{ applicationForm.applicant_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Fecha de Nacimiento:</span>
+                        <span class="value">{{ applicationForm.dob | date: 'dd/MM/yyyy' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Género:</span>
+                        <span class="value">{{ applicationForm.gender === 'M' ? 'Masculino' : 'Femenino' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">SSN:</span>
+                        <span class="value">{{ applicationForm.ssn }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Email:</span>
+                        <span class="value">{{ applicationForm.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Teléfono:</span>
+                        <span class="value">{{ applicationForm.phone }}</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="label">Dirección:</span>
+                        <span class="value">
+                            {{ applicationForm.address }}
+                            {{ applicationForm.unit_apt ? ', ' + applicationForm.unit_apt : '' }},
+                            {{ applicationForm.city }}, {{ applicationForm.state }} {{ applicationForm.zip_code }}
+                        </span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Información del Seguro -->
+        <mat-card class="info-card" *ngIf="applicationForm.insurance_company">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>shield</mat-icon>
+                    Información del Seguro
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Compañía:</span>
+                        <span class="value">{{ applicationForm.insurance_company }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Plan:</span>
+                        <span class="value">{{ applicationForm.insurance_plan }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Subsidio:</span>
+                        <span class="value">${{ applicationForm.subsidy || 0 | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Costo Final:</span>
+                        <span class="value highlight">${{ applicationForm.final_cost || 0 | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Información de la Póliza -->
+        <mat-card class="info-card" *ngIf="applicationForm.poliza_number">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>description</mat-icon>
+                    Detalles de la Póliza
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Número de Póliza:</span>
+                        <span class="value">{{ applicationForm.poliza_number }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Categoría:</span>
+                        <span class="value">{{ applicationForm.poliza_category }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Monto:</span>
+                        <span class="value">${{ applicationForm.poliza_amount || 0 | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Día de Pago:</span>
+                        <span class="value">Día {{ applicationForm.poliza_payment_day }}</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="label">Beneficiario:</span>
+                        <span class="value">{{ applicationForm.poliza_beneficiary }}</span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Agente Asignado -->
+        <mat-card class="info-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>support_agent</mat-icon>
+                    Tu Agente
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="agent-info">
+                    <mat-icon class="agent-avatar">account_circle</mat-icon>
+                    <div class="agent-details">
+                        <h3>{{ applicationForm.agent_name }}</h3>
+                        <p>Para cualquier consulta o cambio, contacta con tu agente.</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

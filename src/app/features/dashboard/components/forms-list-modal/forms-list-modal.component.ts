@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit } from '@angular/core';
+import { Component, inject, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +29,8 @@ export class FormsListModalComponent implements OnInit {
     private formService = inject(ApplicationFormService);
     private dialog = inject(MatDialog);
 
+    private cdr = inject(ChangeDetectorRef);
+
     forms: ApplicationForm[] = [];
     loading = true;
     title = '';
@@ -48,14 +50,19 @@ export class FormsListModalComponent implements OnInit {
 
     loadForms(): void {
         this.loading = true;
+        console.log('Loading forms with status:', this.filterStatus);
         this.formService.getApplicationForms({ status: this.filterStatus }).subscribe({
             next: (response) => {
+                console.log('Forms response:', response);
                 this.forms = response.data || response;
+                console.log('Forms loaded:', this.forms.length);
                 this.loading = false;
+                this.cdr.detectChanges();
             },
             error: (error) => {
                 console.error('Error loading forms:', error);
                 this.loading = false;
+                this.cdr.detectChanges();
             }
         });
     }
