@@ -68,7 +68,7 @@ export class AllClientsComponent implements OnInit {
     private userService = inject(UserService);
     private authService = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
-    private dialog = inject(MatDialog);
+    private dialog = inject(MatDialog, { optional: true });
 
     ngOnInit(): void {
         this.checkUserRole();
@@ -141,6 +141,11 @@ export class AllClientsComponent implements OnInit {
 
     editClient(client: Client): void {
         console.log('Editar cliente:', client.id);
+
+        if (!this.dialog) {
+            console.error('MatDialog no está disponible');
+            return;
+        }
 
         const dialogRef = this.dialog.open(EditClientModalComponent, {
             width: '700px',

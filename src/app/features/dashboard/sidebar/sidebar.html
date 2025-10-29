@@ -60,11 +60,11 @@
             <li *ngFor="let item of visibleMenuItems" class="relative">
                 <!-- Elemento padre -->
                 <div class="menu-item-parent">
-                    <a (click)="toggleMenuItem(item)" [ngClass]="{
+                    <button (click)="toggleMenuItem(item)" type="button" [ngClass]="{
                             'justify-center': !isExpanded,
                             'justify-between': isExpanded
                         }"
-                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 cursor-pointer group"
+                        class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 cursor-pointer group bg-transparent border-0"
                         [class.active]="item.expanded" [matTooltip]="!isExpanded ? item.label : ''"
                         matTooltipPosition="right" matTooltipClass="custom-tooltip">
                         <div class="flex items-center gap-3">
@@ -75,7 +75,7 @@
                             [class.rotate-180]="item.expanded">
                             expand_more
                         </mat-icon>
-                    </a>
+                    </button>
 
                     <!-- Submenú vertical (expandido) -->
                     <ul *ngIf="isExpanded && item.children && item.expanded"

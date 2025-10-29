@@ -1,4 +1,4 @@
-import { Component, OnInit, LOCALE_ID } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, inject } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter } from '@angular/material/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -24,9 +24,7 @@ import { ConfirmDialogComponent } from '../../../../shared/components/notificati
 // Registrar el locale español
 registerLocaleData(localeEs);
 
-import { Injectable } from '@angular/core';
 // Adaptador personalizado para español
-@Injectable()
 export class SpanishDateAdapter extends NativeDateAdapter {
     override getFirstDayOfWeek(): number {
         return 1; // Lunes como primer día de la semana
@@ -98,7 +96,8 @@ interface Client {
         MatNativeDateModule,
         MatProgressSpinnerModule,
         MatCheckboxModule,
-        MatAutocompleteModule
+        MatAutocompleteModule,
+        MatDialogModule
     ],
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
@@ -168,14 +167,13 @@ export class NewQuoteComponent implements OnInit {
         { value: 'Discover', label: 'Discover' }
     ];
 
-    constructor(
-        private fb: FormBuilder,
-        private applicationFormService: ApplicationFormService,
-        private userService: UserService,
-        private authService: AuthService,
-        private dialog: MatDialog,
-        private router: Router
-    ) { }
+    // Inyección usando inject() - mejor para SSR/hydration
+    private fb = inject(FormBuilder);
+    private applicationFormService = inject(ApplicationFormService);
+    private userService = inject(UserService);
+    private authService = inject(AuthService);
+    private dialog = inject(MatDialog);
+    private router = inject(Router);
 
     ngOnInit(): void {
         this.initializeForms();
