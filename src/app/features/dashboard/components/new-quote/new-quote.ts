@@ -109,6 +109,21 @@ interface Client {
     styleUrl: './new-quote.scss'
 })
 export class NewQuoteComponent implements OnInit {
+    // Formatea el input de teléfono en formato (###) ###-####
+    formatPhone(controlName: string, form: FormGroup): void {
+        const control = form.get(controlName);
+        if (!control) return;
+        let digits = (control.value || '').replace(/\D/g, '').substring(0, 10);
+        let formatted = digits;
+        if (digits.length > 6) {
+            formatted = `(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, 10)}`;
+        } else if (digits.length > 3) {
+            formatted = `(${digits.substring(0, 3)}) ${digits.substring(3, 6)}`;
+        } else if (digits.length > 0) {
+            formatted = `(${digits}`;
+        }
+        control.setValue(formatted, { emitEvent: false });
+    }
     // Estado de carga
     isLoadingClients = false;
     isSubmitting = false;
@@ -135,7 +150,7 @@ export class NewQuoteComponent implements OnInit {
     legalStatusOptions = [
         { value: 'Ciudadano', label: 'Ciudadano' },
         { value: 'Residente', label: 'Residente' },
-        { value: 'Visa de Trabajo', label: 'Visa de Trabajo' },
+        { value: 'Permiso de trabajo', label: 'Permiso de trabajo' },
         { value: 'Otro', label: 'Otro' }
     ];
 
@@ -200,7 +215,7 @@ export class NewQuoteComponent implements OnInit {
             phone2: ['', Validators.maxLength(20)],
             email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
             gender: ['', Validators.required],
-            ssn: ['', [Validators.required, Validators.maxLength(20)]],
+            ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
             legal_status: ['', [Validators.required, Validators.maxLength(100)]],
             document_number: ['', [Validators.required, Validators.maxLength(50)]]
         });
@@ -237,7 +252,7 @@ export class NewQuoteComponent implements OnInit {
             person1_document_number: ['', Validators.maxLength(50)],
             person1_dob: [''],
             person1_company_name: ['', Validators.maxLength(255)],
-            person1_ssn: ['', Validators.maxLength(20)],
+            person1_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
             person1_gender: [''],
             person1_wages: [null, Validators.min(0)],
             person1_frequency: [''],
@@ -250,7 +265,7 @@ export class NewQuoteComponent implements OnInit {
             person2_document_number: ['', Validators.maxLength(50)],
             person2_dob: [''],
             person2_company_name: ['', Validators.maxLength(255)],
-            person2_ssn: ['', Validators.maxLength(20)],
+            person2_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
             person2_gender: [''],
             person2_wages: [null, Validators.min(0)],
             person2_frequency: [''],
@@ -263,7 +278,7 @@ export class NewQuoteComponent implements OnInit {
             person3_document_number: ['', Validators.maxLength(50)],
             person3_dob: [''],
             person3_company_name: ['', Validators.maxLength(255)],
-            person3_ssn: ['', Validators.maxLength(20)],
+            person3_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
             person3_gender: [''],
             person3_wages: [null, Validators.min(0)],
             person3_frequency: [''],
@@ -276,7 +291,7 @@ export class NewQuoteComponent implements OnInit {
             person4_document_number: ['', Validators.maxLength(50)],
             person4_dob: [''],
             person4_company_name: ['', Validators.maxLength(255)],
-            person4_ssn: ['', Validators.maxLength(20)],
+            person4_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
             person4_gender: [''],
             person4_wages: [null, Validators.min(0)],
             person4_frequency: ['']
