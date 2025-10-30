@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,11 +9,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
-import { AuthService } from '../../../../core/services/auth.service';
-import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { FormSkeletonComponent } from '../../../../../shared/components/form-skeleton/form-skeleton';
 
 @Component({
-    selector: 'app-create-client',
+    selector: 'app-add-client-modal',
     standalone: true,
     imports: [
         CommonModule,
@@ -29,30 +28,16 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
         MatSelectModule,
         FormSkeletonComponent
     ],
-    templateUrl: './create-client.html',
-    styleUrls: ['./create-client.scss']
+    templateUrl: './add-client-modal.html',
+    styleUrls: ['./add-client-modal.scss']
 })
-export class CreateClientComponent implements OnInit {
-    // Transforma cada palabra a uppercase
-    onNameInput(): void {
-        const control = this.clientForm.get('name');
-        if (control) {
-            const value = control.value as string;
-            control.setValue(value.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()), { emitEvent: false });
-        }
-    }
+export class AddClientModalComponent implements OnInit {
+    @Output() clientCreated = new EventEmitter<any>();
+    @Output() cancelModal = new EventEmitter<void>();
 
-    // Transforma el email a minúsculas
-    onEmailInput(): void {
-        const control = this.clientForm.get('email');
-        if (control) {
-            const value = control.value as string;
-            control.setValue(value.toLowerCase(), { emitEvent: false });
-        }
-    }
     clientForm!: FormGroup;
     loading = false;
-    isInitializing = true; // Para mostrar skeleton durante inicialización
+    isInitializing = true;
     isAdmin = false;
     agents: any[] = [];
     currentUser: any;
@@ -60,7 +45,6 @@ export class CreateClientComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
-        private router: Router,
         private snackBar: MatSnackBar
     ) { }
 
@@ -70,11 +54,9 @@ export class CreateClientComponent implements OnInit {
 
         this.initForm();
 
-        // Si es admin, cargar lista de agentes
         if (this.isAdmin) {
             this.loadAgents();
         } else {
-            // Si no es admin, finalizar inicialización inmediatamente
             setTimeout(() => {
                 this.isInitializing = false;
             }, 300);
@@ -85,27 +67,45 @@ export class CreateClientComponent implements OnInit {
         this.clientForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
-            password: ['latin1234*'], // Password por defecto
-            type: ['client'], // Siempre client
+            password: ['latin1234*'],
+            type: ['client'],
             agent_id: [this.isAdmin ? '' : this.currentUser?.id, this.isAdmin ? [Validators.required] : []]
         });
 
-        // Si no es admin, el agent_id ya está asignado automáticamente
         if (!this.isAdmin) {
             this.clientForm.get('agent_id')?.disable();
         }
     }
 
     loadAgents(): void {
-        // TODO: Implementar servicio para obtener lista de agentes
-        // Simulando llamada asíncrona
         setTimeout(() => {
-            // Por ahora, mock data
             this.agents = [
                 { id: 2, name: 'Agent User', email: 'agent@example.com' }
             ];
-            this.isInitializing = false; // Finalizar inicialización después de cargar agentes
+            this.isInitializing = false;
         }, 500);
+    }
+
+    onNameInput(): void {
+        const control = this.clientForm.get('name');
+        if (control) {
+            const value = control.value as string;
+            control.setValue(value.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()), { emitEvent: false });
+        }
+    }
+
+    onEmailInput(): void {
+        const control = this.clientForm.get('email');
+        if (control) {
+            const value = control.value as string;
+            control.setValue(value.toLowerCase(), { emitEvent: false });
+        }
+    }
+
+    onCancel(): void {
+        this.clientForm.reset();
+        this.initForm();
+        this.cancelModal.emit();
     }
 
     onSubmit(): void {
@@ -119,7 +119,7 @@ export class CreateClientComponent implements OnInit {
         }
 
         this.loading = true;
-        const formData = this.clientForm.getRawValue(); // getRawValue para incluir campos disabled
+        const formData = this.clientForm.getRawValue();
 
         this.authService.register(formData).subscribe({
             next: (response) => {
@@ -128,8 +128,12 @@ export class CreateClientComponent implements OnInit {
                     duration: 3000,
                     panelClass: ['success-snackbar']
                 });
+
+                // Emitir evento con el nuevo cliente creado
+                this.clientCreated.emit(response);
+
                 this.clientForm.reset();
-                this.initForm(); // Reiniciar form con valores por defecto
+                this.initForm();
             },
             error: (error) => {
                 this.loading = false;

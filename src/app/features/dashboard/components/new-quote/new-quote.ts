@@ -20,6 +20,7 @@ import { ApplicationFormService } from '../../../../core/services/application-fo
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/notification-dialog/confirm-dialog.component';
+import { AddClientModalComponent } from './add-client-modal/add-client-modal';
 
 // Registrar el locale español
 registerLocaleData(localeEs);
@@ -97,7 +98,8 @@ interface Client {
         MatProgressSpinnerModule,
         MatCheckboxModule,
         MatAutocompleteModule,
-        MatDialogModule
+        MatDialogModule,
+        AddClientModalComponent
     ],
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
@@ -109,6 +111,18 @@ interface Client {
     styleUrl: './new-quote.scss'
 })
 export class NewQuoteComponent implements OnInit {
+    // Validador personalizado para teléfono formateado
+    phoneValidator(control: any): { [key: string]: boolean } | null {
+        if (!control.value) {
+            return null; // Si está vacío, lo maneja Validators.required
+        }
+        const digits = control.value.replace(/\D/g, '');
+        if (digits.length >= 10) {
+            return null; // Válido si tiene 10 o más dígitos
+        }
+        return { 'invalidPhone': true };
+    }
+
     // Formatea el input de teléfono en formato (###) ###-####
     formatPhone(controlName: string, form: FormGroup): void {
         const control = form.get(controlName);
@@ -123,6 +137,7 @@ export class NewQuoteComponent implements OnInit {
             formatted = `(${digits}`;
         }
         control.setValue(formatted, { emitEvent: false });
+        control.updateValueAndValidity({ emitEvent: false });
     }
     // Estado de carga
     isLoadingClients = false;
@@ -132,6 +147,13 @@ export class NewQuoteComponent implements OnInit {
     availableClients: Client[] = [];
     filteredClients: Client[] = [];
     selectedClient: Client | null = null;
+
+    // Modal para agregar nuevo cliente
+    showAddClientModal = false;
+
+    // Control de personas adicionales
+    selectedPersonIndex = 1; // Persona actualmente visible (1-6)
+    maxPersons = 6; // Máximo de personas adicionales
 
     // Formularios por paso
     clientSelectionForm!: FormGroup;
@@ -150,7 +172,7 @@ export class NewQuoteComponent implements OnInit {
     legalStatusOptions = [
         { value: 'Ciudadano', label: 'Ciudadano' },
         { value: 'Residente', label: 'Residente' },
-        { value: 'Permiso de trabajo', label: 'Permiso de trabajo' },
+        { value: 'Para Visa', label: 'Para Visa' },
         { value: 'Otro', label: 'Otro' }
     ];
 
@@ -211,8 +233,8 @@ export class NewQuoteComponent implements OnInit {
             city: ['', [Validators.required, Validators.maxLength(100)]],
             state: ['', [Validators.required, Validators.maxLength(50)]],
             zip_code: ['', [Validators.required, Validators.maxLength(20)]],
-            phone: ['', [Validators.required, Validators.maxLength(20)]],
-            phone2: ['', Validators.maxLength(20)],
+            phone: ['', [Validators.required, this.phoneValidator.bind(this)]],
+            phone2: ['', this.phoneValidator.bind(this)],
             email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
             gender: ['', Validators.required],
             ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
@@ -224,7 +246,7 @@ export class NewQuoteComponent implements OnInit {
         this.employmentForm = this.fb.group({
             employment_type: [''],
             employment_company_name: ['', Validators.maxLength(255)],
-            work_phone: ['', Validators.maxLength(20)],
+            work_phone: ['', this.phoneValidator.bind(this)],
             wages: [null, Validators.min(0)],
             wages_frequency: ['']
         });
@@ -294,7 +316,33 @@ export class NewQuoteComponent implements OnInit {
             person4_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
             person4_gender: [''],
             person4_wages: [null, Validators.min(0)],
-            person4_frequency: ['']
+            person4_frequency: [''],
+
+            // Persona 5
+            person5_name: ['', Validators.maxLength(255)],
+            person5_relation: [''],
+            person5_is_applicant: [false],
+            person5_legal_status: ['', Validators.maxLength(100)],
+            person5_document_number: ['', Validators.maxLength(50)],
+            person5_dob: [''],
+            person5_company_name: ['', Validators.maxLength(255)],
+            person5_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person5_gender: [''],
+            person5_wages: [null, Validators.min(0)],
+            person5_frequency: [''],
+
+            // Persona 6
+            person6_name: ['', Validators.maxLength(255)],
+            person6_relation: [''],
+            person6_is_applicant: [false],
+            person6_legal_status: ['', Validators.maxLength(100)],
+            person6_document_number: ['', Validators.maxLength(50)],
+            person6_dob: [''],
+            person6_company_name: ['', Validators.maxLength(255)],
+            person6_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person6_gender: [''],
+            person6_wages: [null, Validators.min(0)],
+            person6_frequency: ['']
         });
 
         // Paso 5: Método de Pago
@@ -434,11 +482,19 @@ export class NewQuoteComponent implements OnInit {
             confirmed: false
         };
 
+        // Limpiar teléfonos (quitar formato, dejar solo dígitos)
+        const phoneFields = ['phone', 'phone2', 'work_phone'];
+        phoneFields.forEach(field => {
+            if (formData[field]) {
+                formData[field] = formData[field].replace(/\D/g, '');
+            }
+        });
+
         // Convertir fechas a formato ISO
         if (formData.dob) {
             formData.dob = this.formatDate(formData.dob);
         }
-        ['person1_dob', 'person2_dob', 'person3_dob', 'person4_dob'].forEach(field => {
+        ['person1_dob', 'person2_dob', 'person3_dob', 'person4_dob', 'person5_dob', 'person6_dob'].forEach(field => {
             if (formData[field]) {
                 formData[field] = this.formatDate(formData[field]);
             }
@@ -447,12 +503,37 @@ export class NewQuoteComponent implements OnInit {
         // Enviar al backend
         this.applicationFormService.createApplicationForm(formData).subscribe({
             next: (response) => {
-                this.showSuccess('Planilla de aplicación creada exitosamente');
+                console.log('✅ Planilla creada:', response);
+
+                // Extraer el token de confirmación del backend
+                const token = response.confirmation_token;
+                const expiresAt = response.token_expires_at;
+
+                // Generar el link de confirmación con el TOKEN
+                const confirmationLink = `${window.location.origin}/confirm/${token}`;
+
+                // Mostrar notificación con link
+                const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+                    data: {
+                        title: '¡Planilla Creada Exitosamente!',
+                        message: 'La planilla de aplicación ha sido generada correctamente. Comparta el siguiente link con el cliente para que confirme su información:',
+                        type: 'success',
+                        confirmButtonText: 'Entendido',
+                        showLink: true,
+                        linkUrl: confirmationLink,
+                        linkLabel: 'Link de confirmación:',
+                        disableBackdropClick: true
+                    },
+                    width: '500px',
+                    disableClose: true
+                });
+
                 this.isSubmitting = false;
-                // Redirigir a la vista de reporte de agentes o al listado
-                setTimeout(() => {
+
+                // Redirigir después de cerrar el dialog
+                dialogRef.afterClosed().subscribe(() => {
                     this.router.navigate(['/dashboard/agents-report']);
-                }, 1500);
+                });
             },
             error: (error) => {
                 console.error('Error al crear application form:', error);
@@ -471,6 +552,22 @@ export class NewQuoteComponent implements OnInit {
             return `${year}-${month}-${day}`;
         }
         return date;
+    }
+
+    // Métodos para navegación de personas adicionales
+    selectPerson(personIndex: number): void {
+        if (personIndex >= 1 && personIndex <= this.maxPersons) {
+            this.selectedPersonIndex = personIndex;
+        }
+    }
+
+    hasPersonData(personIndex: number): boolean {
+        const nameControl = this.additionalPersonsForm.get(`person${personIndex}_name`);
+        return nameControl?.value?.trim().length > 0;
+    }
+
+    getPersonsArray(): number[] {
+        return Array.from({ length: this.maxPersons }, (_, i) => i + 1);
     }
 
     showSuccess(message: string): void {
@@ -497,6 +594,29 @@ export class NewQuoteComponent implements OnInit {
             },
             width: '400px'
         });
+    }
+
+    // Métodos para modal de agregar cliente
+    openAddClientModal(): void {
+        this.showAddClientModal = true;
+    }
+
+    closeAddClientModal(): void {
+        this.showAddClientModal = false;
+    }
+
+    onClientCreated(newClient: any): void {
+        // Agregar el nuevo cliente a la lista disponible
+        this.availableClients.unshift(newClient);
+        this.filteredClients = this.availableClients;
+
+        // Seleccionar automáticamente el nuevo cliente
+        this.selectClient(newClient);
+
+        // Cerrar el modal
+        this.closeAddClientModal();
+
+        this.showSuccess('Cliente creado. Ya puede seleccionarlo para continuar con la cotización');
     }
 
     cancel(): void {

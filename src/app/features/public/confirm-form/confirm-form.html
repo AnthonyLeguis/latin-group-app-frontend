@@ -1,0 +1,102 @@
+<div class="confirm-container">
+    <!-- Loading State -->
+    <div class="card loading-card hidden" [class.hidden]="!loading">
+        <div class="spinner"></div>
+        <p>Cargando información...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="card error-card" [class.hidden]="loading || !error || success">
+        <div class="icon error-icon">❌</div>
+        <h2>{{ tokenExpired ? 'Enlace Expirado' : (alreadyConfirmed ? 'Ya Confirmado' : 'Error') }}</h2>
+        <p>{{ error }}</p>
+        <button class="btn btn-primary" (click)="router.navigate(['/home'])">
+            🏠 Ir al inicio
+        </button>
+    </div>
+
+    <!-- Success State -->
+    <div class="card success-card" [class.hidden]="loading || (!success && error) || !success">
+        <div class="icon success-icon">✅</div>
+        <h2>¡Confirmación Exitosa!</h2>
+        <p *ngIf="!error">Gracias por confirmar su información. Su agente ha sido notificado y se pondrá en contacto con
+            usted pronto.
+        </p>
+        <p *ngIf="error">{{ error }}</p>
+        <div class="confirmation-date" [class.hidden]="!formData?.confirmed_at">
+            <span>⏰ Confirmado el {{ formatDate(formData?.confirmed_at) }}</span>
+        </div>
+    </div>
+
+    <!-- Form Data Display -->
+    <div class="card form-card" [class.hidden]="loading || error || success || !formData">
+        <div class="document-content">
+            <div class="document-header">
+                <img src="images/logo.png" alt="Latin Group Insurance Logo" class="company-logo">
+            </div>
+
+            <p class="greeting">Estimado Sr/a.</p>
+
+            <div class="client-info">
+                <p><strong>Nombre y apellido:</strong> {{ formData?.client_name }}</p>
+                <p><strong>Fecha de Nacimiento:</strong> {{ formData?.dob }}</p>
+                <p><strong>Correo Electrónico:</strong> <a [href]="'mailto:' + formData?.email"> {{ formData?.email
+                        }}</a>
+                </p>
+                <p><strong>Número de Teléfono:</strong> {{ formData?.phone }}</p>
+                <p *ngIf="formData?.final_cost"><strong>Salario Promedio Mensual:</strong> {{ formData?.final_cost }}
+                </p>
+                <p *ngIf="formData?.insurance_plan"><strong>Plan 2025:</strong> {{ formData?.insurance_plan }}</p>
+                <p *ngIf="formData?.state"><strong>Estado:</strong> {{ formData?.state }}</p>
+            </div>
+
+            <div class="document-text">
+                <p>Le enviamos este mensaje en nombre de <strong>Latin Group Insurance</strong> para confirmar su
+                    autorización al Asesor <strong>{{ formData?.agent_name || 'su asesor' }}</strong> a trabajar con el
+                    NPN 19903181 / 19606203.
+                    De <strong>{{ formData?.client_name }}</strong> para acceder y utilizar la información confidencial
+                    que
+                    usted ha proporcionado para el período 2025. Cabe destacar que la explicación de su plan ya ha sido
+                    completada y verificada tanto por usted como por su asesor.</p>
+
+                <p *ngIf="formData?.insurance_plan">Su plan para el año 2025 es: <strong>{{ formData?.insurance_plan
+                        }}</strong>.</p>
+
+                <p>La información recibida por usted será exclusivamente usada por una o más de las siguientes razones:
+                </p>
+
+                <ul class="reasons-list">
+                    <li>Consultar una aplicación existente en el Mercado de Seguros.</li>
+                    <li>Completar una solicitud para determinar su elegibilidad e inscripción en un Plan de Salud
+                        Calificado del Mercado.</li>
+                    <li>Brindar asistencia continua en la administración de su cuenta y proceso de inscripción, según
+                        sea necesario.</li>
+                    <li>Responder a consultas del Mercado relacionadas con su aplicación.</li>
+                </ul>
+
+                <p>Entiendo que los agentes mencionados no utilizarán ni compartirán mi información personal para fines
+                    distintos a los especificados anteriormente. Asimismo, se comprometen a mantener la confidencialidad
+                    y
+                    seguridad de mi información en todo momento.</p>
+
+                <p class="confirmation-request">Si está de acuerdo con lo anterior, le pedimos que confirme su
+                    Información</p>
+            </div>
+
+            <div class="button-container">
+                <button class="btn btn-confirm" (click)="confirmDocument()" [disabled]="confirming">
+                    <span class="spinner-small" *ngIf="confirming"></span>
+                    {{ confirming ? 'CONFIRMANDO...' : 'ACEPTAR DOCUMENTO' }}
+                </button>
+            </div>
+
+            <div class="footer">
+                <p>Atentamente,</p>
+                <p><strong>Latin Group Insurance</strong></p>
+                <p class="ip-info" *ngIf="formData?.id">IP: 153.33.203.103</p>
+                <p class="sent-from">Sent from <a href="https://latingroupcorp.com"
+                        target="_blank">latingroupcorp.com</a></p>
+            </div>
+        </div>
+    </div>
+</div>

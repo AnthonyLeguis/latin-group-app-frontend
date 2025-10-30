@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface DialogData {
     title?: string;
@@ -13,16 +14,22 @@ export interface DialogData {
     cancelButtonText?: string;
     autoClose?: boolean;
     autoCloseDuration?: number; // ms
+    showLink?: boolean; // Si debe mostrar un link
+    linkUrl?: string; // URL del link
+    linkLabel?: string; // Etiqueta para el link
+    disableBackdropClick?: boolean; // Evitar cerrar al hacer click fuera
 }
 
 @Component({
     selector: 'app-confirm-dialog',
     standalone: true,
-    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule],
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss']
 })
 export class ConfirmDialogComponent {
+    linkCopied = false;
+
     constructor(
         public dialogRef: MatDialogRef<ConfirmDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: DialogData
@@ -32,7 +39,13 @@ export class ConfirmDialogComponent {
             data.type = 'info';
         }
 
-        if (data.autoClose) {
+        // Deshabilitar cierre por backdrop si se especifica
+        if (data.disableBackdropClick) {
+            this.dialogRef.disableClose = true;
+        }
+
+        // Auto-cerrar solo si no tiene link y autoClose está habilitado
+        if (data.autoClose && !data.showLink) {
             setTimeout(() => this.dialogRef.close(true), data.autoCloseDuration || 3000);
         }
     }
@@ -57,5 +70,18 @@ export class ConfirmDialogComponent {
 
     onConfirm(): void {
         this.dialogRef.close(true);
+    }
+
+    copyLink(): void {
+        if (this.data.linkUrl) {
+            navigator.clipboard.writeText(this.data.linkUrl).then(() => {
+                this.linkCopied = true;
+                setTimeout(() => {
+                    this.linkCopied = false;
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar el link:', err);
+            });
+        }
     }
 }

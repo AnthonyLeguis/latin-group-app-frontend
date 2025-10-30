@@ -1,9 +1,9 @@
-<div class="create-client-container">
+<div class="add-client-modal-wrapper">
     <!-- Skeleton durante inicialización -->
     <app-form-skeleton *ngIf="isInitializing"></app-form-skeleton>
 
     <!-- Formulario real después de inicialización -->
-    <mat-card class="create-client-card" *ngIf="!isInitializing">
+    <mat-card class="add-client-card" *ngIf="!isInitializing">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon>person_add</mat-icon>
@@ -66,10 +66,9 @@
 
                 <!-- Botones -->
                 <div class="form-actions">
-                    <button mat-raised-button type="button" (click)="clientForm.reset(); initForm()"
-                        [disabled]="loading">
-                        <mat-icon>clear</mat-icon>
-                        Limpiar
+                    <button mat-raised-button type="button" (click)="onCancel()" [disabled]="loading">
+                        <mat-icon>close</mat-icon>
+                        Cancelar
                     </button>
 
                     <button mat-raised-button color="primary" type="submit" [disabled]="loading || clientForm.invalid">

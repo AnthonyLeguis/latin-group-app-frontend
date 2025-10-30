@@ -85,8 +85,11 @@ export class FormDetailModalComponent implements OnInit {
         this.formService.getApplicationForm(this.data.formId).subscribe({
             next: (form) => {
                 //console.log('Form data loaded:', form);
+                //console.log('Form status:', form.status);
+                //console.log('Form status lowercase:', form.status?.toLowerCase());
                 this.form = form;
                 this.currentStatus = this.statuses.find(s => s.value === form.status);
+                //console.log('Current status:', this.currentStatus);
                 this.statusForm.patchValue({
                     status: form.status,
                     status_comment: form.status_comment || ''
@@ -245,5 +248,41 @@ export class FormDetailModalComponent implements OnInit {
             style: 'currency',
             currency: 'USD'
         }).format(value);
+    }
+
+    hasAdditionalPersons(): boolean {
+        if (!this.form) return false;
+        return !!(
+            (this.form as any).person1_name ||
+            (this.form as any).person2_name ||
+            (this.form as any).person3_name ||
+            (this.form as any).person4_name ||
+            (this.form as any).person5_name ||
+            (this.form as any).person6_name
+        );
+    }
+
+    getAdditionalPersons(): any[] {
+        if (!this.form) return [];
+        const persons = [];
+        for (let i = 1; i <= 6; i++) {
+            const person = {
+                name: (this.form as any)[`person${i}_name`],
+                relation: (this.form as any)[`person${i}_relation`],
+                dob: (this.form as any)[`person${i}_dob`],
+                gender: (this.form as any)[`person${i}_gender`],
+                ssn: (this.form as any)[`person${i}_ssn`],
+                is_applicant: (this.form as any)[`person${i}_is_applicant`],
+                document_number: (this.form as any)[`person${i}_document_number`],
+                legal_status: (this.form as any)[`person${i}_legal_status`],
+                company_name: (this.form as any)[`person${i}_company_name`],
+                wages: (this.form as any)[`person${i}_wages`],
+                frequency: (this.form as any)[`person${i}_frequency`]
+            };
+            if (person.name) {
+                persons.push(person);
+            }
+        }
+        return persons;
     }
 }

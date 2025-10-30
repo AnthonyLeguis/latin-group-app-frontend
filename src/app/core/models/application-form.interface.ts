@@ -110,6 +110,9 @@ export interface ApplicationForm {
     pending_changes_at?: string;
     pending_changes_by?: number;
 
+    // PDF Sheet (generated document)
+    pdf_path?: string; // Ruta relativa del PDF confirmado
+
     // Timestamps
     created_at: string;
     updated_at: string;

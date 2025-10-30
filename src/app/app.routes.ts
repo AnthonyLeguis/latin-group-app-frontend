@@ -26,6 +26,10 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
     },
     {
+        path: 'confirm/:token',
+        loadComponent: () => import('./features/public/confirm-form/confirm-form').then(m => m.ConfirmFormComponent)
+    },
+    {
         path: '**',
         redirectTo: '/home'
     }

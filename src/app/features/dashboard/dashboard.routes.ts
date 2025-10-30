@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
-import { CreateClientComponent } from './components/create-client/create-client';
 import { CreateUserComponent } from './components/create-user/create-user';
 import { AgentsReportComponent } from './components/agents-report/agents-report';
 import { AllClientsComponent } from './components/all-clients/all-clients';
 import { ClientPolicyComponent } from './components/client-policy/client-policy';
 import { ClientDocumentsComponent } from './components/client-documents/client-documents';
 import { NewQuoteComponent } from './components/new-quote/new-quote';
+import { QuotesHistoryComponent } from './components/quotes-history/quotes-history';
+import { EmptyPlaceholderComponent } from './components/empty-placeholder/empty-placeholder';
 
 export const dashboardRoutes: Routes = [
     {
@@ -13,9 +14,9 @@ export const dashboardRoutes: Routes = [
         loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent),
         children: [
             {
-                path: 'create-client',
-                component: CreateClientComponent,
-                title: 'Ingresar Cliente - LatinGroup'
+                path: 'quoting-tool',
+                component: EmptyPlaceholderComponent,
+                title: 'Cotizador Online - LatinGroup'
             },
             {
                 path: 'create-user',
@@ -46,6 +47,11 @@ export const dashboardRoutes: Routes = [
                 path: 'new-quote',
                 component: NewQuoteComponent,
                 title: 'Nueva Cotización - LatinGroup'
+            },
+            {
+                path: 'quotes-history',
+                component: QuotesHistoryComponent,
+                title: 'Historial de Cotizaciones - LatinGroup'
             }
         ]
     }

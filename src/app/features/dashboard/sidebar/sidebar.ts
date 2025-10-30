@@ -65,14 +65,14 @@ export class SidebarComponent implements OnInit {
             expanded: false
         },
         {
-            label: 'Cotizar',
+            label: 'Cotización',
             icon: 'request_quote',
             route: '/dashboard/quotes',
             allowedRoles: ['admin', 'agent'], // Admin y Agent pueden cotizar
             children: [
                 { label: 'Nueva cotización', icon: 'add_circle', route: '/dashboard/new-quote' },
-                { label: 'Ingresar Cliente', icon: 'person_add', route: '/dashboard/create-client' },
-                { label: 'Historial de cotizaciones', icon: 'history', route: '/dashboard/quotes/history' }
+                { label: 'Cotizar', icon: 'person_add', route: '/dashboard/quoting-tool' },
+                { label: 'Historial de cotizaciones', icon: 'history', route: '/dashboard/quotes-history' }
             ],
             expanded: false
         },

@@ -1,0 +1,136 @@
+<div class="quotes-history-container overflow-visible">
+    <!-- Skeleton durante carga -->
+    <app-form-skeleton *ngIf="isLoading"></app-form-skeleton>
+
+    <!-- Contenido principal -->
+    <mat-card class="quotes-history-card overflow-visible" *ngIf="!isLoading">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>history</mat-icon>
+                Historial de Cotizaciones
+            </mat-card-title>
+            <mat-card-subtitle>
+                {{ totalForms }} planilla(s) registrada(s)
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Buscador -->
+            <div class="search-container">
+                <mat-form-field appearance="outline" class="search-field">
+                    <mat-label>Buscar planilla</mat-label>
+                    <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
+                        placeholder="Buscar por cliente, agente o número de planilla...">
+                    <mat-icon matPrefix>search</mat-icon>
+                    <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="clearSearch()" type="button">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                    <mat-hint>Filtra por cliente, agente, nombre del aplicante o número de planilla</mat-hint>
+                </mat-form-field>
+            </div>
+
+            <!-- Tabla de planillas -->
+            <div class="table-container" *ngIf="filteredForms.length > 0">
+                <table mat-table [dataSource]="filteredForms" class="quotes-table">
+                    <!-- Columna Cliente -->
+                    <ng-container matColumnDef="client">
+                        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                        <td mat-cell *matCellDef="let form">
+                            <div class="client-cell">
+                                <mat-icon class="client-icon">person</mat-icon>
+                                <div class="client-info">
+                                    <span class="client-name">{{ form.client?.name || 'N/A' }}</span>
+                                    <span class="applicant-name">{{ form.applicant_name }}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Planilla -->
+                    <ng-container matColumnDef="form">
+                        <th mat-header-cell *matHeaderCellDef>Planilla</th>
+                        <td mat-cell *matCellDef="let form">
+                            <button mat-button class="form-link" (click)="openFormDetail(form.id)">
+                                <mat-icon>description</mat-icon>
+                                Planilla #{{ form.id }}
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Agente (solo admin) -->
+                    <ng-container matColumnDef="agent">
+                        <th mat-header-cell *matHeaderCellDef>Agente</th>
+                        <td mat-cell *matCellDef="let form">
+                            <div class="agent-cell" *ngIf="form.agent">
+                                <mat-icon class="agent-icon">support_agent</mat-icon>
+                                <span class="agent-name">{{ form.agent.name }}</span>
+                            </div>
+                            <span *ngIf="!form.agent" class="no-agent">Sin agente</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Estado -->
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Estado</th>
+                        <td mat-cell *matCellDef="let form">
+                            <div class="status-cell group relative">
+                                <div [class]="'status-chip ' + getStatusClass(form.status)">
+                                    <mat-icon>{{ getStatusIcon(form.status) }}</mat-icon>
+                                    {{ getStatusLabel(form.status) }}
+                                </div>
+                                <!-- Tooltip Tailwind -->
+                                <div *ngIf="form.status_comment"
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    {{ form.status_comment }}
+                                    <div
+                                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Autorizado/Confirmado -->
+                    <ng-container matColumnDef="confirmed">
+                        <th mat-header-cell *matHeaderCellDef>Autorizado</th>
+                        <td mat-cell *matCellDef="let form">
+                            <div class="confirmed-cell">
+                                <mat-icon [class]="form.confirmed ? 'confirmed-icon' : 'not-confirmed-icon'">
+                                    {{ form.confirmed ? 'check_circle' : 'cancel' }}
+                                </mat-icon>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna PDF -->
+                    <ng-container matColumnDef="pdf">
+                        <th mat-header-cell *matHeaderCellDef>PDF</th>
+                        <td mat-cell *matCellDef="let form">
+                            <div class="pdf-cell">
+                                <button mat-icon-button [disabled]="!form.pdf_path" (click)="downloadPDF(form)"
+                                    [matTooltip]="form.pdf_path ? 'Descargar PDF' : 'PDF no disponible'"
+                                    matTooltipPosition="above" class="pdf-button">
+                                    <mat-icon [class.pdf-available]="form.pdf_path"
+                                        [class.pdf-unavailable]="!form.pdf_path">
+                                        {{ form.pdf_path ? 'picture_as_pdf' : 'block' }}
+                                    </mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+                </table>
+            </div>
+
+            <!-- Sin resultados -->
+            <div class="no-data" *ngIf="filteredForms.length === 0">
+                <mat-icon>inbox</mat-icon>
+                <h3>No hay planillas {{ searchTerm ? 'que coincidan con la búsqueda' : 'registradas' }}</h3>
+                <p>{{ searchTerm ? 'Intenta con otro término de búsqueda' : 'Aún no se han creado planillas de
+                    aplicación en el sistema' }}</p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

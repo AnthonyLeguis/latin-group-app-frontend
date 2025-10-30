@@ -13,6 +13,23 @@
         </button>
     </div>
 
+    <!-- Botón para agregar un nuevo cliente en modal -->
+    <div class="add-client-button-container" *ngIf="!isLoadingClients && availableClients.length > 0">
+        <button mat-raised-button color="accent" (click)="openAddClientModal()">
+            <mat-icon>person_add</mat-icon>
+            Ingresar Cliente
+        </button>
+    </div>
+
+    <!-- Modal para agregar nuevo cliente -->
+    <div *ngIf="showAddClientModal" class="add-client-modal-overlay">
+        <div class="modal-backdrop" (click)="closeAddClientModal()"></div>
+        <div class="modal-content">
+            <app-add-client-modal (clientCreated)="onClientCreated($event)" (cancelModal)="closeAddClientModal()">
+            </app-add-client-modal>
+        </div>
+    </div>
+
     <!-- Loading state -->
     <div *ngIf="isLoadingClients" class="loading-container">
         <mat-spinner diameter="40"></mat-spinner>
@@ -149,7 +166,7 @@
                             </div>
 
                             <!-- Dirección -->
-                            <div class="custom-label-group span-2">
+                            <div class="custom-label-group">
                                 <label class="custom-label-required">Dirección:</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="address" placeholder="Calle, número">
@@ -204,10 +221,15 @@
                                 <label class="custom-label-required">Teléfono:</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="phone" placeholder="(305) 123-4567"
-                                        inputmode="numeric" pattern="[0-9]*" maxlength="14"
+                                        inputmode="numeric" maxlength="14"
                                         (input)="formatPhone('phone', applicantForm)">
                                     <mat-icon matPrefix>phone</mat-icon>
-                                    <mat-error>Teléfono requerido</mat-error>
+                                    <mat-error *ngIf="applicantForm.get('phone')?.hasError('required')">
+                                        Teléfono requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="applicantForm.get('phone')?.hasError('invalidPhone')">
+                                        Debe ingresar un teléfono válido (10 dígitos)
+                                    </mat-error>
                                 </mat-form-field>
                             </div>
 
@@ -216,9 +238,12 @@
                                 <label class="custom-label-required">Teléfono Alterno (Opcional):</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="phone2" placeholder="(305) 987-6543"
-                                        inputmode="numeric" pattern="[0-9]*" maxlength="14"
+                                        inputmode="numeric" maxlength="14"
                                         (input)="formatPhone('phone2', applicantForm)">
                                     <mat-icon matPrefix>phone</mat-icon>
+                                    <mat-error *ngIf="applicantForm.get('phone2')?.hasError('invalidPhone')">
+                                        Debe ingresar un teléfono válido (10 dígitos)
+                                    </mat-error>
                                 </mat-form-field>
                             </div>
 
@@ -281,51 +306,64 @@
 
                         <div class="form-grid">
                             <!-- Tipo de empleo -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Tipo de Empleo</mat-label>
-                                <mat-select formControlName="employment_type">
-                                    <mat-option *ngFor="let type of employmentTypeOptions" [value]="type.value">
-                                        {{ type.label }}
-                                    </mat-option>
-                                </mat-select>
-                                <mat-icon matPrefix>work</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Tipo de Empleo:</label>
+                                <mat-form-field appearance="outline">
+                                    <mat-select formControlName="employment_type">
+                                        <mat-option *ngFor="let type of employmentTypeOptions" [value]="type.value">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matPrefix>work</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Nombre de la empresa -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Nombre de la Empresa</mat-label>
-                                <input matInput formControlName="employment_company_name" placeholder="ABC Corp">
-                                <mat-icon matPrefix>business</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Nombre de la Empresa:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="employment_company_name" placeholder="ABC Corp">
+                                    <mat-icon matPrefix>business</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Teléfono del trabajo -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Teléfono del Trabajo</mat-label>
-                                <input matInput formControlName="work_phone" placeholder="(305) 555-1234"
-                                    inputmode="numeric" pattern="[0-9]*" maxlength="14"
-                                    (input)="formatPhone('work_phone', employmentForm)">
-                                <mat-icon matPrefix>phone</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Teléfono del Trabajo:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="work_phone" placeholder="(305) 555-1234"
+                                        inputmode="numeric" maxlength="14"
+                                        (input)="formatPhone('work_phone', employmentForm)">
+                                    <mat-icon matPrefix>phone</mat-icon>
+                                    <mat-error *ngIf="employmentForm.get('work_phone')?.hasError('invalidPhone')">
+                                        Debe ingresar un teléfono válido (10 dígitos)
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Salario -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Salario</mat-label>
-                                <input matInput type="number" formControlName="wages" placeholder="0.00"
-                                    inputmode="numeric" pattern="[0-9]*"
-                                    oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
-                                <mat-icon matPrefix>attach_money</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Salario:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="wages" placeholder="0.00"
+                                        inputmode="numeric" pattern="[0-9]*"
+                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Frecuencia de pago -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Frecuencia de Pago</mat-label>
-                                <mat-select formControlName="wages_frequency">
-                                    <mat-option *ngFor="let freq of wagesFrequencyOptions" [value]="freq.value">
-                                        {{ freq.label }}
-                                    </mat-option>
-                                </mat-select>
-                                <mat-icon matPrefix>schedule</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Frecuencia de Pago:</label>
+                                <mat-form-field appearance="outline">
+                                    <mat-select formControlName="wages_frequency">
+                                        <mat-option *ngFor="let freq of wagesFrequencyOptions" [value]="freq.value">
+                                            {{ freq.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matPrefix>schedule</mat-icon>
+                                </mat-form-field>
+                            </div>
                         </div>
 
                         <div class="step-actions">
@@ -351,76 +389,94 @@
 
                         <div class="form-grid">
                             <!-- Compañía de Seguro -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Compañía de Seguro</mat-label>
-                                <input matInput formControlName="insurance_company" placeholder="Ej: Blue Cross">
-                                <mat-icon matPrefix>shield</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Compañía de Seguro:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="insurance_company" placeholder="Ej: Blue Cross">
+                                    <mat-icon matPrefix>shield</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Plan de Seguro -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Plan de Seguro</mat-label>
-                                <input matInput formControlName="insurance_plan" placeholder="Plan Gold">
-                                <mat-icon matPrefix>description</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Plan de Seguro:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="insurance_plan" placeholder="Plan Gold">
+                                    <mat-icon matPrefix>description</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Subsidio (Opcional) -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Subsidio (Opcional)</mat-label>
-                                <input matInput type="number" formControlName="subsidy" placeholder="0.00"
-                                    inputmode="numeric" pattern="[0-9]*"
-                                    oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
-                                <mat-icon matPrefix>attach_money</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Subsidio (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="subsidy" placeholder="0.00"
+                                        inputmode="numeric" pattern="[0-9]*"
+                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Costo de la Prima -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Costo de la Prima</mat-label>
-                                <input matInput type="number" formControlName="final_cost" placeholder="0.00"
-                                    inputmode="numeric" pattern="[0-9]*"
-                                    oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
-                                <mat-icon matPrefix>attach_money</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Costo de la Prima:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="final_cost" placeholder="0.00"
+                                        inputmode="numeric" pattern="[0-9]*"
+                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Número de Póliza -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Número de Póliza</mat-label>
-                                <input matInput formControlName="poliza_number" placeholder="POL-123456">
-                                <mat-icon matPrefix>confirmation_number</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Número de Póliza:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_number" placeholder="POL-123456">
+                                    <mat-icon matPrefix>confirmation_number</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Póliza Dental -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Póliza Dental</mat-label>
-                                <input matInput formControlName="poliza_category" placeholder="Dental">
-                                <mat-icon matPrefix>category</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Póliza Dental:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_category" placeholder="Dental">
+                                    <mat-icon matPrefix>category</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Monto Prima Dental -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Monto Prima Dental</mat-label>
-                                <input matInput type="number" formControlName="poliza_amount" placeholder="0.00"
-                                    inputmode="numeric" pattern="[0-9]*"
-                                    oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
-                                <mat-icon matPrefix>attach_money</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Monto Prima Dental:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="poliza_amount" placeholder="0.00"
+                                        inputmode="numeric" pattern="[0-9]*"
+                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Día de Pago -->
-                            <mat-form-field appearance="outline">
-                                <mat-label>Día de Pago</mat-label>
-                                <input matInput type="number" formControlName="poliza_payment_day" placeholder="1-31"
-                                    inputmode="numeric" pattern="[0-9]*"
-                                    oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                                <mat-icon matPrefix>event</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Día de Pago:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="poliza_payment_day"
+                                        placeholder="1-31" inputmode="numeric" pattern="[0-9]*"
+                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                    <mat-icon matPrefix>event</mat-icon>
+                                </mat-form-field>
+                            </div>
 
                             <!-- Beneficiario -->
-                            <mat-form-field appearance="outline" class="span-2">
-                                <mat-label>Beneficiario</mat-label>
-                                <input matInput formControlName="poliza_beneficiary"
-                                    placeholder="Nombre del beneficiario">
-                                <mat-icon matPrefix>person</mat-icon>
-                            </mat-form-field>
+                            <div class="custom-label-group span-2">
+                                <label class="custom-label-required">Beneficiario:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_beneficiary"
+                                        placeholder="Nombre del beneficiario">
+                                    <mat-icon matPrefix>person</mat-icon>
+                                </mat-form-field>
+                            </div>
                         </div>
 
                         <div class="step-actions">
@@ -442,82 +498,152 @@
                 <form [formGroup]="additionalPersonsForm">
                     <div class="step-content">
                         <h2>Personas Adicionales</h2>
-                        <p class="step-description">Agrega hasta 4 personas adicionales (Opcional)</p>
+                        <p class="step-description">Agrega hasta 6 personas adicionales (Opcional)</p>
 
-                        <!-- Persona 1 -->
+                        <!-- Navegación de Personas con Botones -->
+                        <div class="persons-navigation">
+                            <button *ngFor="let personNum of getPersonsArray()" type="button" mat-raised-button
+                                (click)="selectPerson(personNum)" [class.active]="selectedPersonIndex === personNum"
+                                [class.has-data]="hasPersonData(personNum)" class="person-button">
+                                <mat-icon>{{ hasPersonData(personNum) ? 'check_circle' : 'person' }}</mat-icon>
+                                Persona {{ personNum }}
+                            </button>
+                        </div>
+
+                        <!-- Formulario Dinámico para la Persona Seleccionada -->
                         <mat-card class="person-card">
                             <mat-card-header>
                                 <mat-card-title>
                                     <mat-icon>person_add</mat-icon>
-                                    Persona 1
+                                    Persona {{ selectedPersonIndex }}
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
                                 <div class="form-grid">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Nombre Completo</mat-label>
-                                        <input matInput formControlName="person1_name">
-                                        <mat-icon matPrefix>person</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Relación</mat-label>
-                                        <mat-select formControlName="person1_relation">
-                                            <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
-                                                {{ rel.label }}
-                                            </mat-option>
-                                        </mat-select>
-                                        <mat-icon matPrefix>family_restroom</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Fecha de Nacimiento</mat-label>
-                                        <input matInput [matDatepicker]="person1DobPicker"
-                                            formControlName="person1_dob">
-                                        <mat-icon matPrefix>cake</mat-icon>
-                                        <mat-datepicker-toggle matSuffix
-                                            [for]="person1DobPicker"></mat-datepicker-toggle>
-                                        <mat-datepicker #person1DobPicker></mat-datepicker>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Género</mat-label>
-                                        <mat-select formControlName="person1_gender">
-                                            <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
-                                                {{ gender.label }}
-                                            </mat-option>
-                                        </mat-select>
-                                        <mat-icon matPrefix>wc</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>SSN</mat-label>
-                                        <input matInput formControlName="person1_ssn" placeholder="Ingrese su SSN"
-                                            inputmode="numeric" pattern="[0-9]*" maxlength="20"
-                                            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                                        <mat-icon matPrefix>badge</mat-icon>
-                                        <mat-error
-                                            *ngIf="additionalPersonsForm.get('person1_ssn')?.hasError('maxlength')">
-                                            Máximo 20 caracteres
-                                        </mat-error>
-                                        <mat-error
-                                            *ngIf="additionalPersonsForm.get('person1_ssn')?.hasError('pattern')">
-                                            Solo se permiten números
-                                        </mat-error>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Número de Documento</mat-label>
-                                        <input matInput formControlName="person1_document_number">
-                                        <mat-icon matPrefix>credit_card</mat-icon>
-                                    </mat-form-field>
-                                    <mat-checkbox formControlName="person1_is_applicant" class="span-2">
+                                    <!-- Nombre Completo -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Nombre Completo:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput
+                                                [formControlName]="'person' + selectedPersonIndex + '_name'">
+                                            <mat-icon matPrefix>person</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Relación -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Relación:</label>
+                                        <mat-form-field appearance="outline">
+                                            <mat-select
+                                                [formControlName]="'person' + selectedPersonIndex + '_relation'">
+                                                <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
+                                                    {{ rel.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-icon matPrefix>family_restroom</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Fecha de Nacimiento -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Fecha de Nacimiento:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput [matDatepicker]="dobPickerPerson1"
+                                                *ngIf="selectedPersonIndex === 1"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <input matInput [matDatepicker]="dobPickerPerson2"
+                                                *ngIf="selectedPersonIndex === 2"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <input matInput [matDatepicker]="dobPickerPerson3"
+                                                *ngIf="selectedPersonIndex === 3"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <input matInput [matDatepicker]="dobPickerPerson4"
+                                                *ngIf="selectedPersonIndex === 4"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <input matInput [matDatepicker]="dobPickerPerson5"
+                                                *ngIf="selectedPersonIndex === 5"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <input matInput [matDatepicker]="dobPickerPerson6"
+                                                *ngIf="selectedPersonIndex === 6"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <mat-icon matPrefix>cake</mat-icon>
+                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson1"
+                                                *ngIf="selectedPersonIndex === 1">
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson2"
+                                                *ngIf="selectedPersonIndex === 2">
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson3"
+                                                *ngIf="selectedPersonIndex === 3">
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson4"
+                                                *ngIf="selectedPersonIndex === 4">
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson5"
+                                                *ngIf="selectedPersonIndex === 5">
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson6"
+                                                *ngIf="selectedPersonIndex === 6">
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker #dobPickerPerson1></mat-datepicker>
+                                            <mat-datepicker #dobPickerPerson2></mat-datepicker>
+                                            <mat-datepicker #dobPickerPerson3></mat-datepicker>
+                                            <mat-datepicker #dobPickerPerson4></mat-datepicker>
+                                            <mat-datepicker #dobPickerPerson5></mat-datepicker>
+                                            <mat-datepicker #dobPickerPerson6></mat-datepicker>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Género -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Género:</label>
+                                        <mat-form-field appearance="outline">
+                                            <mat-select [formControlName]="'person' + selectedPersonIndex + '_gender'">
+                                                <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
+                                                    {{ gender.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-icon matPrefix>wc</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- SSN -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">SSN:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput [formControlName]="'person' + selectedPersonIndex + '_ssn'"
+                                                placeholder="Ingrese su SSN" inputmode="numeric" pattern="[0-9]*"
+                                                maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                            <mat-icon matPrefix>badge</mat-icon>
+                                            <mat-error
+                                                *ngIf="additionalPersonsForm.get('person' + selectedPersonIndex + '_ssn')?.hasError('maxlength')">
+                                                Máximo 20 caracteres
+                                            </mat-error>
+                                            <mat-error
+                                                *ngIf="additionalPersonsForm.get('person' + selectedPersonIndex + '_ssn')?.hasError('pattern')">
+                                                Solo se permiten números
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Número de Documento -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Número de Documento:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput
+                                                [formControlName]="'person' + selectedPersonIndex + '_document_number'">
+                                            <mat-icon matPrefix>credit_card</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Checkbox: Es el aplicante principal -->
+                                    <mat-checkbox [formControlName]="'person' + selectedPersonIndex + '_is_applicant'"
+                                        class="span-2">
                                         Es el aplicante principal
                                     </mat-checkbox>
                                 </div>
                             </mat-card-content>
                         </mat-card>
-
-                        <!-- Las demás personas siguen el mismo patrón, pero simplificado para el ejemplo -->
-                        <div class="more-persons-hint">
-                            <mat-icon>info</mat-icon>
-                            <p>Puedes agregar hasta 3 personas más si es necesario (Persona 2, 3 y 4)</p>
-                        </div>
 
                         <div class="step-actions">
                             <button mat-button matStepperPrevious>
@@ -548,30 +674,39 @@
                                     Tarjeta de Crédito/Débito
                                 </h3>
                                 <div class="form-grid">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Tipo de Tarjeta</mat-label>
-                                        <mat-select formControlName="card_type">
-                                            <mat-option *ngFor="let type of cardTypeOptions" [value]="type.value">
-                                                {{ type.label }}
-                                            </mat-option>
-                                        </mat-select>
-                                        <mat-icon matPrefix>credit_card</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Número de Tarjeta</mat-label>
-                                        <input matInput formControlName="card_number" placeholder="XXXX XXXX XXXX XXXX">
-                                        <mat-icon matPrefix>payment</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Fecha de Expiración</mat-label>
-                                        <input matInput formControlName="card_expiration" placeholder="MM/YY">
-                                        <mat-icon matPrefix>event</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>CVV</mat-label>
-                                        <input matInput formControlName="card_cvv" placeholder="XXX">
-                                        <mat-icon matPrefix>lock</mat-icon>
-                                    </mat-form-field>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Tipo de Tarjeta:</label>
+                                        <mat-form-field appearance="outline">
+                                            <mat-select formControlName="card_type">
+                                                <mat-option *ngFor="let type of cardTypeOptions" [value]="type.value">
+                                                    {{ type.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-icon matPrefix>credit_card</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Número de Tarjeta:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_number"
+                                                placeholder="XXXX XXXX XXXX XXXX">
+                                            <mat-icon matPrefix>payment</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Fecha de Expiración:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_expiration" placeholder="MM/YY">
+                                            <mat-icon matPrefix>event</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">CVV:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_cvv" placeholder="XXX">
+                                            <mat-icon matPrefix>lock</mat-icon>
+                                        </mat-form-field>
+                                    </div>
                                 </div>
                             </div>
 
@@ -582,21 +717,27 @@
                                     Cuenta Bancaria
                                 </h3>
                                 <div class="form-grid">
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Nombre del Banco</mat-label>
-                                        <input matInput formControlName="bank_name" placeholder="Bank of America">
-                                        <mat-icon matPrefix>account_balance</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Routing Number</mat-label>
-                                        <input matInput formControlName="bank_routing" placeholder="123456789">
-                                        <mat-icon matPrefix>tag</mat-icon>
-                                    </mat-form-field>
-                                    <mat-form-field appearance="outline" class="span-2">
-                                        <mat-label>Número de Cuenta</mat-label>
-                                        <input matInput formControlName="bank_account" placeholder="1234567890">
-                                        <mat-icon matPrefix>numbers</mat-icon>
-                                    </mat-form-field>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Nombre del Banco:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="bank_name" placeholder="Bank of America">
+                                            <mat-icon matPrefix>account_balance</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Routing Number:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="bank_routing" placeholder="123456789">
+                                            <mat-icon matPrefix>tag</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group span-2">
+                                        <label class="custom-label-required">Número de Cuenta:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="bank_account" placeholder="1234567890">
+                                            <mat-icon matPrefix>numbers</mat-icon>
+                                        </mat-form-field>
+                                    </div>
                                 </div>
                             </div>
                         </div>

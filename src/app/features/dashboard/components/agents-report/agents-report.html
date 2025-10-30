@@ -48,6 +48,11 @@
                             <span class="stat-value">{{ stats.pending_forms }}</span>
                             <span class="stat-label">Planillas Pendientes</span>
                         </div>
+                        <!-- Indicador con Pulse -->
+                        <div class="notification-badge" *ngIf="stats.pending_forms > 0">
+                            <span class="badge-pulse"></span>
+                            <span class="badge-content">{{ stats.pending_forms }}</span>
+                        </div>
                         <!-- Tooltip Tailwind -->
                         <div
                             class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">

@@ -12,6 +12,18 @@
     <!-- Contenido -->
     <div mat-dialog-content class="dialog-content">
         <p *ngIf="data.message" class="dialog-message">{{ data.message }}</p>
+
+        <!-- Link de confirmación -->
+        <div *ngIf="data.showLink && data.linkUrl" class="link-container">
+            <label class="link-label">{{ data.linkLabel || 'Su link es:' }}</label>
+            <div class="link-box">
+                <input type="text" [value]="data.linkUrl" readonly class="link-input" #linkInput>
+                <button mat-icon-button (click)="copyLink()" class="copy-btn"
+                    [matTooltip]="linkCopied ? '¡Copiado!' : 'Copiar link'" matTooltipPosition="above">
+                    <mat-icon>{{ linkCopied ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Botones -->
