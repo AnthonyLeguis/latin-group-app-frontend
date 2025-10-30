@@ -1,0 +1,76 @@
+<div class="token-authorization-modal">
+    <!-- Header -->
+    <div class="modal-header">
+        <div class="header-content">
+            <mat-icon class="header-icon">verified_user</mat-icon>
+            <div class="header-text">
+                <h2>Autorización del Cliente</h2>
+                <p class="client-name">{{ data.clientName }}</p>
+            </div>
+        </div>
+        <button mat-icon-button (click)="onClose()" class="close-btn">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="status-section">
+        <div class="status-badge" [ngClass]="getExpirationClass()">
+            <mat-icon>{{ getExpirationIcon() }}</mat-icon>
+            <span>{{ getExpirationMessage() }}</span>
+        </div>
+        <span class="expiration-date" *ngIf="data.tokenExpiresAt">
+            Expira: {{ formatDate(data.tokenExpiresAt) }}
+        </span>
+    </div>
+
+    <!-- Planilla ya confirmada -->
+    <div class="confirmed-alert" *ngIf="data.confirmed">
+        <mat-icon>info</mat-icon>
+        <p>Esta planilla ya fue confirmada por el cliente. El token de confirmación ya no es necesario.</p>
+    </div>
+
+    <!-- Token Section -->
+    <div class="token-section" *ngIf="!data.confirmed">
+        <div class="section-header">
+            <mat-icon>link</mat-icon>
+            <h3>Link de Confirmación</h3>
+        </div>
+
+        <div class="link-container">
+            <div class="link-box">
+                <input type="text" [value]="confirmationLink" readonly class="link-input" #linkInput>
+                <button mat-icon-button (click)="copyLink()" class="copy-btn"
+                    [matTooltip]="linkCopied ? '¡Copiado!' : 'Copiar link'" matTooltipPosition="above">
+                    <mat-icon>{{ linkCopied ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+            </div>
+            <p class="link-hint">
+                <mat-icon>info_outline</mat-icon>
+                Comparte este link con el cliente para que confirme su planilla
+            </p>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="modal-actions" *ngIf="!data.confirmed">
+        <button mat-stroked-button (click)="onClose()" [disabled]="isRenewing">
+            <mat-icon>close</mat-icon>
+            Cerrar
+        </button>
+        <button mat-raised-button color="accent" (click)="renewToken()" [disabled]="isRenewing" class="renew-btn">
+            <mat-spinner *ngIf="isRenewing" diameter="20" class="button-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isRenewing">autorenew</mat-icon>
+            <span *ngIf="!isRenewing">{{ isTokenExpired ? 'Generar Nuevo Token' : 'Renovar Token' }}</span>
+            <span *ngIf="isRenewing">Renovando...</span>
+        </button>
+    </div>
+
+    <!-- Close button if confirmed -->
+    <div class="modal-actions" *ngIf="data.confirmed">
+        <button mat-raised-button color="primary" (click)="onClose()">
+            <mat-icon>check</mat-icon>
+            Entendido
+        </button>
+    </div>
+</div>

@@ -101,6 +101,8 @@ export interface ApplicationForm {
     status: 'pendiente' | 'activo' | 'inactivo' | 'rechazado';
     status_comment?: string;
     confirmed: boolean;
+    confirmation_token?: string;
+    token_expires_at?: string;
     reviewed_by?: number;
     reviewed_at?: string;
 

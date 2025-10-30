@@ -151,6 +151,27 @@
                         </td>
                     </ng-container>
 
+                    <!-- Columna Token de Autorización -->
+                    <ng-container matColumnDef="token">
+                        <th mat-header-cell *matHeaderCellDef>Token</th>
+                        <td mat-cell *matCellDef="let form">
+                            <div class="token-cell group relative">
+                                <button mat-icon-button (click)="openTokenAuthorizationModal(form)"
+                                    class="token-button">
+                                    <mat-icon>autorenew</mat-icon>
+                                </button>
+                                <!-- Tooltip Tailwind -->
+                                <div
+                                    class="absolute bottom-full left-1/4 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    Renovar token
+                                    <div
+                                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
                 </table>

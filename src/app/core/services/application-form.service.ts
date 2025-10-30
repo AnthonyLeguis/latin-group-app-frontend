@@ -114,4 +114,14 @@ export class ApplicationFormService {
     deleteDocument(formId: number, documentId: number): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}/${formId}/documents/${documentId}`);
     }
+
+    /**
+     * Renovar token de confirmación (extender 3 días más)
+     */
+    renewToken(formId: number): Observable<{ message: string; token: string; expires_at: string; confirmation_link: string }> {
+        return this.http.post<{ message: string; token: string; expires_at: string; confirmation_link: string }>(
+            `${this.apiUrl}/${formId}/renew-token`,
+            {}
+        );
+    }
 }

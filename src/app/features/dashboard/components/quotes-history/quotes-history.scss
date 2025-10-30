@@ -934,3 +934,24 @@
         overflow: visible !important;
     }
 }
+
+// Columna Token
+.token-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .token-button {
+        transition: all 0.2s ease;
+
+        mat-icon {
+            color: #dc2626;
+            transition: transform 0.3s ease;
+        }
+
+        &:hover mat-icon {
+            transform: rotate(180deg);
+            color: #991b1b;
+        }
+    }
+}

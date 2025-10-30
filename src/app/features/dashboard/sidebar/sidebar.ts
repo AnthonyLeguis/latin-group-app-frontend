@@ -60,7 +60,7 @@ export class SidebarComponent implements OnInit {
             allowedRoles: ['admin', 'agent'], // Admin y Agent pueden ver esta opción
             children: [
                 { label: 'Todos los clientes', icon: 'groups', route: '/dashboard/all-clients' },
-                { label: 'Clientes activos', icon: 'verified_user', route: '/dashboard/clients/active' }
+                // { label: 'Clientes activos', icon: 'verified_user', route: '/dashboard/clients/active' }
             ],
             expanded: false
         },
@@ -184,6 +184,15 @@ export class SidebarComponent implements OnInit {
             'client': 'Cliente'
         };
         return labels[type] || type;
+    }
+
+    getUserTypeLabelShort(type: string): string {
+        const shortLabels: { [key: string]: string } = {
+            'admin': 'Admin',
+            'agent': 'Agente',
+            'client': 'Cliente'
+        };
+        return shortLabels[type] || type;
     }
 
     toggleSidebar(): void {

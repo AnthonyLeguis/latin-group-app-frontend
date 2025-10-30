@@ -16,6 +16,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ApplicationForm } from '../../../../core/models/application-form.interface';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
+import { TokenAuthorizationModalComponent } from '../token-authorization-modal/token-authorization-modal.component';
 
 @Component({
     selector: 'app-quotes-history',
@@ -55,7 +56,7 @@ export class QuotesHistoryComponent implements OnInit {
     // Usuario actual
     isAdmin = false;
 
-    displayedColumns: string[] = ['client', 'form', 'status', 'confirmed', 'pdf'];
+    displayedColumns: string[] = ['client', 'form', 'status', 'confirmed', 'pdf', 'token'];
 
     ngOnInit(): void {
         this.checkUserRole();
@@ -262,5 +263,20 @@ export class QuotesHistoryComponent implements OnInit {
         const token = this.authService.getToken();
         const url = `http://127.0.0.1:8000/api/v1/forms/${form.id}/view-pdf?token=${token}`;
         window.open(url, '_blank');
+    }
+
+    openTokenAuthorizationModal(form: ApplicationForm): void {
+        this.dialog.open(TokenAuthorizationModalComponent, {
+            data: {
+                formId: form.id,
+                clientName: form.client?.name || 'Cliente Desconocido',
+                confirmationToken: form.confirmation_token,
+                tokenExpiresAt: form.token_expires_at,
+                confirmed: form.confirmed
+            },
+            width: '600px',
+            maxWidth: '95vw',
+            panelClass: 'token-authorization-dialog'
+        });
     }
 }
