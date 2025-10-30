@@ -141,8 +141,14 @@ export class AddClientModalComponent implements OnInit {
                     panelClass: ['success-snackbar']
                 });
 
+                const createdUser = (response as any)?.user ?? response;
+                const emittedClient = {
+                    ...createdUser,
+                    agent_id: formData.agent_id || this.currentUser?.id
+                };
+
                 // Emitir evento con el nuevo cliente creado
-                this.clientCreated.emit(response);
+                this.clientCreated.emit(emittedClient);
 
                 this.clientForm.reset();
                 this.initForm();

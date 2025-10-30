@@ -613,12 +613,23 @@ export class NewQuoteComponent implements OnInit {
     }
 
     onClientCreated(newClient: any): void {
-        // Agregar el nuevo cliente a la lista disponible
-        this.availableClients.unshift(newClient);
-        this.filteredClients = this.availableClients;
+        if (!newClient) {
+            return;
+        }
+
+        const client: Client = {
+            id: newClient.id,
+            name: newClient.name,
+            email: newClient.email,
+            agent_id: newClient.agent_id ?? this.authService.currentUser?.id
+        };
+
+        // Evitar duplicados si ya existe en la lista
+        this.availableClients = [client, ...this.availableClients.filter(c => c.id !== client.id)];
+        this.filteredClients = [...this.availableClients];
 
         // Seleccionar automáticamente el nuevo cliente
-        this.selectClient(newClient);
+        this.selectClient(client);
 
         // Cerrar el modal
         this.closeAddClientModal();
