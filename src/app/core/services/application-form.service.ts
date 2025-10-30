@@ -12,10 +12,16 @@ export class ApplicationFormService {
     private apiUrl = `${environment.apiUrl}/application-forms`;
 
     /**
-     * Obtener todas las planillas (con filtros opcionales)
+     * Obtener todas las planillas (con filtros opcionales y paginación)
      */
-    getApplicationForms(filters?: { status?: string; client_id?: number }): Observable<any> {
-        let params = new HttpParams();
+    getApplicationForms(
+        page: number = 1,
+        perPage: number = 15,
+        filters?: { status?: string; client_id?: number }
+    ): Observable<any> {
+        let params = new HttpParams()
+            .set('page', page.toString())
+            .set('per_page', perPage.toString());
 
         if (filters?.status) {
             params = params.set('status', filters.status);

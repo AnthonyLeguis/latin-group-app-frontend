@@ -15,6 +15,7 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EditClientModalComponent } from '../edit-client-modal/edit-client-modal';
+import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 
 interface Client {
     id: number;
@@ -25,6 +26,9 @@ interface Client {
         id: number;
         name: string;
         email: string;
+    };
+    application_form?: {
+        id: number;
     };
 }
 
@@ -135,8 +139,34 @@ export class AllClientsComponent implements OnInit {
 
     viewClient(client: Client): void {
         console.log('Ver detalles del cliente:', client.id);
-        // Implementa aquí tu lógica de navegación o modal
-        // Ejemplo: this.router.navigate(['/clients', client.id]);
+
+        // Verificar si el cliente tiene application_form
+        if (!client.application_form || !client.application_form.id) {
+            console.warn('Este cliente no tiene una planilla de aplicación');
+            // Podrías mostrar un mensaje al usuario aquí
+            return;
+        }
+
+        if (!this.dialog) {
+            console.error('MatDialog no está disponible');
+            return;
+        }
+
+        // Abrir el modal de detalles de la application form
+        const dialogRef = this.dialog.open(FormDetailModalComponent, {
+            width: '900px',
+            maxWidth: '95vw',
+            data: { formId: client.application_form.id },
+            panelClass: 'form-detail-dialog'
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result?.updated) {
+                // Si hubo cambios, recargar la lista
+                console.log('Planilla actualizada, recargando lista...');
+                this.loadClients(this.currentPage);
+            }
+        });
     }
 
     editClient(client: Client): void {
@@ -160,7 +190,9 @@ export class AllClientsComponent implements OnInit {
             if (result) {
                 // Si se guardaron cambios, recargar la lista
                 console.log('Cliente actualizado, recargando lista...');
-                this.loadClients(this.currentPage);
+                setTimeout(() => {
+                    this.loadClients(this.currentPage);
+                });
             }
         });
     }

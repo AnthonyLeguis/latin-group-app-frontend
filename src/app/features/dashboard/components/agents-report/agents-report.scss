@@ -226,11 +226,25 @@
 }
 
 // Buscador
-.search-container {
+// Fila de filtros (Buscador + Píldoras de Estado)
+.filters-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
     margin-bottom: 1.25rem;
 
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
     .search-field {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
+
+        @media (max-width: 768px) {
+            width: 100%;
+        }
 
         ::ng-deep {
             .mat-mdc-form-field-focus-overlay {
@@ -361,6 +375,125 @@
             }
         }
     }
+
+    // Píldoras de Filtro por Estado
+    .status-filters {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        @media (max-width: 768px) {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .status-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            white-space: nowrap;
+
+            @media (max-width: 768px) {
+                flex: 1;
+                min-width: calc(50% - 0.25rem);
+                justify-content: center;
+                padding: 0.375rem 0.625rem;
+                font-size: 0.6875rem;
+            }
+
+            mat-icon {
+                font-size: 1rem;
+                width: 1rem;
+                height: 1rem;
+
+                @media (max-width: 768px) {
+                    font-size: 0.875rem;
+                    width: 0.875rem;
+                    height: 0.875rem;
+                }
+            }
+
+            &.pendiente {
+                color: #d97706;
+                border-color: #fbbf24;
+                background: #fef3c7;
+
+                &:hover {
+                    background: #fde68a;
+                    border-color: #f59e0b;
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                    border-color: #d97706;
+                    color: white;
+                    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+                }
+            }
+
+            &.activo {
+                color: #059669;
+                border-color: #34d399;
+                background: #d1fae5;
+
+                &:hover {
+                    background: #a7f3d0;
+                    border-color: #10b981;
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    border-color: #059669;
+                    color: white;
+                    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+                }
+            }
+
+            &.rechazado {
+                color: #dc2626;
+                border-color: #fca5a5;
+                background: #fee2e2;
+
+                &:hover {
+                    background: #fecaca;
+                    border-color: #ef4444;
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                    border-color: #dc2626;
+                    color: white;
+                    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+                }
+            }
+
+            &.inactivo {
+                color: #4b5563;
+                border-color: #9ca3af;
+                background: #f3f4f6;
+
+                &:hover {
+                    background: #e5e7eb;
+                    border-color: #6b7280;
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+                    border-color: #4b5563;
+                    color: white;
+                    box-shadow: 0 2px 8px rgba(75, 85, 99, 0.3);
+                }
+            }
+        }
+    }
 }
 
 // Accordion - Más compacto y profesional
@@ -438,20 +571,38 @@
         }
 
         .clients-chip {
-            background-color: #374151;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.375rem 0.75rem;
-            border-radius: 4px;
-            font-weight: 500;
-            font-size: 0.8125rem;
+            background-color: #374151 !important;
+            color: white !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.375rem !important;
+            padding: 0.375rem 0.75rem !important;
+            border-radius: 4px !important;
+            font-weight: 500 !important;
+            font-size: 0.8125rem !important;
+            height: auto !important;
+            min-height: 28px !important;
+            line-height: 1 !important;
 
             mat-icon {
-                font-size: 1rem;
-                width: 1rem;
-                height: 1rem;
+                font-size: 1rem !important;
+                width: 1rem !important;
+                height: 1rem !important;
+                margin: 0 !important;
+            }
+
+            // Ajustar contenido interno de mat-chip
+            ::ng-deep .mdc-evolution-chip__action {
+                padding: 0 !important;
+            }
+
+            ::ng-deep .mat-mdc-chip-action-label {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.375rem !important;
+                padding: 0 !important;
+                line-height: 1 !important;
             }
         }
     }
@@ -993,19 +1144,37 @@
         }
 
         .clients-chip {
-            background-color: #dc2626;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 500;
+            background-color: #dc2626 !important;
+            color: white !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 20px !important;
+            font-weight: 500 !important;
+            height: auto !important;
+            min-height: 32px !important;
+            line-height: 1 !important;
 
             mat-icon {
-                font-size: 1.25rem;
-                width: 1.25rem;
-                height: 1.25rem;
+                font-size: 1.25rem !important;
+                width: 1.25rem !important;
+                height: 1.25rem !important;
+                margin: 0 !important;
+            }
+
+            // Ajustar contenido interno de mat-chip
+            ::ng-deep .mdc-evolution-chip__action {
+                padding: 0 !important;
+            }
+
+            ::ng-deep .mat-mdc-chip-action-label {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.5rem !important;
+                padding: 0 !important;
+                line-height: 1 !important;
             }
         }
     }
@@ -1286,18 +1455,27 @@
 
 @keyframes pulseRing {
     0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
     }
 
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    50% {
+        box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
     }
 
     100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
+}
+
+@keyframes pulseShadow {
+
+    0%,
+    100% {
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+    }
+
+    50% {
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35), 0 0 0 4px rgba(220, 38, 38, 0.1);
     }
 }
 
@@ -1314,19 +1492,48 @@
     flex-wrap: wrap;
 }
 
-// Píldora de cambios pendientes con efecto pulse
+// Píldora de cambios pendientes con efecto pulse en la sombra
 .pending-changes-chip {
-    background-color: #fef2f2 !important;
-    color: #dc2626 !important;
-    border: 2px solid #dc2626 !important;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+    color: #991b1b !important;
+    border: 1px solid rgba(220, 38, 38, 0.2) !important;
     font-weight: 600 !important;
-    font-size: 0.75rem !important;
-    padding: 0.375rem 0.75rem !important;
-    animation: pulseRing 2s infinite !important;
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0.625rem !important;
+    height: auto !important;
+    min-height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.375rem !important;
+    border-radius: 20px !important;
+    animation: pulseShadow 2s ease-in-out infinite !important;
+    transition: all 0.3s ease !important;
+
+    &:hover {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25) !important;
+    }
 
     mat-icon {
         color: #dc2626 !important;
-        animation: pulse 2s infinite !important;
+        font-size: 1rem !important;
+        width: 1rem !important;
+        height: 1rem !important;
+        margin: 0 !important;
+    }
+
+    // Ajustar el texto interno
+    ::ng-deep .mdc-evolution-chip__action {
+        padding: 0 !important;
+    }
+
+    ::ng-deep .mat-mdc-chip-action-label {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0 !important;
     }
 }
 

@@ -123,8 +123,8 @@ export class LoginComponent {
   }
 
   onForgotPassword(): void {
-    // Implementar lógica de recuperación de contraseña
-    console.log('Recuperar contraseña');
+    console.log('🔑 Navegando a recuperación de contraseña');
+    this.router.navigate(['/auth/forgot-password']);
   }
 
   onBackToHome(): void {

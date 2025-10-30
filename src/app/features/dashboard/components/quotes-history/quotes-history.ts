@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -30,6 +31,7 @@ import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal
         MatInputModule,
         MatChipsModule,
         MatTooltipModule,
+        MatPaginatorModule,
         MatDialogModule,
         FormSkeletonComponent
     ],
@@ -45,7 +47,10 @@ export class QuotesHistoryComponent implements OnInit {
     forms: ApplicationForm[] = [];
     filteredForms: ApplicationForm[] = [];
     searchTerm = '';
+    selectedStatus: string | null = null; // Estado seleccionado para filtrar
     totalForms = 0;
+    currentPage = 1;
+    pageSize = 15;
 
     // Usuario actual
     isAdmin = false;
@@ -67,15 +72,17 @@ export class QuotesHistoryComponent implements OnInit {
         }
     }
 
-    loadForms(): void {
+    loadForms(page: number = 1): void {
         this.isLoading = true;
-        this.formService.getApplicationForms().subscribe({
+        this.formService.getApplicationForms(page, this.pageSize).subscribe({
             next: (response: any) => {
                 console.log('📋 Quotes history response:', response);
-                // El backend devuelve un objeto paginado: { data: [...], total: X }
+                // El backend devuelve un objeto paginado: { data: [...], total: X, current_page, per_page }
                 this.forms = response.data || [];
                 this.filteredForms = [...this.forms];
                 this.totalForms = response.total || 0;
+                this.currentPage = response.current_page || 1;
+                this.pageSize = response.per_page || 15;
                 this.isLoading = false;
             },
             error: (error: any) => {
@@ -85,23 +92,53 @@ export class QuotesHistoryComponent implements OnInit {
         });
     }
 
+    onPageChange(event: PageEvent): void {
+        this.loadForms(event.pageIndex + 1);
+    }
+
     onSearch(): void {
-        const term = this.searchTerm.toLowerCase().trim();
-        if (!term) {
-            this.filteredForms = this.forms;
+        this.applyFilters();
+    }
+
+    clearSearch(): void {
+        this.searchTerm = '';
+        this.applyFilters();
+    }
+
+    // Filtrar por estado
+    filterByStatus(status: string): void {
+        // Si el estado ya está seleccionado, quitamos el filtro
+        if (this.selectedStatus === status) {
+            this.selectedStatus = null;
         } else {
-            this.filteredForms = this.forms.filter(form =>
+            this.selectedStatus = status;
+        }
+        this.applyFilters();
+    }
+
+    // Aplicar todos los filtros (búsqueda + estado)
+    applyFilters(): void {
+        let filtered = [...this.forms];
+
+        // Filtro por texto de búsqueda
+        if (this.searchTerm) {
+            const term = this.searchTerm.toLowerCase().trim();
+            filtered = filtered.filter(form =>
                 form.client?.name?.toLowerCase().includes(term) ||
                 form.applicant_name?.toLowerCase().includes(term) ||
                 form.agent?.name?.toLowerCase().includes(term) ||
                 form.id.toString().includes(term)
             );
         }
-    }
 
-    clearSearch(): void {
-        this.searchTerm = '';
-        this.onSearch();
+        // Filtro por estado
+        if (this.selectedStatus) {
+            filtered = filtered.filter(form =>
+                form.status?.toLowerCase() === this.selectedStatus
+            );
+        }
+
+        this.filteredForms = filtered;
     }
 
     openFormDetail(formId: number): void {

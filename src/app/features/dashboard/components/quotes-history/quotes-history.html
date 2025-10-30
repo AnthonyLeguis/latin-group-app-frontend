@@ -15,8 +15,9 @@
         </mat-card-header>
 
         <mat-card-content>
-            <!-- Buscador -->
-            <div class="search-container">
+            <!-- Buscador y Filtros de Estado -->
+            <div class="filters-row">
+                <!-- Buscador -->
                 <mat-form-field appearance="outline" class="search-field">
                     <mat-label>Buscar planilla</mat-label>
                     <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
@@ -27,6 +28,30 @@
                     </button>
                     <mat-hint>Filtra por cliente, agente, nombre del aplicante o número de planilla</mat-hint>
                 </mat-form-field>
+
+                <!-- Píldoras de Filtro por Estado -->
+                <div class="status-filters">
+                    <button mat-stroked-button class="status-chip pendiente"
+                        [class.active]="selectedStatus === 'pendiente'" (click)="filterByStatus('pendiente')">
+                        <mat-icon>schedule</mat-icon>
+                        <span>Pendiente</span>
+                    </button>
+                    <button mat-stroked-button class="status-chip activo" [class.active]="selectedStatus === 'activo'"
+                        (click)="filterByStatus('activo')">
+                        <mat-icon>check_circle</mat-icon>
+                        <span>Activo</span>
+                    </button>
+                    <button mat-stroked-button class="status-chip rechazado"
+                        [class.active]="selectedStatus === 'rechazado'" (click)="filterByStatus('rechazado')">
+                        <mat-icon>error</mat-icon>
+                        <span>Rechazado</span>
+                    </button>
+                    <button mat-stroked-button class="status-chip inactivo"
+                        [class.active]="selectedStatus === 'inactivo'" (click)="filterByStatus('inactivo')">
+                        <mat-icon>cancel</mat-icon>
+                        <span>Inactivo</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Tabla de planillas -->
@@ -106,15 +131,22 @@
                     <ng-container matColumnDef="pdf">
                         <th mat-header-cell *matHeaderCellDef>PDF</th>
                         <td mat-cell *matCellDef="let form">
-                            <div class="pdf-cell">
+                            <div class="pdf-cell group relative">
                                 <button mat-icon-button [disabled]="!form.pdf_path" (click)="downloadPDF(form)"
-                                    [matTooltip]="form.pdf_path ? 'Descargar PDF' : 'PDF no disponible'"
-                                    matTooltipPosition="above" class="pdf-button">
+                                    class="pdf-button">
                                     <mat-icon [class.pdf-available]="form.pdf_path"
                                         [class.pdf-unavailable]="!form.pdf_path">
                                         {{ form.pdf_path ? 'picture_as_pdf' : 'block' }}
                                     </mat-icon>
                                 </button>
+                                <!-- Tooltip Tailwind -->
+                                <div
+                                    class="absolute bottom-full left-1/4  -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                    {{ form.pdf_path ? 'Descargar' : 'No disponible' }}
+                                    <div
+                                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </ng-container>
@@ -122,6 +154,11 @@
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                     <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
                 </table>
+
+                <!-- Paginador -->
+                <mat-paginator [length]="totalForms" [pageSize]="pageSize" [pageIndex]="currentPage - 1"
+                    [pageSizeOptions]="[10, 15, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
             </div>
 
             <!-- Sin resultados -->

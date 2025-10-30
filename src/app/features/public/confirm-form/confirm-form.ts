@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -50,7 +50,8 @@ export class ConfirmFormComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         public router: Router,
-        private http: HttpClient
+        private http: HttpClient,
+        private cd: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -76,6 +77,7 @@ export class ConfirmFormComponent implements OnInit {
         setTimeout(() => {
             if (this.loading) {
                 this.loading = false;
+                this.cd.detectChanges();
             }
         }, 3000);
 
@@ -85,6 +87,7 @@ export class ConfirmFormComponent implements OnInit {
                 if (error.name === 'TimeoutError') {
                     this.error = 'La solicitud está tardando demasiado. Por favor, verifique su conexión a internet y que el servidor backend esté corriendo.';
                     this.loading = false;
+                    this.cd.detectChanges();
                 }
                 return throwError(() => error);
             })
@@ -99,6 +102,8 @@ export class ConfirmFormComponent implements OnInit {
                     this.alreadyConfirmed = true;
                     this.error = 'Esta planilla ya fue confirmada anteriormente. Puede cerrar esta pestaña.';
                 }
+
+                setTimeout(() => this.cd.detectChanges(), 0);
             },
             error: (error) => {
                 this.loading = false;
@@ -129,6 +134,8 @@ export class ConfirmFormComponent implements OnInit {
                 } else if (error.name !== 'TimeoutError') {
                     this.error = error.error?.error || error.error?.message || 'Error al cargar los datos del formulario.';
                 }
+
+                setTimeout(() => this.cd.detectChanges(), 0);
             }
         });
     }
@@ -155,7 +162,7 @@ export class ConfirmFormComponent implements OnInit {
                 }
 
                 // Forzar actualización de la vista
-                setTimeout(() => { }, 0);
+                setTimeout(() => this.cd.detectChanges(), 0);
             },
             error: (error) => {
                 console.error('❌ Error al confirmar:', error);
@@ -180,7 +187,7 @@ export class ConfirmFormComponent implements OnInit {
                 }
 
                 // Forzar actualización de la vista
-                setTimeout(() => { }, 0);
+                setTimeout(() => this.cd.detectChanges(), 0);
             }
         });
     }

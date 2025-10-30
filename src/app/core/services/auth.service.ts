@@ -152,4 +152,35 @@ export class AuthService {
                 return '/dashboard';
         }
     }
+
+    /**
+     * Solicitar recuperación de contraseña
+     * @param email Email del usuario
+     */
+    forgotPassword(email: string): Observable<{ message: string }> {
+        return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email });
+    }
+
+    /**
+     * Restablecer contraseña con token
+     * @param resetData Datos para resetear la contraseña
+     */
+    resetPassword(resetData: { email: string; token: string; password: string; password_confirmation: string }): Observable<{ message: string }> {
+        return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, resetData);
+    }
+
+    /**
+     * Cambiar contraseña del usuario autenticado
+     * @param changeData Datos para cambiar la contraseña
+     */
+    changePassword(changeData: { current_password: string; new_password: string; new_password_confirmation: string }): Observable<{ message: string }> {
+        const token = this.getToken();
+        let headers = new HttpHeaders();
+
+        if (token) {
+            headers = headers.set('Authorization', `Bearer ${token}`);
+        }
+
+        return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/change-password`, changeData, { headers });
+    }
 }

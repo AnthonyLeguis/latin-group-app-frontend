@@ -9,8 +9,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApplicationForm } from '../../../../core/models/application-form.interface';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 
 @Component({
@@ -27,6 +29,7 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
         MatInputModule,
         MatProgressSpinnerModule,
         MatSnackBarModule,
+        MatTooltipModule,
         FormSkeletonComponent
     ],
     templateUrl: './form-detail-modal.component.html',
@@ -36,7 +39,7 @@ export class FormDetailModalComponent implements OnInit {
     private fb = inject(FormBuilder);
     private formService = inject(ApplicationFormService);
     private snackBar = inject(MatSnackBar);
-
+    private authService = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
 
     form!: ApplicationForm;
@@ -48,6 +51,7 @@ export class FormDetailModalComponent implements OnInit {
     showRejectionForm = false;
     viewingPendingChanges = false;
     currentStatus: { value: string; label: string; icon: string; color: string } | undefined;
+    isAdmin = false;
 
     statuses = [
         { value: 'pendiente', label: 'Pendiente', icon: 'schedule', color: '#f59e0b' },
@@ -60,6 +64,9 @@ export class FormDetailModalComponent implements OnInit {
         public dialogRef: MatDialogRef<FormDetailModalComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { formId: number }
     ) {
+        // Verificar si el usuario es admin
+        this.isAdmin = this.authService.currentUser?.type === 'admin';
+
         this.statusForm = this.fb.group({
             status: ['', Validators.required],
             status_comment: ['', [Validators.required, Validators.maxLength(1000)]]
@@ -228,9 +235,141 @@ export class FormDetailModalComponent implements OnInit {
 
     // Verificar si un campo tiene cambios pendientes
     hasPendingChange(field: string): boolean {
-        return this.form?.has_pending_changes &&
-            this.form?.pending_changes?.hasOwnProperty(field) &&
-            this.getPendingValue(field) !== (this.form as any)[field];
+        if (!this.form?.has_pending_changes || !this.form?.pending_changes?.hasOwnProperty(field)) {
+            return false;
+        }
+
+        const pendingValue = this.getPendingValue(field);
+        const currentValue = (this.form as any)[field];
+
+        // Normalizar valores para comparación
+        const normalizePending = this.normalizeValue(pendingValue);
+        const normalizeCurrent = this.normalizeValue(currentValue);
+
+        return normalizePending !== normalizeCurrent;
+    }
+
+    // Normalizar valores para comparación (manejar números, strings, null)
+    normalizeValue(value: any): any {
+        // Si es null o undefined, retornar null
+        if (value === null || value === undefined || value === '') {
+            return null;
+        }
+
+        // Si es un número o string numérico, convertir a número y comparar
+        const numValue = Number(value);
+        if (!isNaN(numValue) && value !== '') {
+            return numValue;
+        }
+
+        // Si es string, trim y lowercase
+        if (typeof value === 'string') {
+            return value.trim().toLowerCase();
+        }
+
+        return value;
+    }
+
+    // Obtener valor de un campo del form de forma segura (para acceso dinámico)
+    getFormValue(field: string): any {
+        return this.form ? (this.form as any)[field] : undefined;
+    }
+
+    // Obtener todos los cambios pendientes organizados
+    getModifiedFields(): { label: string; field: string; category?: string }[] {
+        if (!this.form?.has_pending_changes || !this.form?.pending_changes) {
+            return [];
+        }
+
+        const changes: { label: string; field: string; category?: string }[] = [];
+        const pendingChanges = this.form.pending_changes;
+
+        // Definir mapeo de campos con sus etiquetas
+        const fieldLabels: { [key: string]: { label: string; category?: string } } = {
+            // Información del Aplicante
+            'applicant_name': { label: 'Nombre Completo', category: 'applicant' },
+            'email': { label: 'Email', category: 'applicant' },
+            'phone': { label: 'Teléfono', category: 'applicant' },
+            'phone2': { label: 'Teléfono Alterno', category: 'applicant' },
+            'dob': { label: 'Fecha de Nacimiento', category: 'applicant' },
+            'gender': { label: 'Género', category: 'applicant' },
+            'ssn': { label: 'SSN', category: 'applicant' },
+            'legal_status': { label: 'Estatus Legal', category: 'applicant' },
+            'document_number': { label: 'Número de Documento', category: 'applicant' },
+            'address': { label: 'Dirección', category: 'applicant' },
+            'unit_apt': { label: 'Unidad/Apto', category: 'applicant' },
+            'city': { label: 'Ciudad', category: 'applicant' },
+            'state': { label: 'Estado', category: 'applicant' },
+            'zip_code': { label: 'Código Postal', category: 'applicant' },
+
+            // Información de Empleo
+            'employment_type': { label: 'Tipo de Empleo', category: 'employment' },
+            'employment_company_name': { label: 'Empresa', category: 'employment' },
+            'work_phone': { label: 'Teléfono del Trabajo', category: 'employment' },
+            'wages': { label: 'Salario', category: 'employment' },
+            'wages_frequency': { label: 'Frecuencia de Pago', category: 'employment' },
+
+            // Información de Seguro
+            'insurance_company': { label: 'Compañía de Seguro', category: 'insurance' },
+            'insurance_plan': { label: 'Plan de Seguro', category: 'insurance' },
+            'subsidy': { label: 'Subsidio', category: 'insurance' },
+            'final_cost': { label: 'Costo de la Prima', category: 'insurance' },
+            'poliza_number': { label: 'Número de Póliza', category: 'insurance' },
+            'poliza_category': { label: 'Categoría Póliza', category: 'insurance' },
+            'poliza_amount': { label: 'Monto Prima Dental', category: 'insurance' },
+            'poliza_beneficiary': { label: 'Beneficiario', category: 'insurance' },
+            'poliza_payment_day': { label: 'Día de Pago', category: 'insurance' }
+        };
+
+        // Verificar cambios en campos principales
+        Object.keys(pendingChanges).forEach(field => {
+            if (this.hasPendingChange(field)) {
+                if (fieldLabels[field]) {
+                    changes.push({
+                        label: fieldLabels[field].label,
+                        field,
+                        category: fieldLabels[field].category
+                    });
+                } else if (field.startsWith('person')) {
+                    // Manejar personas adicionales
+                    const match = field.match(/person(\d+)_(.+)/);
+                    if (match) {
+                        const personNum = match[1];
+                        const personField = match[2];
+                        const personFieldLabels: { [key: string]: string } = {
+                            'name': 'Nombre',
+                            'relation': 'Relación',
+                            'dob': 'Fecha de Nacimiento',
+                            'gender': 'Género',
+                            'ssn': 'SSN',
+                            'is_applicant': 'Es Aplicante'
+                        };
+                        changes.push({
+                            label: personFieldLabels[personField] || personField,
+                            field,
+                            category: `person${personNum}`
+                        });
+                    }
+                }
+            }
+        });
+
+        return changes;
+    }
+
+    // Obtener personas modificadas (números únicos)
+    getModifiedPersons(): number[] {
+        const modifiedFields = this.getModifiedFields();
+        const persons = new Set<number>();
+
+        modifiedFields.forEach(change => {
+            if (change.category?.startsWith('person')) {
+                const personNum = parseInt(change.category.replace('person', ''));
+                persons.add(personNum);
+            }
+        });
+
+        return Array.from(persons).sort();
     }
 
     formatDate(date: string | undefined): string {

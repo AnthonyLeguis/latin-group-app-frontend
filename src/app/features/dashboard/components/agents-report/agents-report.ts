@@ -45,6 +45,7 @@ export class AgentsReportComponent implements OnInit {
     totalClients = 0;
     totalPendingChanges = 0;
     searchTerm = '';
+    selectedStatus: string | null = null; // Estado seleccionado para filtrar
 
     constructor(
         private userService: UserService,
@@ -102,42 +103,100 @@ export class AgentsReportComponent implements OnInit {
 
     // Filtrar agentes y clientes por búsqueda
     onSearch(): void {
-        const term = this.searchTerm.toLowerCase().trim();
-
-        if (!term) {
-            this.filteredAgents = this.agents;
-            return;
-        }
-
-        this.filteredAgents = this.agents
-            .map(agent => {
-                // Verificar si el agente coincide con el término
-                const agentMatches = agent.name.toLowerCase().includes(term) ||
-                    agent.email.toLowerCase().includes(term);
-
-                // Filtrar clientes que coincidan
-                const filteredClients = agent.created_users?.filter((client: any) =>
-                    client.name.toLowerCase().includes(term) ||
-                    client.email.toLowerCase().includes(term)
-                ) || [];
-
-                // Si el agente coincide o tiene clientes que coinciden, incluirlo
-                if (agentMatches || filteredClients.length > 0) {
-                    return {
-                        ...agent,
-                        created_users: agentMatches ? agent.created_users : filteredClients
-                    };
-                }
-
-                return null;
-            })
-            .filter(agent => agent !== null) as Agent[];
+        this.applyFilters();
     }
 
     // Limpiar búsqueda
     clearSearch(): void {
         this.searchTerm = '';
-        this.onSearch();
+        this.applyFilters();
+    }
+
+    // Filtrar por estado
+    filterByStatus(status: string): void {
+        // Si el estado ya está seleccionado, quitamos el filtro
+        if (this.selectedStatus === status) {
+            this.selectedStatus = null;
+        } else {
+            this.selectedStatus = status;
+        }
+        this.applyFilters();
+    }
+
+    // Aplicar todos los filtros (búsqueda + estado)
+    applyFilters(): void {
+        let filtered = [...this.agents];
+
+        // Filtro por texto de búsqueda
+        if (this.searchTerm) {
+            const term = this.searchTerm.toLowerCase().trim();
+            filtered = filtered
+                .map(agent => {
+                    // Verificar si el agente coincide con el término
+                    const agentMatches = agent.name.toLowerCase().includes(term) ||
+                        agent.email.toLowerCase().includes(term);
+
+                    // Filtrar clientes que coincidan
+                    const filteredClients = agent.created_users?.filter((client: any) =>
+                        client.name.toLowerCase().includes(term) ||
+                        client.email.toLowerCase().includes(term)
+                    ) || [];
+
+                    // Si el agente coincide o tiene clientes que coinciden, incluirlo
+                    if (agentMatches || filteredClients.length > 0) {
+                        return {
+                            ...agent,
+                            created_users: agentMatches ? agent.created_users : filteredClients
+                        };
+                    }
+
+                    return null;
+                })
+                .filter(agent => agent !== null) as Agent[];
+        }
+
+        // Filtro por estado (filtrar planillas dentro de cada cliente)
+        if (this.selectedStatus) {
+            filtered = filtered
+                .map(agent => {
+                    if (!agent.created_users) return agent;
+
+                    // Filtrar clientes que tienen planillas con el estado seleccionado
+                    const clientsWithFilteredForms = agent.created_users
+                        .map((client: any) => {
+                            if (!client.application_forms_as_client) return null;
+
+                            // Filtrar planillas por estado
+                            const filteredForms = client.application_forms_as_client.filter((form: any) =>
+                                form.status?.toLowerCase() === this.selectedStatus
+                            );
+
+                            // Si el cliente tiene planillas con el estado, incluirlo
+                            if (filteredForms.length > 0) {
+                                return {
+                                    ...client,
+                                    application_forms_as_client: filteredForms
+                                };
+                            }
+
+                            return null;
+                        })
+                        .filter((client: any) => client !== null);
+
+                    // Si el agente tiene clientes con planillas filtradas, incluirlo
+                    if (clientsWithFilteredForms.length > 0) {
+                        return {
+                            ...agent,
+                            created_users: clientsWithFilteredForms
+                        };
+                    }
+
+                    return null;
+                })
+                .filter(agent => agent !== null) as Agent[];
+        }
+
+        this.filteredAgents = filtered;
     }
 
     // Abrir modal con detalles de la planilla

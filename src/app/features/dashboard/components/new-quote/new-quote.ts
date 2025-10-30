@@ -78,6 +78,7 @@ interface Client {
     id: number;
     name: string;
     email: string;
+    agent_id?: number;
 }
 
 @Component({
@@ -434,6 +435,8 @@ export class NewQuoteComponent implements OnInit {
     }
 
     selectClient(client: Client): void {
+        console.log('👤 Cliente seleccionado:', client);
+        console.log('🔑 Agent ID del cliente:', client.agent_id);
         this.selectedClient = client;
         this.clientSelectionForm.patchValue({
             clientSearch: client.name,
@@ -473,6 +476,7 @@ export class NewQuoteComponent implements OnInit {
         // Combinar todos los datos
         const formData = {
             client_id: this.selectedClient?.id,
+            agent_id: this.selectedClient?.agent_id, // Usar el agente del cliente, no el usuario actual
             ...this.applicantForm.value,
             ...this.employmentForm.value,
             ...this.policyForm.value,
@@ -598,10 +602,13 @@ export class NewQuoteComponent implements OnInit {
 
     // Métodos para modal de agregar cliente
     openAddClientModal(): void {
+        console.log('🚀 Abriendo modal de agregar cliente...');
         this.showAddClientModal = true;
+        console.log('📊 showAddClientModal:', this.showAddClientModal);
     }
 
     closeAddClientModal(): void {
+        console.log('❌ Cerrando modal de agregar cliente...');
         this.showAddClientModal = false;
     }
 

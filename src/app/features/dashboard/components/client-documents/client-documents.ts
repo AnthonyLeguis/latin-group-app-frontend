@@ -73,7 +73,7 @@ export class ClientDocumentsComponent implements OnInit {
             return;
         }
 
-        this.applicationFormService.getApplicationForms({ client_id: userId }).subscribe({
+        this.applicationFormService.getApplicationForms(1, 999, { client_id: userId }).subscribe({
             next: (response: any) => {
                 console.log('Application form loaded:', response);
                 if (response.data && response.data.length > 0) {

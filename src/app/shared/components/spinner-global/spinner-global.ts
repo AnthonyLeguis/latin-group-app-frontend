@@ -9,6 +9,6 @@ import { CommonModule } from '@angular/common';
     styleUrl: './spinner-global.scss'
 })
 export class SpinnerGlobalComponent {
-    @Input() size: 'small' | 'medium' | 'large' = 'medium';
-    @Input() color: 'primary' | 'white' | 'red' = 'primary';
+    @Input() size: 'xsmall' | 'small' | 'medium' | 'large' = 'medium';
+    @Input() color: 'primary' | 'white' | 'red' | 'light' = 'primary';
 }

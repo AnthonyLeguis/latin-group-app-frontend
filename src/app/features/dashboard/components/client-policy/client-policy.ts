@@ -39,7 +39,7 @@ export class ClientPolicyComponent implements OnInit {
         this.isLoading = true;
 
         // Obtener la application form del cliente actual
-        this.applicationFormService.getApplicationForms({ client_id: this.currentUser.id }).subscribe({
+        this.applicationFormService.getApplicationForms(1, 999, { client_id: this.currentUser.id }).subscribe({
             next: (response: any) => {
                 const forms = response.data || response;
                 if (forms && forms.length > 0) {

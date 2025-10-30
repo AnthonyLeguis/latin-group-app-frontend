@@ -94,8 +94,9 @@
             </mat-card-header>
 
             <mat-card-content>
-                <!-- Buscador -->
-                <div class="search-container">
+                <!-- Buscador y Filtros de Estado -->
+                <div class="filters-row">
+                    <!-- Buscador -->
                     <mat-form-field appearance="outline" class="search-field">
                         <mat-label>Buscar agente o cliente</mat-label>
                         <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
@@ -106,6 +107,30 @@
                         </button>
                         <mat-hint>Filtra por nombre o email de agente o cliente</mat-hint>
                     </mat-form-field>
+
+                    <!-- Píldoras de Filtro por Estado -->
+                    <div class="status-filters">
+                        <button mat-stroked-button class="status-chip pendiente"
+                            [class.active]="selectedStatus === 'pendiente'" (click)="filterByStatus('pendiente')">
+                            <mat-icon>schedule</mat-icon>
+                            <span>Pendiente</span>
+                        </button>
+                        <button mat-stroked-button class="status-chip activo"
+                            [class.active]="selectedStatus === 'activo'" (click)="filterByStatus('activo')">
+                            <mat-icon>check_circle</mat-icon>
+                            <span>Activo</span>
+                        </button>
+                        <button mat-stroked-button class="status-chip rechazado"
+                            [class.active]="selectedStatus === 'rechazado'" (click)="filterByStatus('rechazado')">
+                            <mat-icon>error</mat-icon>
+                            <span>Rechazado</span>
+                        </button>
+                        <button mat-stroked-button class="status-chip inactivo"
+                            [class.active]="selectedStatus === 'inactivo'" (click)="filterByStatus('inactivo')">
+                            <mat-icon>cancel</mat-icon>
+                            <span>Inactivo</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Lista de Agentes con Expansión -->
@@ -129,13 +154,12 @@
                                         }}
                                     </mat-chip>
 
-                                    <!-- Píldora de cambios pendientes con efecto pulse -->
+                                    <!-- Notificación de cambios pendientes -->
                                     <mat-chip *ngIf="agent.pending_changes_count && agent.pending_changes_count > 0"
-                                        class="pending-changes-chip pulse-chip">
-                                        <mat-icon class="pulse-icon">warning</mat-icon>
-                                        {{ agent.pending_changes_count }}
-                                        {{ agent.pending_changes_count === 1 ? 'planilla por aprobar modificación' :
-                                        'planillas por aprobar modificaciones' }}
+                                        class="pending-changes-chip">
+                                        <mat-icon>pending_actions</mat-icon>
+                                        <span>{{ agent.pending_changes_count }} pendiente{{ agent.pending_changes_count
+                                            === 1 ? '' : 's' }}</span>
                                     </mat-chip>
                                 </div>
                             </mat-panel-description>

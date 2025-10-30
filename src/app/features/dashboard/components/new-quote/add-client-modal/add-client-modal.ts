@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -45,12 +45,16 @@ export class AddClientModalComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private cd: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
+        console.log('🔧 AddClientModal: Iniciando...');
         this.currentUser = this.authService.currentUser;
         this.isAdmin = this.currentUser?.type === 'admin';
+        console.log('👤 Usuario actual:', this.currentUser);
+        console.log('🔑 Es admin?', this.isAdmin);
 
         this.initForm();
 
@@ -58,7 +62,9 @@ export class AddClientModalComponent implements OnInit {
             this.loadAgents();
         } else {
             setTimeout(() => {
+                console.log('✅ Formulario listo (no-admin)');
                 this.isInitializing = false;
+                this.cd.detectChanges();
             }, 300);
         }
     }
@@ -78,11 +84,16 @@ export class AddClientModalComponent implements OnInit {
     }
 
     loadAgents(): void {
+        console.log('📋 Cargando agentes...');
+        // TODO: Reemplazar con llamada real al servicio
         setTimeout(() => {
             this.agents = [
                 { id: 2, name: 'Agent User', email: 'agent@example.com' }
             ];
+            console.log('✅ Agentes cargados:', this.agents);
             this.isInitializing = false;
+            console.log('✅ Formulario listo (admin)');
+            this.cd.detectChanges();
         }, 500);
     }
 
@@ -106,6 +117,7 @@ export class AddClientModalComponent implements OnInit {
         this.clientForm.reset();
         this.initForm();
         this.cancelModal.emit();
+        setTimeout(() => this.cd.detectChanges(), 0);
     }
 
     onSubmit(): void {
@@ -134,6 +146,7 @@ export class AddClientModalComponent implements OnInit {
 
                 this.clientForm.reset();
                 this.initForm();
+                setTimeout(() => this.cd.detectChanges(), 0);
             },
             error: (error) => {
                 this.loading = false;
@@ -142,6 +155,7 @@ export class AddClientModalComponent implements OnInit {
                     duration: 5000,
                     panelClass: ['error-snackbar']
                 });
+                setTimeout(() => this.cd.detectChanges(), 0);
             }
         });
     }

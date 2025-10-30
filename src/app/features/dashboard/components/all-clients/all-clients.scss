@@ -4,6 +4,25 @@
     overflow: visible; // Esto evita el recorte vertical
     box-sizing: border-box;
     position: relative; // Opcional, pero a veces ayuda
+    min-height: 500px; // Altura mínima para evitar pagination pegado arriba
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 768px) {
+        min-height: 400px;
+    }
+
+    // Tabla ocupa solo el espacio necesario (no flex)
+    .clients-table {
+        flex: 0 0 auto; // No crece, solo ocupa lo necesario
+    }
+
+    // Pagination siempre al fondo
+    mat-paginator {
+        margin-top: auto; // Empuja el pagination al fondo
+        border-top: 1px solid #e5e7eb;
+        background-color: #fafafa;
+    }
 }
 
 .all-clients-card {

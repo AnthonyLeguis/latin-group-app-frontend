@@ -51,60 +51,188 @@
                 <span class="date-info">{{ formatDate(form.created_at) }}</span>
             </div>
 
-            <!-- Pending Changes Alert -->
-            <div *ngIf="form.has_pending_changes" class="pending-changes-alert">
-                <div class="alert-icon">
-                    <mat-icon class="pulse-icon">warning</mat-icon>
-                </div>
-                <div class="alert-text">
-                    <h4>Cambios Pendientes de Aprobación</h4>
-                    <p>El agente {{ form.agent?.name }} ha propuesto modificaciones a esta planilla.</p>
-                    <p class="alert-date">{{ formatDate(form.pending_changes_at) }}</p>
-                </div>
-                <div class="alert-actions">
-                    <button mat-button (click)="togglePendingChangesView()" [disabled]="submitting">
-                        <mat-icon>{{ viewingPendingChanges ? 'visibility_off' : 'visibility' }}</mat-icon>
-                    </button>
-                    <button mat-button class="approve-btn" (click)="onApprovePendingChanges()" [disabled]="submitting">
-                        <mat-spinner *ngIf="submitting" diameter="16"></mat-spinner>
-                        <mat-icon *ngIf="!submitting">check_circle</mat-icon>
-                    </button>
-                    <button mat-button color="warn" (click)="onShowRejectionForm()" [disabled]="submitting">
-                        <mat-icon>cancel</mat-icon>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Rejection Form Modal -->
-            <div *ngIf="showRejectionForm && form.has_pending_changes" class="rejection-modal-overlay">
-                <div class="rejection-modal">
-                    <h4>Rechazar Cambios Propuestos</h4>
-                    <form [formGroup]="rejectionForm">
-                        <mat-form-field appearance="outline" class="full-width">
-                            <mat-label>Motivo del rechazo</mat-label>
-                            <textarea matInput formControlName="rejection_reason" rows="4"
-                                placeholder="Explica por qué rechazas estos cambios..." maxlength="500"></textarea>
-                            <mat-hint align="end">{{ rejectionForm.get('rejection_reason')?.value?.length || 0
-                                }}/500</mat-hint>
-                        </mat-form-field>
-                        <div class="rejection-actions">
-                            <button mat-stroked-button (click)="onCancelRejection()" [disabled]="submitting">
-                                <mat-icon>close</mat-icon>
-                                Cancelar
-                            </button>
-                            <button mat-flat-button color="warn" (click)="onRejectPendingChanges()"
-                                [disabled]="rejectionForm.invalid || submitting">
-                                <mat-spinner *ngIf="submitting" diameter="16"></mat-spinner>
-                                <mat-icon *ngIf="!submitting">send</mat-icon>
-                                Confirmar Rechazo
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <!-- Scrollable Content -->
             <div class="card-body">
+                <!-- Pending Changes Alert (Solo Admin) -->
+                <div *ngIf="isAdmin && form.has_pending_changes" class="pending-changes-alert">
+                    <div class="alert-content">
+                        <div class="alert-icon">
+                            <mat-icon>pending_actions</mat-icon>
+                        </div>
+                        <div class="alert-text">
+                            <h4>Cambios Pendientes de Aprobación</h4>
+                            <p>El agente <strong>{{ form.agent?.name }}</strong> ha propuesto modificaciones a esta
+                                planilla.</p>
+                            <p class="alert-date">
+                                <mat-icon>schedule</mat-icon>
+                                {{ formatDate(form.pending_changes_at) }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="alert-actions">
+                        <button mat-icon-button class="action-btn view-btn" (click)="togglePendingChangesView()"
+                            [disabled]="submitting" matTooltip="Ver cambios propuestos" matTooltipPosition="above">
+                            <mat-icon>{{ viewingPendingChanges ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                        <button mat-icon-button class="action-btn approve-btn" (click)="onApprovePendingChanges()"
+                            [disabled]="submitting" matTooltip="Aprobar cambios" matTooltipPosition="above">
+                            <mat-spinner *ngIf="submitting" diameter="20"></mat-spinner>
+                            <mat-icon *ngIf="!submitting">check_circle</mat-icon>
+                        </button>
+                        <button mat-icon-button class="action-btn reject-btn" (click)="onShowRejectionForm()"
+                            [disabled]="submitting" matTooltip="Rechazar cambios" matTooltipPosition="above">
+                            <mat-icon>cancel</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Rejection Form (Solo Admin) -->
+                <div *ngIf="isAdmin && showRejectionForm && form.has_pending_changes" class="rejection-form-section">
+                    <div class="rejection-form-card">
+                        <div class="rejection-header">
+                            <mat-icon>block</mat-icon>
+                            <h4>Rechazar Cambios Propuestos</h4>
+                        </div>
+                        <form [formGroup]="rejectionForm">
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Motivo del rechazo</mat-label>
+                                <textarea matInput formControlName="rejection_reason" rows="4"
+                                    placeholder="Explica por qué rechazas estos cambios..." maxlength="500"></textarea>
+                                <mat-hint align="end">{{ rejectionForm.get('rejection_reason')?.value?.length || 0
+                                    }}/500</mat-hint>
+                            </mat-form-field>
+                            <div class="rejection-actions">
+                                <button mat-stroked-button (click)="onCancelRejection()" [disabled]="submitting">
+                                    <mat-icon>close</mat-icon>
+                                    Cancelar
+                                </button>
+                                <button mat-flat-button color="warn" (click)="onRejectPendingChanges()"
+                                    [disabled]="rejectionForm.invalid || submitting">
+                                    <mat-spinner *ngIf="submitting" diameter="16"></mat-spinner>
+                                    <mat-icon *ngIf="!submitting">send</mat-icon>
+                                    Confirmar Rechazo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Pending Changes Comparison View -->
+                <div *ngIf="isAdmin && viewingPendingChanges && form.has_pending_changes" class="pending-changes-view">
+                    <div class="changes-header">
+                        <mat-icon>compare_arrows</mat-icon>
+                        <h3>{{ getModifiedFields().length }} {{ getModifiedFields().length === 1 ? 'Campo Modificado' :
+                            'Campos Modificados' }}</h3>
+                        <button mat-icon-button (click)="togglePendingChangesView()" class="close-comparison-btn">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                    <div class="changes-content">
+                        <div class="changes-legend">
+                            <div class="legend-item">
+                                <span class="legend-dot current"></span>
+                                <span>Actual</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot proposed"></span>
+                                <span>Propuesto</span>
+                            </div>
+                        </div>
+                        <div class="changes-grid">
+                            <!-- Mostrar solo los campos modificados -->
+                            <ng-container *ngFor="let change of getModifiedFields()">
+                                <!-- Campos de personas adicionales agrupados -->
+                                <ng-container *ngIf="change.category?.startsWith('person')">
+                                    <!-- Este se renderiza dentro de person-changes-section más abajo -->
+                                </ng-container>
+                                <!-- Campos normales (no de personas) -->
+                                <div class="change-item" *ngIf="!change.category?.startsWith('person')">
+                                    <div class="change-label">{{ change.label }}</div>
+                                    <div class="change-values">
+                                        <div class="value current" *ngIf="change.field === 'gender'">
+                                            {{ getFormValue(change.field) === 'M' ? 'Masculino' : 'Femenino' }}
+                                        </div>
+                                        <div class="value current" *ngIf="change.field === 'dob'">
+                                            {{ formatDate(getFormValue(change.field)) }}
+                                        </div>
+                                        <div class="value current"
+                                            *ngIf="change.field === 'wages' || change.field === 'subsidy' || change.field === 'final_cost' || change.field === 'poliza_amount'">
+                                            {{ formatCurrency(getFormValue(change.field)) }}
+                                        </div>
+                                        <div class="value current"
+                                            *ngIf="change.field !== 'gender' && change.field !== 'dob' && change.field !== 'wages' && change.field !== 'subsidy' && change.field !== 'final_cost' && change.field !== 'poliza_amount'">
+                                            {{ getFormValue(change.field) || 'N/A' }}
+                                        </div>
+
+                                        <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+
+                                        <div class="value proposed" *ngIf="change.field === 'gender'">
+                                            {{ getPendingValue(change.field) === 'M' ? 'Masculino' : 'Femenino' }}
+                                        </div>
+                                        <div class="value proposed" *ngIf="change.field === 'dob'">
+                                            {{ formatDate(getPendingValue(change.field)) }}
+                                        </div>
+                                        <div class="value proposed"
+                                            *ngIf="change.field === 'wages' || change.field === 'subsidy' || change.field === 'final_cost' || change.field === 'poliza_amount'">
+                                            {{ formatCurrency(getPendingValue(change.field)) }}
+                                        </div>
+                                        <div class="value proposed"
+                                            *ngIf="change.field !== 'gender' && change.field !== 'dob' && change.field !== 'wages' && change.field !== 'subsidy' && change.field !== 'final_cost' && change.field !== 'poliza_amount'">
+                                            {{ getPendingValue(change.field) || 'N/A' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                            <!-- Personas Adicionales Modificadas (agrupadas) -->
+                            <ng-container *ngFor="let personNum of getModifiedPersons()">
+                                <div class="person-changes-section">
+                                    <h4 class="person-section-title">Persona {{ personNum }}</h4>
+                                    <ng-container *ngFor="let change of getModifiedFields()">
+                                        <div class="change-item" *ngIf="change.category === 'person' + personNum">
+                                            <div class="change-label">{{ change.label }}</div>
+                                            <div class="change-values">
+                                                <div class="value current" *ngIf="change.field.includes('_gender')">
+                                                    {{ getFormValue(change.field) === 'M' ? 'Masculino' : 'Femenino' }}
+                                                </div>
+                                                <div class="value current" *ngIf="change.field.includes('_dob')">
+                                                    {{ formatDate(getFormValue(change.field)) }}
+                                                </div>
+                                                <div class="value current"
+                                                    *ngIf="change.field.includes('_is_applicant')">
+                                                    {{ getFormValue(change.field) ? 'Sí' : 'No' }}
+                                                </div>
+                                                <div class="value current"
+                                                    *ngIf="!change.field.includes('_gender') && !change.field.includes('_dob') && !change.field.includes('_is_applicant')">
+                                                    {{ getFormValue(change.field) || 'N/A' }}
+                                                </div>
+
+                                                <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+
+                                                <div class="value proposed" *ngIf="change.field.includes('_gender')">
+                                                    {{ getPendingValue(change.field) === 'M' ? 'Masculino' : 'Femenino'
+                                                    }}
+                                                </div>
+                                                <div class="value proposed" *ngIf="change.field.includes('_dob')">
+                                                    {{ formatDate(getPendingValue(change.field)) }}
+                                                </div>
+                                                <div class="value proposed"
+                                                    *ngIf="change.field.includes('_is_applicant')">
+                                                    {{ getPendingValue(change.field) ? 'Sí' : 'No' }}
+                                                </div>
+                                                <div class="value proposed"
+                                                    *ngIf="!change.field.includes('_gender') && !change.field.includes('_dob') && !change.field.includes('_is_applicant')">
+                                                    {{ getPendingValue(change.field) || 'N/A' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section 1: Información del Aplicante -->
                 <div class="form-section">
                     <div class="section-header">
@@ -320,8 +448,8 @@
                     </div>
                 </div>
 
-                <!-- Section 6: Actualizar Estado -->
-                <div class="form-section status-section-form">
+                <!-- Section 6: Actualizar Estado (Solo Admin) -->
+                <div *ngIf="isAdmin" class="form-section status-section-form">
                     <div class="section-header">
                         <mat-icon>edit_note</mat-icon>
                         <h3>Actualizar Estado</h3>
@@ -393,14 +521,14 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Footer -->
-            <div class="card-footer">
-                <div class="footer-meta">
-                    <span class="meta-item"><mat-icon>event</mat-icon> Creada: {{ formatDate(form.created_at) }}</span>
-                    <span class="meta-item"><mat-icon>update</mat-icon> Actualizada: {{ formatDate(form.updated_at)
-                        }}</span>
-                </div>
+        <!-- Footer -->
+        <div class="card-footer">
+            <div class="footer-meta">
+                <span class="meta-item"><mat-icon>event</mat-icon> Creada: {{ formatDate(form.created_at) }}</span>
+                <span class="meta-item"><mat-icon>update</mat-icon> Actualizada: {{ formatDate(form.updated_at)
+                    }}</span>
             </div>
         </div>
     </div>

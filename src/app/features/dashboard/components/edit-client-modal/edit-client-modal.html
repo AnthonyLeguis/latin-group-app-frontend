@@ -70,11 +70,481 @@
                                     <span class="value">{{ formatDate(data.client.created_at) }}</span>
                                 </div>
                             </div>
-                            <div class="info-item" *ngIf="data.client.agent">
+                            <div class="info-item" *ngIf="data?.client?.agent">
                                 <mat-icon>support_agent</mat-icon>
                                 <div class="info-text">
                                     <span class="label">Agente asignado:</span>
-                                    <span class="value">{{ data.client.agent.name }}</span>
+                                    <span class="value">{{ data.client!.agent!.name }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </mat-tab>
+
+            <!-- Tab: Planilla de Aplicación -->
+            <mat-tab *ngIf="hasApplicationForm">
+                <ng-template mat-tab-label>
+                    <mat-icon class="tab-icon">assignment</mat-icon>
+                    Planilla de Aplicación
+                </ng-template>
+
+                <div class="tab-content">
+                    <form [formGroup]="applicationForm" class="application-form">
+
+                        <!-- Sección: Información del Aplicante -->
+                        <div class="form-section-compact">
+                            <div class="section-header-compact">
+                                <mat-icon>person</mat-icon>
+                                <h3>Información del Aplicante</h3>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Nombre completo:</label>
+                                    <span>{{ data.client.application_form?.applicant_name || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="applicant_name" placeholder="Nombre completo">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Email:</label>
+                                    <span>{{ data.client.application_form?.email || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput type="email" formControlName="email" placeholder="Email">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Teléfono:</label>
+                                    <span>{{ data.client.application_form?.phone || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="phone" placeholder="Teléfono">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Teléfono alterno:</label>
+                                    <span>{{ data.client.application_form?.phone2 || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="phone2" placeholder="Teléfono alterno">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Fecha de nacimiento:</label>
+                                    <span>{{ data.client.application_form?.dob || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput type="date" formControlName="dob">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Género:</label>
+                                    <span>{{ data.client.application_form?.gender === 'M' ? 'Masculino' :
+                                        data.client.application_form?.gender === 'F' ? 'Femenino' : 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <mat-select formControlName="gender">
+                                        <mat-option value="M">Masculino</mat-option>
+                                        <mat-option value="F">Femenino</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>SSN:</label>
+                                    <span>{{ data.client.application_form?.ssn || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="ssn" placeholder="SSN">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Estatus legal:</label>
+                                    <span>{{ data.client.application_form?.legal_status || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="legal_status" placeholder="Estatus legal">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Número de documento:</label>
+                                    <span>{{ data.client.application_form?.document_number || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="document_number" placeholder="Número de documento">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Dirección:</label>
+                                    <span>{{ data.client.application_form?.address || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="address" placeholder="Dirección">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Unidad/Apt:</label>
+                                    <span>{{ data.client.application_form?.unit_apt || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="unit_apt" placeholder="Unidad/Apt">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Ciudad:</label>
+                                    <span>{{ data.client.application_form?.city || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="city" placeholder="Ciudad">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Estado:</label>
+                                    <span>{{ data.client.application_form?.state || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="state" placeholder="Estado">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Código postal:</label>
+                                    <span>{{ data.client.application_form?.zip_code || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="zip_code" placeholder="Código postal">
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Información de Empleo -->
+                        <div class="form-section-compact">
+                            <div class="section-header-compact">
+                                <mat-icon>work</mat-icon>
+                                <h3>Información de Empleo</h3>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Tipo de empleo:</label>
+                                    <span>{{ data.client.application_form?.employment_type || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="employment_type" placeholder="Tipo de empleo">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Empresa:</label>
+                                    <span>{{ data.client.application_form?.employment_company_name || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="employment_company_name"
+                                        placeholder="Nombre de la empresa">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Teléfono del trabajo:</label>
+                                    <span>{{ data.client.application_form?.work_phone || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="work_phone" placeholder="Teléfono del trabajo">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Salario:</label>
+                                    <span>{{ formatCurrency(data.client.application_form?.wages) }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput type="number" formControlName="wages" placeholder="Salario">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Frecuencia de pago:</label>
+                                    <span>{{ data.client.application_form?.wages_frequency || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="wages_frequency" placeholder="Frecuencia de pago">
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Información de Seguro y Póliza -->
+                        <div class="form-section-compact">
+                            <div class="section-header-compact">
+                                <mat-icon>health_and_safety</mat-icon>
+                                <h3>Información de Seguro y Póliza</h3>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Compañía de seguro:</label>
+                                    <span>{{ data.client.application_form?.insurance_company || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="insurance_company"
+                                        placeholder="Compañía de seguro">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Plan de seguro:</label>
+                                    <span>{{ data.client.application_form?.insurance_plan || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="insurance_plan" placeholder="Plan de seguro">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Subsidio:</label>
+                                    <span>{{ formatCurrency(data.client.application_form?.subsidy) }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput type="number" formControlName="subsidy" placeholder="Subsidio">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Costo final:</label>
+                                    <span>{{ formatCurrency(data.client.application_form?.final_cost) }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput type="number" formControlName="final_cost"
+                                        placeholder="Costo final">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Número de póliza:</label>
+                                    <span>{{ data.client.application_form?.poliza_number || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="poliza_number" placeholder="Número de póliza">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Categoría póliza:</label>
+                                    <span>{{ data.client.application_form?.poliza_category || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="poliza_category" placeholder="Categoría póliza">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Monto prima dental:</label>
+                                    <span>{{ formatCurrency(data.client.application_form?.poliza_amount) }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput type="number" formControlName="poliza_amount"
+                                        placeholder="Monto prima dental">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Beneficiario:</label>
+                                    <span>{{ data.client.application_form?.poliza_beneficiary || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="poliza_beneficiary" placeholder="Beneficiario">
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-field-row">
+                                <div class="current-value">
+                                    <label>Día de pago:</label>
+                                    <span>{{ data.client.application_form?.poliza_payment_day || 'N/A' }}</span>
+                                </div>
+                                <mat-form-field appearance="outline" class="edit-input">
+                                    <mat-label>Nuevo valor</mat-label>
+                                    <input matInput formControlName="poliza_payment_day" placeholder="Día de pago">
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Personas Adicionales -->
+                        <div class="form-section-compact">
+                            <div class="section-header-compact">
+                                <mat-icon>group_add</mat-icon>
+                                <h3>Personas Adicionales</h3>
+                            </div>
+
+                            <!-- Navegación de Personas -->
+                            <div class="persons-navigation">
+                                <button *ngFor="let personNum of getPersonsArray()" type="button" mat-raised-button
+                                    (click)="selectPerson(personNum)" [class.active]="selectedPersonIndex === personNum"
+                                    [class.has-data]="hasPersonData(personNum)" class="person-button">
+                                    <mat-icon>{{ hasPersonData(personNum) ? 'check_circle' : 'person' }}</mat-icon>
+                                    {{ personNum }}
+                                </button>
+                            </div>
+
+                            <!-- Formulario de la Persona Seleccionada -->
+                            <div class="person-card">
+                                <div class="person-form-grid">
+                                    <!-- Nombre Completo -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>Nombre completo:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_name'] || 'N/A' }}</span>
+                                        </div>
+                                        <mat-form-field appearance="outline" class="edit-input">
+                                            <mat-label>Nuevo valor</mat-label>
+                                            <input matInput [formControlName]="'person' + selectedPersonIndex + '_name'"
+                                                placeholder="Nombre completo">
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Relación -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>Relación:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_relation'] || 'N/A' }}</span>
+                                        </div>
+                                        <mat-form-field appearance="outline" class="edit-input">
+                                            <mat-label>Nuevo valor</mat-label>
+                                            <mat-select
+                                                [formControlName]="'person' + selectedPersonIndex + '_relation'">
+                                                <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
+                                                    {{ rel.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Fecha de Nacimiento -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>Fecha de nacimiento:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_dob'] || 'N/A' }}</span>
+                                        </div>
+                                        <mat-form-field appearance="outline" class="edit-input">
+                                            <mat-label>Nuevo valor</mat-label>
+                                            <input matInput type="date"
+                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Género -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>Género:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_gender'] === 'M' ? 'Masculino' :
+                                                data.client.application_form?.['person'
+                                                + selectedPersonIndex + '_gender'] === 'F' ? 'Femenino' : 'N/A'
+                                                }}</span>
+                                        </div>
+                                        <mat-form-field appearance="outline" class="edit-input">
+                                            <mat-label>Nuevo valor</mat-label>
+                                            <mat-select [formControlName]="'person' + selectedPersonIndex + '_gender'">
+                                                <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
+                                                    {{ gender.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- SSN -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>SSN:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_ssn'] || 'N/A' }}</span>
+                                        </div>
+                                        <mat-form-field appearance="outline" class="edit-input">
+                                            <mat-label>Nuevo valor</mat-label>
+                                            <input matInput [formControlName]="'person' + selectedPersonIndex + '_ssn'"
+                                                placeholder="SSN">
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Es el aplicante principal -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>Es aplicante principal:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_is_applicant'] ? 'Sí' : 'No' }}</span>
+                                        </div>
+                                        <mat-checkbox
+                                            [formControlName]="'person' + selectedPersonIndex + '_is_applicant'"
+                                            class="person-checkbox">
+                                            Es el aplicante principal
+                                        </mat-checkbox>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -92,18 +562,18 @@
 
                 <div class="tab-content">
                     <!-- Sin planilla de aplicación -->
-                    <div *ngIf="!data.client.application_form" class="no-application">
+                    <div *ngIf="!data?.client?.application_form" class="no-application">
                         <mat-icon>info</mat-icon>
                         <p>Este cliente no tiene una planilla de aplicación.</p>
                         <p class="hint">Los documentos solo pueden agregarse a clientes con planilla activa.</p>
                     </div>
 
                     <!-- Con planilla de aplicación -->
-                    <div *ngIf="data.client.application_form" class="documents-section">
+                    <div *ngIf="data?.client?.application_form" class="documents-section">
                         <!-- Botón de subida -->
                         <div class="upload-area">
                             <input type="file" #fileInput (change)="onFileSelected($event)"
-                                accept=".pdf,.jpg,.jpeg,.png" style="display: none" [disabled]="isUploading">
+                                accept=".pdf,.jpg,.jpeg,.png,.mp3,.wma" style="display: none" [disabled]="isUploading">
 
                             <button mat-raised-button color="primary" (click)="fileInput.click()"
                                 [disabled]="isUploading" class="upload-button">
@@ -111,7 +581,7 @@
                                 {{ isUploading ? 'Subiendo...' : 'Subir Documento' }}
                             </button>
 
-                            <p class="upload-hint">PDF, JPG, PNG - Máximo 10MB</p>
+                            <p class="upload-hint">PDF, JPG, PNG, MP3, WMA - Máximo 5MB</p>
 
                             <div *ngIf="isUploading" class="upload-progress">
                                 <mat-spinner diameter="24"></mat-spinner>
@@ -135,26 +605,36 @@
                         <div *ngIf="!isLoadingDocuments && documents.length > 0" class="documents-list">
                             <div *ngFor="let doc of documents" class="document-item">
                                 <div class="document-info">
-                                    <mat-icon
-                                        [class]="'file-icon ' + (doc.is_pdf ? 'pdf' : doc.is_image ? 'image' : 'file')">
+                                    <!-- Miniatura para imágenes -->
+                                    <img *ngIf="doc.is_image" [src]="doc.file_url"
+                                        [alt]="doc.original_name || doc.file_name" class="document-thumbnail" />
+
+                                    <!-- Icono para otros tipos de archivos -->
+                                    <mat-icon *ngIf="!doc.is_image"
+                                        [class]="'file-icon ' + (doc.is_pdf ? 'pdf' : doc.is_audio ? 'audio' : 'file')">
                                         {{ getFileIcon(doc) }}
                                     </mat-icon>
+
                                     <div class="document-details">
-                                        <span class="document-name">{{ doc.file_name }}</span>
+                                        <span class="document-name">{{ doc.original_name || doc.file_name }}</span>
                                         <span class="document-meta">
                                             {{ doc.file_size_formatted }} • {{ formatDate(doc.uploaded_at) }}
+                                            <span class="document-type" *ngIf="doc.document_type">
+                                                • {{ doc.document_type }}
+                                            </span>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="document-actions">
-                                    <button mat-icon-button (click)="viewDocument(doc)" matTooltip="Ver">
+                                    <button mat-icon-button (click)="viewDocument(doc)" matTooltip="Ver"
+                                        [disabled]="doc.is_audio">
                                         <mat-icon>visibility</mat-icon>
                                     </button>
                                     <button mat-icon-button (click)="downloadDocument(doc)" matTooltip="Descargar">
                                         <mat-icon>download</mat-icon>
                                     </button>
-                                    <button mat-icon-button color="warn" (click)="deleteDocument(doc.id)"
-                                        matTooltip="Eliminar">
+                                    <button *ngIf="isAdmin" mat-icon-button color="warn"
+                                        (click)="deleteDocument(doc.id)" matTooltip="Eliminar">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
@@ -170,7 +650,7 @@
         <button mat-button (click)="onCancel()" [disabled]="isSaving">
             Cancelar
         </button>
-        <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isSaving || clientForm.invalid">
+        <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isSaving">
             <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
             <span *ngIf="!isSaving">Guardar Cambios</span>
             <span *ngIf="isSaving">Guardando...</span>

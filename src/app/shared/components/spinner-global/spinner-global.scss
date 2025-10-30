@@ -40,6 +40,33 @@
 }
 
 // Tamaños
+.spinner-xsmall .loader {
+    width: 32px;
+    height: 20px;
+}
+
+.spinner-xsmall .loader::before,
+.spinner-xsmall .loader::after {
+    height: 20px;
+    width: 20px;
+}
+
+@keyframes split-xsmall {
+
+    0%,
+    25% {
+        width: 32px;
+    }
+
+    100% {
+        width: 76px;
+    }
+}
+
+.spinner-xsmall .loader {
+    animation: split-xsmall 1s ease-in infinite alternate;
+}
+
 .spinner-small .loader {
     width: 48px;
     height: 32px;
@@ -115,7 +142,7 @@
 }
 
 .loader-white::before {
-    background: #ffffff;
+    background: #ff8888;
 }
 
 .loader-white::after {
@@ -128,4 +155,12 @@
 
 .loader-red::after {
     background: #fca5a5;
+}
+
+.loader-light::before {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.loader-light::after {
+    background: rgba(148, 163, 184, 0.45);
 }

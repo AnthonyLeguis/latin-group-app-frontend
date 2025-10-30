@@ -86,7 +86,7 @@
                             <div *ngIf="availableClients.length === 0" class="no-clients">
                                 <mat-icon>info</mat-icon>
                                 <p>No hay clientes disponibles sin planilla de aplicación</p>
-                                <button mat-raised-button color="primary" routerLink="/dashboard/create-client">
+                                <button mat-raised-button color="primary" (click)="openAddClientModal()">
                                     <mat-icon>person_add</mat-icon>
                                     Crear nuevo cliente
                                 </button>

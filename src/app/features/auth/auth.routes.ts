@@ -6,6 +6,14 @@ export const authRoutes: Routes = [
         loadComponent: () => import('./login/login').then(m => m.LoginComponent)
     },
     {
+        path: 'forgot-password',
+        loadComponent: () => import('./forgot-password/forgot-password').then(m => m.ForgotPasswordComponent)
+    },
+    {
+        path: 'reset-password',
+        loadComponent: () => import('./reset-password/reset-password').then(m => m.ResetPasswordComponent)
+    },
+    {
         path: 'access-denied',
         loadComponent: () => import('./access-denied/access-denied').then(m => m.AccessDeniedComponent)
     },
