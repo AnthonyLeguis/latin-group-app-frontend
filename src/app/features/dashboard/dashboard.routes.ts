@@ -7,6 +7,8 @@ import { ClientDocumentsComponent } from './components/client-documents/client-d
 import { NewQuoteComponent } from './components/new-quote/new-quote';
 import { QuotesHistoryComponent } from './components/quotes-history/quotes-history';
 import { EmptyPlaceholderComponent } from './components/empty-placeholder/empty-placeholder';
+import { ChangePasswordComponent } from './components/change-password/change-password';
+import { AllUsersComponent } from './components/all-users/all-users';
 
 export const dashboardRoutes: Routes = [
     {
@@ -52,6 +54,16 @@ export const dashboardRoutes: Routes = [
                 path: 'quotes-history',
                 component: QuotesHistoryComponent,
                 title: 'Historial de Cotizaciones - LatinGroup'
+            },
+            {
+                path: 'profile-settings',
+                component: ChangePasswordComponent,
+                title: 'Configuración de Perfil - LatinGroup'
+            },
+            {
+                path: 'users/list',
+                component: AllUsersComponent,
+                title: 'Lista de Usuarios - LatinGroup'
             }
         ]
     }

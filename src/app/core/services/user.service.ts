@@ -101,6 +101,7 @@ export class UserService {
         }
 
         const url = `${environment.apiUrl}/users${params.toString() ? '?' + params.toString() : ''}`;
+        console.log('Solicitando usuarios desde:', url);
 
         return this.http.get<any>(url, { headers: this.getHeaders() });
     }
@@ -112,6 +113,16 @@ export class UserService {
         return this.http.put<any>(
             `${environment.apiUrl}/users/${userId}`,
             data,
+            { headers: this.getHeaders() }
+        );
+    }
+
+    /**
+     * Eliminar un usuario
+     */
+    deleteUser(userId: number): Observable<any> {
+        return this.http.delete<any>(
+            `${environment.apiUrl}/users/${userId}`,
             { headers: this.getHeaders() }
         );
     }

@@ -1,0 +1,210 @@
+<div class="all-users-container">
+    <!-- Skeleton durante carga -->
+    <app-form-skeleton *ngIf="isLoading"></app-form-skeleton>
+
+    <!-- Contenido principal -->
+    <mat-card class="all-users-card" *ngIf="!isLoading">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>group</mat-icon>
+                Lista de Usuarios
+            </mat-card-title>
+            <mat-card-subtitle>
+                Mostrando {{ filteredUsers.length }} de {{ totalUsers }} usuario(s)
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Buscador y Filtros -->
+            <div class="search-and-filters-container">
+                <!-- Buscador -->
+                <div class="search-container">
+                    <mat-form-field appearance="outline" class="search-field">
+                        <mat-label>Buscar usuario</mat-label>
+                        <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
+                            placeholder="Buscar por nombre, email o tipo...">
+                        <mat-icon matPrefix>search</mat-icon>
+                        <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="clearSearch()" type="button">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                        <mat-hint>Filtra por nombre, email, tipo o creador</mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <!-- Píldoras de filtro -->
+                <div class="filters-container">
+                    <span class="filter-label">Filtrar por tipo:</span>
+
+                    <!-- Filtro "Todos" -->
+                    <button type="button" class="filter-pill" [class.active]="!selectedTypeFilter"
+                        (click)="selectTypeFilter(null)">
+                        <mat-icon>filter_list</mat-icon>
+                        Todos
+                    </button>
+
+                    <!-- Filtros por tipo -->
+                    <button type="button" *ngFor="let filter of typeFilters" class="filter-pill"
+                        [class]="'filter-pill ' + filter.class" [class.active]="isTypeFilterActive(filter.value)"
+                        (click)="selectTypeFilter(filter.value)">
+                        <mat-icon>{{ filter.icon }}</mat-icon>
+                        {{ filter.label }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de usuarios -->
+            <div class="table-container" *ngIf="filteredUsers.length > 0">
+                <table mat-table [dataSource]="filteredUsers" class="users-table">
+
+                    <!-- Columna Nombre -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                        <td mat-cell *matCellDef="let user">
+                            <!-- Modo vista -->
+                            <div class="user-cell" *ngIf="!user.isEditing">
+                                <mat-icon class="user-icon">person</mat-icon>
+                                <div class="user-info">
+                                    <span class="user-name">{{ user.name }}</span>
+                                    <span class="user-email">{{ user.email }}</span>
+                                </div>
+                            </div>
+                            <!-- Modo edición -->
+                            <div class="edit-cell" *ngIf="user.isEditing">
+                                <mat-form-field appearance="outline" class="edit-field">
+                                    <input matInput [(ngModel)]="user.name" placeholder="Nombre">
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="edit-field">
+                                    <input matInput type="email" [(ngModel)]="user.email" placeholder="Email">
+                                </mat-form-field>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Creado Por -->
+                    <ng-container matColumnDef="created_by">
+                        <th mat-header-cell *matHeaderCellDef>Creado Por</th>
+                        <td mat-cell *matCellDef="let user">
+                            <div class="creator-cell" *ngIf="user.created_by">
+                                <mat-icon class="creator-icon">person_outline</mat-icon>
+                                <span class="creator-name">{{ user.created_by.name }}</span>
+                            </div>
+                            <span *ngIf="!user.created_by" class="no-creator">No especificado</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Tipo -->
+                    <ng-container matColumnDef="type">
+                        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                        <td mat-cell *matCellDef="let user">
+                            <!-- Modo vista -->
+                            <div *ngIf="!user.isEditing" [class]="'type-chip ' + getUserTypeClass(user.type)">
+                                <mat-icon>{{ user.type === 'admin' ? 'admin_panel_settings' : user.type === 'agent' ?
+                                    'support_agent' : 'person' }}</mat-icon>
+                                {{ getUserTypeLabel(user.type) }}
+                            </div>
+                            <!-- Modo edición -->
+                            <mat-form-field appearance="outline" class="edit-field-select" *ngIf="user.isEditing">
+                                <mat-select [(ngModel)]="user.type">
+                                    <mat-option *ngFor="let type of userTypes" [value]="type.value">
+                                        {{ type.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Acciones -->
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef class="actions-header">Acciones</th>
+                        <td mat-cell *matCellDef="let user" class="actions-cell">
+
+                            <!-- Modo vista: mostrar botones editar y eliminar -->
+                            <div class="action-buttons" *ngIf="!user.isEditing">
+                                <!-- Editar -->
+                                <div class="inline-block relative group">
+                                    <button mat-icon-button color="primary" (click)="startEdit(user)">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                        Editar usuario
+                                        <div
+                                            class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Eliminar -->
+                                <div class="inline-block relative group">
+                                    <button mat-icon-button color="warn" (click)="deleteUser(user)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                        Eliminar usuario
+                                        <div
+                                            class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modo edición: mostrar botones guardar y cancelar -->
+                            <div class="edit-action-buttons" *ngIf="user.isEditing">
+                                <!-- Guardar -->
+                                <div class="inline-block relative group">
+                                    <button mat-icon-button color="primary" (click)="confirmEdit(user)">
+                                        <mat-icon>check_circle</mat-icon>
+                                    </button>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                        Guardar cambios
+                                        <div
+                                            class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cancelar -->
+                                <div class="inline-block relative group">
+                                    <button mat-icon-button color="warn" (click)="cancelEdit(user)">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                    <!-- Tooltip -->
+                                    <div
+                                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                        Cancelar edición
+                                        <div
+                                            class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"
+                        [class.editing-row]="row.isEditing"></tr>
+                </table>
+
+                <!-- Paginador -->
+                <mat-paginator [length]="totalUsers" [pageSize]="pageSize" [pageIndex]="currentPage - 1"
+                    [pageSizeOptions]="[10, 15, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+
+            <!-- Sin resultados -->
+            <div class="no-data" *ngIf="filteredUsers.length === 0">
+                <mat-icon>inbox</mat-icon>
+                <h3>No hay usuarios {{ searchTerm ? 'que coincidan con la búsqueda' : 'registrados' }}</h3>
+                <p>{{ searchTerm ? 'Intenta con otro término de búsqueda' : 'Aún no se han creado usuarios en el
+                    sistema' }}</p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

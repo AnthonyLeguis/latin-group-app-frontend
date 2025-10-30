@@ -55,11 +55,11 @@
                     <ng-container matColumnDef="agent">
                         <th mat-header-cell *matHeaderCellDef>Agente</th>
                         <td mat-cell *matCellDef="let client">
-                            <div class="agent-cell" *ngIf="client.created_by">
+                            <div class="agent-cell" *ngIf="client.agent || client.created_by">
                                 <mat-icon class="agent-icon">support_agent</mat-icon>
-                                <span class="agent-name">{{ client.created_by.name }}</span>
+                                <span class="agent-name">{{ getAgentName(client) }}</span>
                             </div>
-                            <span *ngIf="!client.created_by" class="no-agent">Sin agente</span>
+                            <span *ngIf="!client.agent && !client.created_by" class="no-agent">Sin agente</span>
                         </td>
                     </ng-container>
 

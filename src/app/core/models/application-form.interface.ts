@@ -123,6 +123,11 @@ export interface ApplicationForm {
         name: string;
         email: string;
         type: string;
+        created_by?: {
+            id: number;
+            name: string;
+            email: string;
+        } | null;
     };
     agent?: {
         id: number;

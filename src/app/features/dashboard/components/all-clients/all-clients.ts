@@ -22,7 +22,12 @@ interface Client {
     name: string;
     email: string;
     created_at: string;
-    created_by?: {
+    agent?: { // Agente asignado explícitamente al cliente
+        id: number;
+        name: string;
+        email: string;
+    };
+    created_by?: { // Fallback: usuario que creó al cliente
         id: number;
         name: string;
         email: string;
@@ -203,5 +208,10 @@ export class AllClientsComponent implements OnInit {
             month: 'short',
             day: 'numeric'
         });
+    }
+
+    // Obtener el nombre del agente con fallback a created_by
+    getAgentName(client: Client): string {
+        return client.agent?.name || client.created_by?.name || 'Sin agente';
     }
 }

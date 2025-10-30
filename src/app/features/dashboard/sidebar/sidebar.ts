@@ -226,7 +226,7 @@ export class SidebarComponent implements OnInit {
     }
 
     onProfile(): void {
-        this.router.navigate(['/dashboard/profile']);
+        this.router.navigate(['/dashboard/profile-settings']);
     }
 
     onLogout(): void {

@@ -126,7 +126,7 @@ export class QuotesHistoryComponent implements OnInit {
             filtered = filtered.filter(form =>
                 form.client?.name?.toLowerCase().includes(term) ||
                 form.applicant_name?.toLowerCase().includes(term) ||
-                form.agent?.name?.toLowerCase().includes(term) ||
+                (form.agent?.name || form.client?.created_by?.name || '').toLowerCase().includes(term) ||
                 form.id.toString().includes(term)
             );
         }
@@ -179,6 +179,10 @@ export class QuotesHistoryComponent implements OnInit {
             'rechazado': 'Rechazado'
         };
         return statusMap[status?.toLowerCase()] || status;
+    }
+
+    getAgentName(form: ApplicationForm): string {
+        return form.agent?.name || form.client?.created_by?.name || 'Sin agente';
     }
 
     formatDate(date: string): string {
