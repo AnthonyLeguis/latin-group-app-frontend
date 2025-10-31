@@ -24,7 +24,6 @@ import { AddClientModalComponent } from './add-client-modal/add-client-modal';
 
 // Registrar el locale español
 registerLocaleData(localeEs);
-
 // Adaptador personalizado para español
 export class SpanishDateAdapter extends NativeDateAdapter {
     override getFirstDayOfWeek(): number {
@@ -114,8 +113,8 @@ interface Client {
 export class NewQuoteComponent implements OnInit {
     // Validador personalizado para teléfono formateado
     phoneValidator(control: any): { [key: string]: boolean } | null {
-        if (!control.value) {
-            return null; // Si está vacío, lo maneja Validators.required
+        if (!control.value || control.value.trim() === '') {
+            return null; // Si está vacío, es válido (campo opcional)
         }
         const digits = control.value.replace(/\D/g, '');
         if (digits.length >= 10) {
@@ -203,6 +202,9 @@ export class NewQuoteComponent implements OnInit {
         { value: 'Ciudadano', label: 'Ciudadano' },
         { value: 'Residente', label: 'Residente' },
         { value: 'Para Visa', label: 'Para Visa' },
+        { value: 'Permiso de trabajo', label: 'Permiso de trabajo' },
+        { value: 'Parole humanitario', label: 'Parole humanitario' },
+        { value: 'Asilo político', label: 'Asilo político' },
         { value: 'Otro', label: 'Otro' }
     ];
 
@@ -269,7 +271,7 @@ export class NewQuoteComponent implements OnInit {
             gender: ['', Validators.required],
             ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             legal_status: ['', [Validators.required, Validators.maxLength(100)]],
-            document_number: ['', [Validators.required, Validators.maxLength(50)]]
+            document_number: ['', Validators.maxLength(50)] // Ahora opcional
         });
 
         // Paso 2: Empleo
