@@ -187,8 +187,8 @@ export class EditClientModalComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('🔍 Cliente recibido en modal:', this.data?.client);
-        console.log('📋 Application form:', this.data?.client?.application_form);
+        //console.log('🔍 Cliente recibido en modal:', this.data?.client);
+        //console.log('📋 Application form:', this.data?.client?.application_form);
 
         // Verificar si tiene application form
         this.hasApplicationForm = !!(this.data?.client?.application_form?.id);
@@ -298,10 +298,10 @@ export class EditClientModalComponent implements OnInit {
         // Verificar si el cliente tiene application_form
         const hasApplicationForm = this.data?.client?.application_form && this.data.client.application_form.id;
 
-        console.log('🔍 Has application form?', hasApplicationForm);
+        //console.log('🔍 Has application form?', hasApplicationForm);
 
         if (!hasApplicationForm) {
-            console.log('⚠️ Cliente no tiene application form');
+            //console.log('⚠️ Cliente no tiene application form');
             setTimeout(() => {
                 this.isLoadingDocuments = false;
                 this.cdr.detectChanges();
@@ -310,18 +310,18 @@ export class EditClientModalComponent implements OnInit {
         }
 
         this.isLoadingDocuments = true;
-        console.log('📥 Cargando documentos y datos completos para application_form_id:', this.data.client.application_form!.id);
+        //console.log('📥 Cargando documentos y datos completos para application_form_id:', this.data.client.application_form!.id);
 
         // Cargar la application form completa con todos sus datos
         this.applicationFormService.getApplicationForm(this.data.client.application_form!.id).subscribe({
             next: (response: any) => {
-                console.log('✅ Application form completa recibida:', response);
+                //console.log('✅ Application form completa recibida:', response);
 
                 // Actualizar los datos de la application form con los datos completos
                 if (response) {
                     this.data.client.application_form = response;
                     this.documents = response.documents || [];
-                    console.log('📄 Documentos encontrados:', this.documents.length);
+                    //console.log('📄 Documentos encontrados:', this.documents.length);
 
                     // Reinicializar el formulario con los datos completos
                     if (this.hasApplicationForm) {
@@ -382,7 +382,7 @@ export class EditClientModalComponent implements OnInit {
             this.selectedFile
         ).subscribe({
             next: (response: any) => {
-                console.log('✅ Document uploaded:', response);
+                //console.log('✅ Document uploaded:', response);
                 this.showMessage('Documento subido exitosamente', 'success');
                 this.selectedFile = null;
                 this.isUploading = false;
@@ -412,7 +412,7 @@ export class EditClientModalComponent implements OnInit {
             documentId
         ).subscribe({
             next: (response: any) => {
-                console.log('Document deleted:', response);
+                //console.log('Document deleted:', response);
                 this.showMessage('Documento eliminado exitosamente', 'success');
                 this.loadDocuments();
             },
@@ -527,7 +527,7 @@ export class EditClientModalComponent implements OnInit {
             const clientData = this.clientForm.value;
             this.userService.updateUser(this.data?.client?.id, clientData).subscribe({
                 next: (response) => {
-                    console.log('✅ Cliente actualizado:', response);
+                    //console.log('✅ Cliente actualizado:', response);
                     checkCompletion();
                 },
                 error: (error) => {
@@ -546,11 +546,11 @@ export class EditClientModalComponent implements OnInit {
             const formData = this.applicationForm.value;
             const applicationFormId = this.data.client.application_form!.id;
 
-            console.log('📤 Enviando actualización de application form:', formData);
+            //console.log('📤 Enviando actualización de application form:', formData);
 
             this.applicationFormService.updateForm(applicationFormId, formData).subscribe({
                 next: (response: any) => {
-                    console.log('✅ Application form actualizada:', response);
+                    //console.log('✅ Application form actualizada:', response);
                     if (response.requires_approval) {
                         requiresApproval = true;
                     }

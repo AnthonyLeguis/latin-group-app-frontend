@@ -77,7 +77,7 @@ export class QuotesHistoryComponent implements OnInit {
         this.isLoading = true;
         this.formService.getApplicationForms(page, this.pageSize).subscribe({
             next: (response: any) => {
-                console.log('📋 Quotes history response:', response);
+                //////console.log('📋 Quotes history response:', response);
                 // El backend devuelve un objeto paginado: { data: [...], total: X, current_page, per_page }
                 this.forms = response.data || [];
                 this.filteredForms = [...this.forms];
@@ -205,12 +205,12 @@ export class QuotesHistoryComponent implements OnInit {
         const token = this.authService.getToken();
         const url = `http://127.0.0.1:8000/api/v1/forms/${form.id}/download-pdf`;
 
-        console.log('🔍 Intentando descargar PDF:', {
-            url,
-            form_id: form.id,
-            pdf_path: form.pdf_path,
-            hasToken: !!token
-        });
+        // ////console.log('🔍 Intentando descargar PDF:', {
+        //     url,
+        //     form_id: form.id,
+        //     pdf_path: form.pdf_path,
+        //     hasToken: !!token
+        // });
 
         fetch(url, {
             headers: {
@@ -218,24 +218,25 @@ export class QuotesHistoryComponent implements OnInit {
                 'Accept': 'application/pdf'
             }
         })
-            .then(response => {
-                console.log('📥 Respuesta del servidor:', {
-                    status: response.status,
-                    ok: response.ok,
-                    headers: Object.fromEntries(response.headers.entries())
-                });
+            .then(async response => {
+                // //console.log('📥 Respuesta del servidor:', {
+                //     status: response.status,
+                //     ok: response.ok,
+                //     headers: Object.fromEntries(response.headers.entries())
+                // });
 
                 if (!response.ok) {
-                    return response.json().then(err => {
+                    try {
+                        const err = await response.json();
                         throw new Error(err.message || 'Error al descargar el PDF');
-                    }).catch(() => {
+                    } catch {
                         throw new Error(`Error ${response.status}: ${response.statusText}`);
-                    });
+                    }
                 }
                 return response.blob();
             })
             .then(blob => {
-                console.log('✅ PDF descargado, tamaño:', blob.size, 'bytes');
+                ////console.log('✅ PDF descargado, tamaño:', blob.size, 'bytes');
 
                 // Crear un blob URL y descargar
                 const url = window.URL.createObjectURL(blob);

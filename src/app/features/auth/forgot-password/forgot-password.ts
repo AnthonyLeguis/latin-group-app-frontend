@@ -53,12 +53,12 @@ export class ForgotPasswordComponent implements OnDestroy {
 
             const email = this.emailForm.value.email;
 
-            console.log('📧 Solicitando recuperación de contraseña para:', email);
+            //console.log('📧 Solicitando recuperación de contraseña para:', email);
 
             this.authService.forgotPassword(email).subscribe({
                 next: (response) => {
-                    console.log('✅ Respuesta completa:', response);
-                    console.log('✅ Correo de recuperación enviado exitosamente');
+                    //console.log('✅ Respuesta completa:', response);
+                    //console.log('✅ Correo de recuperación enviado exitosamente');
 
                     // Asegurar que se actualiza el estado
                     setTimeout(() => {
@@ -79,7 +79,7 @@ export class ForgotPasswordComponent implements OnDestroy {
                     }, 0);
                 },
                 complete: () => {
-                    console.log('🏁 Observable completado');
+                    //console.log('🏁 Observable completado');
                 }
             });
         }

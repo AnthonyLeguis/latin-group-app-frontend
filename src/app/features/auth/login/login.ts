@@ -56,20 +56,20 @@ export class LoginComponent {
         password: this.loginForm.value.password
       };
 
-      console.log('🔐 Enviando credenciales de login:', credentials);
+      //console.log('🔐 Enviando credenciales de login:', credentials);
 
       this.authService.login(credentials).subscribe({
         next: (response) => {
-          console.log('✅ Login exitoso:', response);
-          console.log('👤 Usuario:', response.user);
-          console.log('🔑 Token:', response.token);
-          console.log('🔒 Token Type:', response.token_type);
+          //console.log('✅ Login exitoso:', response);
+          //console.log('👤 Usuario:', response.user);
+          //console.log('🔑 Token:', response.token);
+          //console.log('🔒 Token Type:', response.token_type);
 
           this.isLoading = false;
 
           // Redirigir según el tipo de usuario usando el servicio
           const redirectUrl = this.authService.getDashboardRoute();
-          console.log(`🚀 Redirigiendo ${response.user.type} a: ${redirectUrl}`);
+          //console.log(`🚀 Redirigiendo ${response.user.type} a: ${redirectUrl}`);
 
           this.router.navigate([redirectUrl]);
         },
@@ -110,12 +110,12 @@ export class LoginComponent {
   }
 
   onLoginWithGoogle(): void {
-    console.log('🔍 Iniciando login con Google...');
-    console.log('🌐 Redirigiendo a Google OAuth...');
+    //console.log('🔍 Iniciando login con Google...');
+    //console.log('🌐 Redirigiendo a Google OAuth...');
 
     // Obtener la URL de autenticación de Google desde el backend
     const googleAuthUrl = this.authService.getGoogleAuthUrl();
-    console.log('� URL de Google Auth:', googleAuthUrl);
+    //console.log('� URL de Google Auth:', googleAuthUrl);
 
     // Redirigir al usuario a Google para autenticación
     // El backend manejará el callback y redirigirá de vuelta al frontend
@@ -123,7 +123,7 @@ export class LoginComponent {
   }
 
   onForgotPassword(): void {
-    console.log('🔑 Navegando a recuperación de contraseña');
+    //console.log('🔑 Navegando a recuperación de contraseña');
     this.router.navigate(['/auth/forgot-password']);
   }
 

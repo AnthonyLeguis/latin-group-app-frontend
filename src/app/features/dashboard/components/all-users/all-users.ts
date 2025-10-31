@@ -101,9 +101,9 @@ export class AllUsersComponent implements OnInit {
 
         this.userService.getUsers(params).subscribe({
             next: (response: any) => {
-                //console.log(`Usuarios cargados (página ${params.page}):`, response);
-                //console.log('Total de usuarios en respuesta:', response.total);
-                //console.log('Usuarios tipo agent en esta página:', response.data?.filter((u: any) => u.type === 'agent'));
+                ////console.log(`Usuarios cargados (página ${params.page}):`, response);
+                ////console.log('Total de usuarios en respuesta:', response.total);
+                ////console.log('Usuarios tipo agent en esta página:', response.data?.filter((u: any) => u.type === 'agent'));
 
                 if (response.data) {
                     this.users = response.data.map((user: any) => ({
@@ -171,7 +171,7 @@ export class AllUsersComponent implements OnInit {
     }
 
     onPageChange(event: PageEvent): void {
-        //console.log('Cambio de página desde paginador:', event);
+        ////console.log('Cambio de página desde paginador:', event);
         this.pageSize = event.pageSize;
         this.currentPage = event.pageIndex + 1;
         this.loadUsers(this.currentPage);

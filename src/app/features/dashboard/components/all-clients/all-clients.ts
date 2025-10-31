@@ -98,7 +98,7 @@ export class AllClientsComponent implements OnInit {
         this.isLoading = true;
         this.userService.getUsers({ type: 'client', page }).subscribe({
             next: (response) => {
-                console.log('Clients response:', response);
+                //console.log('Clients response:', response);
                 this.clients = response.data || [];
                 this.filteredClients = [...this.clients];
                 this.totalClients = response.total || 0;
@@ -143,7 +143,7 @@ export class AllClientsComponent implements OnInit {
     }
 
     viewClient(client: Client): void {
-        console.log('Ver detalles del cliente:', client.id);
+        //console.log('Ver detalles del cliente:', client.id);
 
         // Verificar si el cliente tiene application_form
         if (!client.application_form || !client.application_form.id) {
@@ -168,14 +168,14 @@ export class AllClientsComponent implements OnInit {
         dialogRef.afterClosed().subscribe(result => {
             if (result?.updated) {
                 // Si hubo cambios, recargar la lista
-                console.log('Planilla actualizada, recargando lista...');
+                //console.log('Planilla actualizada, recargando lista...');
                 this.loadClients(this.currentPage);
             }
         });
     }
 
     editClient(client: Client): void {
-        console.log('Editar cliente:', client.id);
+        //console.log('Editar cliente:', client.id);
 
         if (!this.dialog) {
             console.error('MatDialog no está disponible');
@@ -194,7 +194,7 @@ export class AllClientsComponent implements OnInit {
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
                 // Si se guardaron cambios, recargar la lista
-                console.log('Cliente actualizado, recargando lista...');
+                //console.log('Cliente actualizado, recargando lista...');
                 setTimeout(() => {
                     this.loadClients(this.currentPage);
                 });

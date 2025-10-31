@@ -57,8 +57,8 @@ export class ResetPasswordComponent implements OnInit {
             this.token = params['token'] || '';
             this.email = params['email'] || '';
 
-            console.log('🔑 Token recibido:', this.token);
-            console.log('📧 Email recibido:', this.email);
+            //console.log('🔑 Token recibido:', this.token);
+            //console.log('📧 Email recibido:', this.email);
 
             if (!this.token || !this.email) {
                 console.error('❌ Faltan parámetros en la URL');
@@ -138,14 +138,14 @@ export class ResetPasswordComponent implements OnInit {
                 password_confirmation: this.resetForm.value.password_confirmation
             };
 
-            console.log('🔐 Restableciendo contraseña...');
-            console.log('📧 Email:', this.email);
-            console.log('🔑 Token length:', this.token.length);
+            //console.log('🔐 Restableciendo contraseña...');
+            //console.log('📧 Email:', this.email);
+            //console.log('🔑 Token length:', this.token.length);
 
             this.authService.resetPassword(resetData).subscribe({
                 next: (response) => {
-                    console.log('✅ Respuesta completa:', response);
-                    console.log('✅ Contraseña restablecida exitosamente');
+                    //console.log('✅ Respuesta completa:', response);
+                    //console.log('✅ Contraseña restablecida exitosamente');
 
                     // Asegurar que se actualiza el estado
                     setTimeout(() => {
@@ -166,7 +166,7 @@ export class ResetPasswordComponent implements OnInit {
                     }, 0);
                 },
                 complete: () => {
-                    console.log('🏁 Observable completado');
+                    //console.log('🏁 Observable completado');
                 }
             });
         } else {

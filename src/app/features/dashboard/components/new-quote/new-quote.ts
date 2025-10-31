@@ -402,36 +402,36 @@ export class NewQuoteComponent implements OnInit {
             return;
         }
 
-        console.log('🔍 Cargando clientes disponibles...');
-        console.log('👤 Usuario actual:', currentUser);
+        //console.log('🔍 Cargando clientes disponibles...');
+        //console.log('👤 Usuario actual:', currentUser);
 
         // Obtener todos los clientes (el backend ya filtra por agente si corresponde)
         this.userService.getUsers({ type: 'client' }).subscribe({
             next: (response: any) => {
                 const allClients = response.data || response;
-                console.log('📋 Total de clientes obtenidos:', allClients.length);
-                console.log('📋 Clientes:', allClients);
+                //console.log('📋 Total de clientes obtenidos:', allClients.length);
+                //console.log('📋 Clientes:', allClients);
 
                 // Obtener IDs de clientes que ya tienen application form
                 this.applicationFormService.getClientsWithForms().subscribe({
                     next: (clientsWithFormsResponse) => {
                         const clientsWithForms = clientsWithFormsResponse.client_ids || [];
-                        console.log('🚫 Clientes con forms (IDs):', clientsWithForms);
-                        console.log('🚫 Total de clientes con forms:', clientsWithForms.length);
+                        //console.log('🚫 Clientes con forms (IDs):', clientsWithForms);
+                        //console.log('🚫 Total de clientes con forms:', clientsWithForms.length);
 
                         // Mostrar solo clientes sin application form
                         // El backend ya filtró los clientes según el rol (admin ve todos, agent ve sus clientes)
                         this.availableClients = allClients.filter((client: any) => {
                             const hasForm = clientsWithForms.includes(client.id);
-                            //console.log(`   Cliente ${client.id} (${client.name}): ${hasForm ? '❌ tiene form' : '✅ disponible'}`);
+                            ////console.log(`   Cliente ${client.id} (${client.name}): ${hasForm ? '❌ tiene form' : '✅ disponible'}`);
                             return !hasForm;
                         });
 
                         this.filteredClients = [...this.availableClients];
                         this.isLoadingClients = false;
 
-                        console.log('✅ Clientes disponibles para application form:', this.availableClients.length);
-                        console.log('✅ Lista final:', this.availableClients);
+                        //console.log('✅ Clientes disponibles para application form:', this.availableClients.length);
+                        //console.log('✅ Lista final:', this.availableClients);
                     },
                     error: (error) => {
                         console.error('❌ Error al cargar clientes con application forms:', error);
@@ -464,8 +464,8 @@ export class NewQuoteComponent implements OnInit {
     }
 
     selectClient(client: Client): void {
-        console.log('👤 Cliente seleccionado:', client);
-        console.log('🔑 Agent ID del cliente:', client.agent_id);
+        //console.log('👤 Cliente seleccionado:', client);
+        //console.log('🔑 Agent ID del cliente:', client.agent_id);
         this.selectedClient = client;
         this.clientSelectionForm.patchValue({
             clientSearch: client.name,
@@ -575,7 +575,7 @@ export class NewQuoteComponent implements OnInit {
         // Enviar al backend
         this.applicationFormService.createApplicationForm(formData).subscribe({
             next: (response) => {
-                console.log('✅ Planilla creada:', response);
+                //console.log('✅ Planilla creada:', response);
 
                 // Extraer el token de confirmación del backend
                 const token = response.confirmation_token;
@@ -670,13 +670,13 @@ export class NewQuoteComponent implements OnInit {
 
     // Métodos para modal de agregar cliente
     openAddClientModal(): void {
-        console.log('🚀 Abriendo modal de agregar cliente...');
+        //console.log('🚀 Abriendo modal de agregar cliente...');
         this.showAddClientModal = true;
-        console.log('📊 showAddClientModal:', this.showAddClientModal);
+        //console.log('📊 showAddClientModal:', this.showAddClientModal);
     }
 
     closeAddClientModal(): void {
-        console.log('❌ Cerrando modal de agregar cliente...');
+        //console.log('❌ Cerrando modal de agregar cliente...');
         this.showAddClientModal = false;
     }
 

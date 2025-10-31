@@ -90,21 +90,21 @@ export class AuthService {
     }
 
     logout(): void {
-        console.log('🔓 Cerrando sesión y limpiando localStorage...');
+        //console.log('🔓 Cerrando sesión y limpiando localStorage...');
 
         if (isPlatformBrowser(this.platformId)) {
             // Limpiar tokens y datos de usuario
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
 
-            console.log('✅ localStorage limpiado');
-            console.log('📋 auth_token:', localStorage.getItem('auth_token'));
-            console.log('📋 user:', localStorage.getItem('user'));
+            //console.log('✅ localStorage limpiado');
+            //console.log('📋 auth_token:', localStorage.getItem('auth_token'));
+            //console.log('📋 user:', localStorage.getItem('user'));
         }
 
         // Limpiar el usuario actual del observable
         this.currentUserSubject.next(null);
-        console.log('✅ Usuario deslogueado correctamente');
+        //console.log('✅ Usuario deslogueado correctamente');
     }
 
     isLoggedIn(): boolean {

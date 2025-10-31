@@ -75,7 +75,7 @@ export class ClientDocumentsComponent implements OnInit {
 
         this.applicationFormService.getApplicationForms(1, 999, { client_id: userId }).subscribe({
             next: (response: any) => {
-                console.log('Application form loaded:', response);
+                //console.log('Application form loaded:', response);
                 if (response.data && response.data.length > 0) {
                     this.applicationForm = response.data[0];
                     this.documents = this.applicationForm?.documents || [];
@@ -123,7 +123,7 @@ export class ClientDocumentsComponent implements OnInit {
 
         this.applicationFormService.uploadDocument(this.applicationForm.id, this.selectedFile).subscribe({
             next: (response: any) => {
-                console.log('Document uploaded:', response);
+                //console.log('Document uploaded:', response);
                 this.showMessage('Documento subido exitosamente', 'success');
                 this.selectedFile = null;
                 this.loadDocuments(); // Reload to get updated list
@@ -148,7 +148,7 @@ export class ClientDocumentsComponent implements OnInit {
 
         this.applicationFormService.deleteDocument(this.applicationForm.id, documentId).subscribe({
             next: (response: any) => {
-                console.log('Document deleted:', response);
+                //console.log('Document deleted:', response);
                 this.showMessage('Documento eliminado exitosamente', 'success');
                 this.loadDocuments(); // Reload to get updated list
             },

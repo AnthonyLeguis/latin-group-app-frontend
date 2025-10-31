@@ -50,12 +50,12 @@ export class FormsListModalComponent implements OnInit {
 
     loadForms(): void {
         this.loading = true;
-        console.log('Loading forms with status:', this.filterStatus);
+        //console.log('Loading forms with status:', this.filterStatus);
         this.formService.getApplicationForms(1, 999, { status: this.filterStatus }).subscribe({
             next: (response) => {
-                console.log('Forms response:', response);
+                //console.log('Forms response:', response);
                 this.forms = response.data || response;
-                console.log('Forms loaded:', this.forms.length);
+                //console.log('Forms loaded:', this.forms.length);
                 this.loading = false;
                 this.cdr.detectChanges();
             },

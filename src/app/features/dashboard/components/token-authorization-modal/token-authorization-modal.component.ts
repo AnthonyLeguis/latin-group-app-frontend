@@ -90,7 +90,7 @@ export class TokenAuthorizationModalComponent implements OnInit {
             }))
             .subscribe({
                 next: (response) => {
-                    console.log('✅ Token renovado:', response);
+                    //console.log('✅ Token renovado:', response);
 
                     // Actualizar datos locales
                     this.data.confirmationToken = response.token;

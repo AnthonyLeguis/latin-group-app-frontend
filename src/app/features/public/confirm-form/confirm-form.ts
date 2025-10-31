@@ -151,7 +151,7 @@ export class ConfirmFormComponent implements OnInit {
 
         this.http.post<{ message: string, success: boolean, confirmed_at?: string, form_id?: number }>(url, {}).subscribe({
             next: (response) => {
-                console.log('✅ Documento confirmado:', response);
+                //console.log('✅ Documento confirmado:', response);
                 this.success = true;
                 this.confirming = false;
 

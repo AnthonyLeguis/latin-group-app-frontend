@@ -262,7 +262,7 @@ export class SidebarComponent implements OnInit {
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
                 // Usuario confirmó el cierre de sesión
-                console.log('🚪 Cerrando sesión...');
+                //console.log('🚪 Cerrando sesión...');
                 this.authService.logout();
                 this.router.navigate(['/home']);
             }
