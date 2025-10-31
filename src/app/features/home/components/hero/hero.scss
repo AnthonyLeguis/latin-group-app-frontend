@@ -20,7 +20,9 @@
 // Responsive adjustments
 @media (max-width: 768px) {
     .hero-section {
-        padding: 4rem 1rem;
+        padding-top: 8rem;
+        padding-left: 0.5rem;
+        padding-right: 0;
 
         h1 {
             font-size: 2.5rem !important;

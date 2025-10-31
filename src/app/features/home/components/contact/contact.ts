@@ -12,6 +12,18 @@ import { ConfirmDialogComponent, DialogData } from '../../../../shared/component
 
 declare const grecaptcha: any;
 
+interface ContactFormValues {
+    fullName: string;
+    email: string;
+    phone: string | null;
+    zipCode: string;
+    serviceMedical: boolean;
+    serviceDental: boolean;
+    serviceAccidents: boolean;
+    serviceLife: boolean;
+    acceptSms: boolean;
+}
+
 @Component({
     selector: 'app-contact',
     standalone: true,
@@ -37,29 +49,30 @@ export class ContactComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         @Inject(PLATFORM_ID) private platformId: Object
     ) {
+        const initialValues = this.getInitialFormValues();
+
         this.contactForm = this.fb.group({
-            fullName: ['', [Validators.required, Validators.minLength(2)]],
-            email: ['', [Validators.required, Validators.email]],
-            phone: [undefined, [Validators.required]],
-            zipCode: ['', [Validators.required, Validators.minLength(3)]],
-            serviceMedical: [false],
-            serviceDental: [false],
-            serviceAccidents: [false],
-            serviceLife: [false],
-            acceptSms: [false],
+            fullName: [initialValues.fullName, [Validators.required, Validators.minLength(2)]],
+            email: [initialValues.email, [Validators.required, Validators.email]],
+            phone: [initialValues.phone, [Validators.required]],
+            zipCode: [initialValues.zipCode, [Validators.required, Validators.minLength(3), Validators.maxLength(10)]],
+            serviceMedical: [initialValues.serviceMedical],
+            serviceDental: [initialValues.serviceDental],
+            serviceAccidents: [initialValues.serviceAccidents],
+            serviceLife: [initialValues.serviceLife],
+            acceptSms: [initialValues.acceptSms],
         });
 
-        // Crear el formulario del modal con la misma estructura
         this.modalForm = this.fb.group({
-            fullName: ['', [Validators.required, Validators.minLength(2)]],
-            email: ['', [Validators.required, Validators.email]],
-            phone: [undefined, [Validators.required]],
-            zipCode: ['', [Validators.required, Validators.minLength(3)]],
-            serviceMedical: [false],
-            serviceDental: [false],
-            serviceAccidents: [false],
-            serviceLife: [false],
-            acceptSms: [false],
+            fullName: [initialValues.fullName, [Validators.required, Validators.minLength(2)]],
+            email: [initialValues.email, [Validators.required, Validators.email]],
+            phone: [initialValues.phone, [Validators.required]],
+            zipCode: [initialValues.zipCode, [Validators.required, Validators.minLength(3), Validators.maxLength(10)]],
+            serviceMedical: [initialValues.serviceMedical],
+            serviceDental: [initialValues.serviceDental],
+            serviceAccidents: [initialValues.serviceAccidents],
+            serviceLife: [initialValues.serviceLife],
+            acceptSms: [initialValues.acceptSms],
         });
     }
 
@@ -79,6 +92,14 @@ export class ContactComponent implements OnInit, OnDestroy {
                 }
             }
         );
+
+        // Transformar nombre a uppercase en ambos formularios
+        this.setupFullNameUppercase(this.contactForm);
+        this.setupFullNameUppercase(this.modalForm);
+
+        // Limitar zipCode a solo números y máximo 10 dígitos
+        this.setupZipCodeValidation(this.contactForm);
+        this.setupZipCodeValidation(this.modalForm);
     }
 
     ngOnDestroy(): void {
@@ -106,11 +127,7 @@ export class ContactComponent implements OnInit, OnDestroy {
                             ? phoneValue.number
                             : phoneValue?.toString() || '';
 
-                        const formData = {
-                            ...this.contactForm.value,
-                            phone: phoneString,
-                            recaptcha_token: token
-                        };
+                        const formData = this.buildPayload(this.contactForm, phoneString, token);
                         this.contactService.sendContactForm(formData).subscribe({
                             next: (response) => {
                                 //console.log('Respuesta exitosa del backend:', response);
@@ -123,7 +140,7 @@ export class ContactComponent implements OnInit, OnDestroy {
                                         autoCloseDuration: 3000
                                     } as DialogData
                                 });
-                                this.contactForm.reset();
+                                this.contactForm.reset(this.getInitialFormValues());
                             },
                             error: (err) => {
                                 console.error('Error del backend al enviar contacto:', err);
@@ -155,11 +172,7 @@ export class ContactComponent implements OnInit, OnDestroy {
                             ? phoneValue.number
                             : phoneValue?.toString() || '';
 
-                        const formData = {
-                            ...this.modalForm.value,
-                            phone: phoneString,
-                            recaptcha_token: token
-                        };
+                        const formData = this.buildPayload(this.modalForm, phoneString, token);
                         this.contactService.sendContactForm(formData).subscribe({
                             next: (response) => {
                                 console.log('Respuesta exitosa del backend (modal):', response);
@@ -172,7 +185,7 @@ export class ContactComponent implements OnInit, OnDestroy {
                                         autoCloseDuration: 3000
                                     } as DialogData
                                 });
-                                this.modalForm.reset();
+                                this.modalForm.reset(this.getInitialFormValues());
                                 this.closeModal();
                             },
                             error: (err) => {
@@ -192,6 +205,73 @@ export class ContactComponent implements OnInit, OnDestroy {
             } else {
                 console.error('reCAPTCHA Enterprise no está disponible');
             }
+        }
+    }
+
+    private getInitialFormValues(): ContactFormValues {
+        return {
+            fullName: '',
+            email: '',
+            phone: null,
+            zipCode: '',
+            serviceMedical: false,
+            serviceDental: false,
+            serviceAccidents: false,
+            serviceLife: false,
+            acceptSms: false,
+        };
+    }
+
+    private buildPayload(form: FormGroup, phone: string, token: string) {
+        const raw = form.value as ContactFormValues;
+
+        return {
+            ...raw,
+            phone,
+            serviceMedical: !!raw.serviceMedical,
+            serviceDental: !!raw.serviceDental,
+            serviceAccidents: !!raw.serviceAccidents,
+            serviceLife: !!raw.serviceLife,
+            acceptSms: raw.acceptSms === true,
+            recaptcha_token: token,
+        };
+    }
+
+    /**
+     * Convierte el input de nombre completo a mayúsculas automáticamente
+     */
+    private setupFullNameUppercase(form: FormGroup): void {
+        const fullNameControl = form.get('fullName');
+        if (fullNameControl) {
+            fullNameControl.valueChanges.subscribe(value => {
+                if (value && typeof value === 'string') {
+                    const upperValue = value.toUpperCase();
+                    if (value !== upperValue) {
+                        fullNameControl.setValue(upperValue, { emitEvent: false });
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Limita el zipCode a solo números y máximo 10 dígitos
+     */
+    private setupZipCodeValidation(form: FormGroup): void {
+        const zipCodeControl = form.get('zipCode');
+        if (zipCodeControl) {
+            zipCodeControl.valueChanges.subscribe(value => {
+                if (value) {
+                    // Eliminar caracteres no numéricos
+                    const numericValue = value.replace(/\D/g, '');
+                    // Limitar a 10 dígitos
+                    const limitedValue = numericValue.substring(0, 10);
+
+                    if (value !== limitedValue) {
+                        zipCodeControl.setValue(limitedValue, { emitEvent: false });
+                    }
+                }
+            });
         }
     }
 }

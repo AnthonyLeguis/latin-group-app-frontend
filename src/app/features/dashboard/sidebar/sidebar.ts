@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -104,7 +104,8 @@ export class SidebarComponent implements OnInit {
         private authService: AuthService,
         private router: Router,
         private dialog: MatDialog,
-        private sidebarService: SidebarService
+        private sidebarService: SidebarService,
+        @Inject(PLATFORM_ID) private platformId: Object
     ) { }
 
     ngOnInit(): void {
@@ -126,11 +127,18 @@ export class SidebarComponent implements OnInit {
         // Sincronizar estado inicial con el servicio
         this.sidebarService.setExpanded(this.isExpanded);
 
-        // Escuchar cambios de tamaño de ventana
-        window.addEventListener('resize', () => this.checkMobileView());
+        // Escuchar cambios de tamaño de ventana (solo en el navegador)
+        if (isPlatformBrowser(this.platformId)) {
+            window.addEventListener('resize', () => this.checkMobileView());
+        }
     }
 
     checkMobileView(): void {
+        // Solo en el navegador podemos acceder a window
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         const wasMobile = this.isMobileView;
         this.isMobileView = window.innerWidth < 1024;
 

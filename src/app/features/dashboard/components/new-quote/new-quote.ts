@@ -140,6 +140,35 @@ export class NewQuoteComponent implements OnInit {
         control.setValue(formatted, { emitEvent: false });
         control.updateValueAndValidity({ emitEvent: false });
     }
+
+    enforceDigits(form: FormGroup, controlName: string, maxLength?: number): void {
+        const control = form.get(controlName);
+        if (!control) {
+            return;
+        }
+
+        const rawValue = control.value ?? '';
+        const digits = String(rawValue).replace(/\D/g, '');
+        const limitedDigits = typeof maxLength === 'number' ? digits.slice(0, maxLength) : digits;
+
+        control.setValue(limitedDigits, { emitEvent: false });
+        control.updateValueAndValidity({ emitEvent: false });
+    }
+
+    formatCardExpiration(form: FormGroup, controlName: string): void {
+        const control = form.get(controlName);
+        if (!control) {
+            return;
+        }
+
+        let digits = String(control.value || '').replace(/\D/g, '').slice(0, 4);
+        if (digits.length >= 3) {
+            digits = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        }
+
+        control.setValue(digits, { emitEvent: false });
+        control.updateValueAndValidity({ emitEvent: false });
+    }
     // Estado de carga
     isLoadingClients = false;
     isSubmitting = false;
@@ -233,12 +262,12 @@ export class NewQuoteComponent implements OnInit {
             unit_apt: ['', Validators.maxLength(50)],
             city: ['', [Validators.required, Validators.maxLength(100)]],
             state: ['', [Validators.required, Validators.maxLength(50)]],
-            zip_code: ['', [Validators.required, Validators.maxLength(20)]],
+            zip_code: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
             phone: ['', [Validators.required, this.phoneValidator.bind(this)]],
             phone2: ['', this.phoneValidator.bind(this)],
             email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
             gender: ['', Validators.required],
-            ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             legal_status: ['', [Validators.required, Validators.maxLength(100)]],
             document_number: ['', [Validators.required, Validators.maxLength(50)]]
         });
@@ -261,7 +290,7 @@ export class NewQuoteComponent implements OnInit {
             poliza_number: ['', Validators.maxLength(100)],
             poliza_category: ['', Validators.maxLength(100)],
             poliza_amount: [null, Validators.min(0)],
-            poliza_payment_day: [null, [Validators.min(1), Validators.max(31)]],
+            poliza_payment_day: [null, [Validators.pattern('^(?:[1-9]|[12][0-9]|3[01])?$')]],
             poliza_beneficiary: ['', Validators.maxLength(255)]
         });
 
@@ -275,7 +304,7 @@ export class NewQuoteComponent implements OnInit {
             person1_document_number: ['', Validators.maxLength(50)],
             person1_dob: [''],
             person1_company_name: ['', Validators.maxLength(255)],
-            person1_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person1_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             person1_gender: [''],
             person1_wages: [null, Validators.min(0)],
             person1_frequency: [''],
@@ -288,7 +317,7 @@ export class NewQuoteComponent implements OnInit {
             person2_document_number: ['', Validators.maxLength(50)],
             person2_dob: [''],
             person2_company_name: ['', Validators.maxLength(255)],
-            person2_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person2_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             person2_gender: [''],
             person2_wages: [null, Validators.min(0)],
             person2_frequency: [''],
@@ -301,7 +330,7 @@ export class NewQuoteComponent implements OnInit {
             person3_document_number: ['', Validators.maxLength(50)],
             person3_dob: [''],
             person3_company_name: ['', Validators.maxLength(255)],
-            person3_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person3_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             person3_gender: [''],
             person3_wages: [null, Validators.min(0)],
             person3_frequency: [''],
@@ -314,7 +343,7 @@ export class NewQuoteComponent implements OnInit {
             person4_document_number: ['', Validators.maxLength(50)],
             person4_dob: [''],
             person4_company_name: ['', Validators.maxLength(255)],
-            person4_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person4_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             person4_gender: [''],
             person4_wages: [null, Validators.min(0)],
             person4_frequency: [''],
@@ -327,7 +356,7 @@ export class NewQuoteComponent implements OnInit {
             person5_document_number: ['', Validators.maxLength(50)],
             person5_dob: [''],
             person5_company_name: ['', Validators.maxLength(255)],
-            person5_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person5_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             person5_gender: [''],
             person5_wages: [null, Validators.min(0)],
             person5_frequency: [''],
@@ -340,7 +369,7 @@ export class NewQuoteComponent implements OnInit {
             person6_document_number: ['', Validators.maxLength(50)],
             person6_dob: [''],
             person6_company_name: ['', Validators.maxLength(255)],
-            person6_ssn: ['', [Validators.maxLength(20), Validators.pattern('^[0-9]*$')]],
+            person6_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             person6_gender: [''],
             person6_wages: [null, Validators.min(0)],
             person6_frequency: ['']
@@ -349,12 +378,12 @@ export class NewQuoteComponent implements OnInit {
         // Paso 5: Método de Pago
         this.paymentForm = this.fb.group({
             card_type: [''],
-            card_number: ['', Validators.maxLength(25)],
-            card_expiration: ['', Validators.maxLength(10)],
-            card_cvv: ['', Validators.maxLength(5)],
+            card_number: ['', [Validators.pattern('^(?:\\d{13,19})?$')]],
+            card_expiration: ['', [Validators.pattern('^(?:(0[1-9]|1[0-2])\\/\\d{2})?$')]],
+            card_cvv: ['', [Validators.pattern('^(?:\\d{3,4})?$')]],
             bank_name: ['', Validators.maxLength(255)],
-            bank_routing: ['', Validators.maxLength(20)],
-            bank_account: ['', Validators.maxLength(30)]
+            bank_routing: ['', [Validators.pattern('^(?:\\d{9})?$')]],
+            bank_account: ['', [Validators.pattern('^(?:\\d{4,17})?$')]]
         });
 
         // Listener para búsqueda de clientes
@@ -493,6 +522,45 @@ export class NewQuoteComponent implements OnInit {
                 formData[field] = formData[field].replace(/\D/g, '');
             }
         });
+
+        const sanitizeDigits = (value: any, maxLength?: number): any => {
+            if (value === null || value === undefined) {
+                return value;
+            }
+            const digits = String(value).replace(/\D/g, '');
+            return typeof maxLength === 'number' ? digits.slice(0, maxLength) : digits;
+        };
+
+        if (formData.zip_code) {
+            formData.zip_code = sanitizeDigits(formData.zip_code, 5);
+        }
+
+        ['ssn', 'person1_ssn', 'person2_ssn', 'person3_ssn', 'person4_ssn', 'person5_ssn', 'person6_ssn'].forEach(field => {
+            if (formData[field]) {
+                formData[field] = sanitizeDigits(formData[field], 9);
+            }
+        });
+
+        if (formData.poliza_payment_day) {
+            const dayDigits = sanitizeDigits(formData.poliza_payment_day, 2);
+            formData.poliza_payment_day = dayDigits ? Number(dayDigits) : null;
+        }
+
+        ['card_number', 'card_cvv', 'bank_routing', 'bank_account'].forEach(field => {
+            if (formData[field]) {
+                const maxLengthMap: Record<string, number> = {
+                    card_number: 19,
+                    card_cvv: 4,
+                    bank_routing: 9,
+                    bank_account: 17
+                };
+                formData[field] = sanitizeDigits(formData[field], maxLengthMap[field]);
+            }
+        });
+
+        if (formData.card_expiration) {
+            formData.card_expiration = String(formData.card_expiration).trim();
+        }
 
         // Convertir fechas a formato ISO
         if (formData.dob) {

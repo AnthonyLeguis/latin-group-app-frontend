@@ -48,7 +48,7 @@
 
                         <div class="client-selection-box">
                             <mat-form-field appearance="outline" class="full-width">
-                                <mat-label>Buscar cliente</mat-label>
+                                <mat-label></mat-label>
                                 <input matInput formControlName="clientSearch"
                                     placeholder="Escribe el nombre o email del cliente" [matAutocomplete]="auto">
                                 <mat-icon matPrefix>search</mat-icon>
@@ -153,14 +153,11 @@
                                 <label class="custom-label-required">SSN (Opcional):</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="ssn" placeholder="Ingrese su SSN"
-                                        inputmode="numeric" pattern="[0-9]*" maxlength="20"
-                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        inputmode="numeric" maxlength="9"
+                                        (input)="enforceDigits(applicantForm, 'ssn', 9)">
                                     <mat-icon matPrefix>badge</mat-icon>
-                                    <mat-error *ngIf="applicantForm.get('ssn')?.hasError('maxlength')">
-                                        Máximo 20 caracteres
-                                    </mat-error>
                                     <mat-error *ngIf="applicantForm.get('ssn')?.hasError('pattern')">
-                                        Solo se permiten números
+                                        Debe ingresar 4 o 9 dígitos
                                     </mat-error>
                                 </mat-form-field>
                             </div>
@@ -209,10 +206,14 @@
                                 <label class="custom-label-required">Código Postal:</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="zip_code" placeholder="33101" inputmode="numeric"
-                                        pattern="[0-9]*" maxlength="10"
-                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                        maxlength="5" (input)="enforceDigits(applicantForm, 'zip_code', 5)">
                                     <mat-icon matPrefix>local_post_office</mat-icon>
-                                    <mat-error>Código postal requerido</mat-error>
+                                    <mat-error *ngIf="applicantForm.get('zip_code')?.hasError('required')">
+                                        Código postal requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="applicantForm.get('zip_code')?.hasError('pattern')">
+                                        Ingrese un código postal de 5 dígitos
+                                    </mat-error>
                                 </mat-form-field>
                             </div>
 
@@ -461,9 +462,9 @@
                             <div class="custom-label-group">
                                 <label class="custom-label-required">Día de Pago:</label>
                                 <mat-form-field appearance="outline">
-                                    <input matInput type="number" formControlName="poliza_payment_day"
-                                        placeholder="1-31" inputmode="numeric" pattern="[0-9]*"
-                                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                    <input matInput formControlName="poliza_payment_day" placeholder="1-31"
+                                        inputmode="numeric" maxlength="2"
+                                        (input)="enforceDigits(policyForm, 'poliza_payment_day', 2)">
                                     <mat-icon matPrefix>event</mat-icon>
                                 </mat-form-field>
                             </div>
@@ -612,16 +613,12 @@
                                         <label class="custom-label-required">SSN:</label>
                                         <mat-form-field appearance="outline">
                                             <input matInput [formControlName]="'person' + selectedPersonIndex + '_ssn'"
-                                                placeholder="Ingrese su SSN" inputmode="numeric" pattern="[0-9]*"
-                                                maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                                placeholder="Ingrese su SSN" inputmode="numeric" maxlength="9"
+                                                (input)="enforceDigits(additionalPersonsForm, 'person' + selectedPersonIndex + '_ssn', 9)">
                                             <mat-icon matPrefix>badge</mat-icon>
                                             <mat-error
-                                                *ngIf="additionalPersonsForm.get('person' + selectedPersonIndex + '_ssn')?.hasError('maxlength')">
-                                                Máximo 20 caracteres
-                                            </mat-error>
-                                            <mat-error
                                                 *ngIf="additionalPersonsForm.get('person' + selectedPersonIndex + '_ssn')?.hasError('pattern')">
-                                                Solo se permiten números
+                                                Debe ingresar 4 o 9 dígitos
                                             </mat-error>
                                         </mat-form-field>
                                     </div>
@@ -689,22 +686,36 @@
                                         <label class="custom-label-required">Número de Tarjeta:</label>
                                         <mat-form-field appearance="outline">
                                             <input matInput formControlName="card_number"
-                                                placeholder="XXXX XXXX XXXX XXXX">
+                                                placeholder="XXXX XXXX XXXX XXXX" inputmode="numeric" maxlength="19"
+                                                (input)="enforceDigits(paymentForm, 'card_number', 19)">
                                             <mat-icon matPrefix>payment</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_number')?.hasError('pattern')">
+                                                Ingrese entre 13 y 19 dígitos
+                                            </mat-error>
                                         </mat-form-field>
                                     </div>
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Fecha de Expiración:</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput formControlName="card_expiration" placeholder="MM/YY">
+                                            <input matInput formControlName="card_expiration" placeholder="MM/YY"
+                                                maxlength="5"
+                                                (input)="formatCardExpiration(paymentForm, 'card_expiration')">
                                             <mat-icon matPrefix>event</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_expiration')?.hasError('pattern')">
+                                                Formato inválido (MM/YY)
+                                            </mat-error>
                                         </mat-form-field>
                                     </div>
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">CVV:</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput formControlName="card_cvv" placeholder="XXX">
+                                            <input matInput formControlName="card_cvv" placeholder="XXX"
+                                                inputmode="numeric" maxlength="4"
+                                                (input)="enforceDigits(paymentForm, 'card_cvv', 4)">
                                             <mat-icon matPrefix>lock</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_cvv')?.hasError('pattern')">
+                                                Ingrese 3 o 4 dígitos
+                                            </mat-error>
                                         </mat-form-field>
                                     </div>
                                 </div>
@@ -727,15 +738,25 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Routing Number:</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput formControlName="bank_routing" placeholder="123456789">
+                                            <input matInput formControlName="bank_routing" placeholder="123456789"
+                                                inputmode="numeric" maxlength="9"
+                                                (input)="enforceDigits(paymentForm, 'bank_routing', 9)">
                                             <mat-icon matPrefix>tag</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('bank_routing')?.hasError('pattern')">
+                                                Ingrese 9 dígitos
+                                            </mat-error>
                                         </mat-form-field>
                                     </div>
                                     <div class="custom-label-group span-2">
                                         <label class="custom-label-required">Número de Cuenta:</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput formControlName="bank_account" placeholder="1234567890">
+                                            <input matInput formControlName="bank_account" placeholder="1234567890"
+                                                inputmode="numeric" maxlength="17"
+                                                (input)="enforceDigits(paymentForm, 'bank_account', 17)">
                                             <mat-icon matPrefix>numbers</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('bank_account')?.hasError('pattern')">
+                                                Ingrese entre 4 y 17 dígitos
+                                            </mat-error>
                                         </mat-form-field>
                                     </div>
                                 </div>

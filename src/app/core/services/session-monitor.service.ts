@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
 import { Observable, Subject, Subscription, interval } from 'rxjs';
 import { environment } from '../config/environment';
 
@@ -22,7 +23,10 @@ export class SessionMonitorService {
     private readonly sessionWarning$ = new Subject<TokenExpiryInfo>();
     private monitoringSubscription: Subscription | null = null;
 
-    constructor(private readonly http: HttpClient) { }
+    constructor(
+        private readonly http: HttpClient,
+        @Inject(PLATFORM_ID) private platformId: Object
+    ) { }
 
     /** Observable que emite advertencias sobre el estado de la sesión */
     getSessionWarnings(): Observable<TokenExpiryInfo> {
@@ -48,6 +52,11 @@ export class SessionMonitorService {
 
     /** Consulta al backend el estado del token */
     private checkTokenExpiry(): void {
+        // Solo en el navegador podemos acceder a localStorage
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         const token = localStorage.getItem('auth_token');
 
         if (!token) {
@@ -87,6 +96,13 @@ export class SessionMonitorService {
 
     /** Solicita la renovación del token actual */
     refreshToken(): Observable<{ message: string; token?: string; expires_in?: number }> {
+        // Solo en el navegador podemos acceder a localStorage
+        if (!isPlatformBrowser(this.platformId)) {
+            return new Observable(observer => {
+                observer.error(new Error('localStorage no disponible en SSR'));
+            });
+        }
+
         const token = localStorage.getItem('auth_token');
         const headers = token ? new HttpHeaders().set('Authorization', `Bearer ${token}`) : undefined;
 
@@ -99,6 +115,13 @@ export class SessionMonitorService {
 
     /** Revoca el token actual en el backend */
     logout(): Observable<{ message: string }> {
+        // Solo en el navegador podemos acceder a localStorage
+        if (!isPlatformBrowser(this.platformId)) {
+            return new Observable(observer => {
+                observer.error(new Error('localStorage no disponible en SSR'));
+            });
+        }
+
         const token = localStorage.getItem('auth_token');
         const headers = token ? new HttpHeaders().set('Authorization', `Bearer ${token}`) : undefined;
 
