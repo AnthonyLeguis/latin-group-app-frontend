@@ -29,7 +29,8 @@
 
                                 <!-- Testimonial Author with Image -->
                                 <div class="testimonial-author flex items-center justify-center gap-4">
-                                    <img [src]="testimonial.image" [alt]="testimonial.name" class="testimonial-image">
+                                    <img [src]="testimonial.image" [alt]="testimonial.name" class="testimonial-image"
+                                        width="80" height="80" loading="lazy">
                                     <div class="text-left">
                                         <h4 class="font-bold text-gray-800">{{ testimonial.name }}</h4>
                                         <p class="text-red-600 font-semibold text-sm">{{ testimonial.state }}</p>
@@ -61,7 +62,8 @@
 
                             <!-- Testimonial Author with Image -->
                             <div class="testimonial-author flex items-center gap-4">
-                                <img [src]="testimonial.image" [alt]="testimonial.name" class="testimonial-image">
+                                <img [src]="testimonial.image" [alt]="testimonial.name" class="testimonial-image"
+                                    width="80" height="80" loading="lazy">
                                 <div class="text-left">
                                     <h4 class="font-bold text-gray-800">{{ testimonial.name }}</h4>
                                     <p class="text-red-600 font-semibold text-sm">{{ testimonial.state }}</p>

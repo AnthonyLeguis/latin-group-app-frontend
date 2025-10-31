@@ -20,7 +20,8 @@
                         [style.transform]="'translateX(-' + (currentIndex * getCardWidth()) + '%)'">
                         <div *ngFor="let card of allCards; let i = index" class="carousel-slide">
                             <div class="service-card-mini">
-                                <img [src]="card.image" [alt]="card.title" class="service-image">
+                                <img [src]="card.image" [alt]="card.title" class="service-image" width="400"
+                                    height="300" loading="lazy">
                                 <h3 class="service-title">{{ card.title }}</h3>
                             </div>
                         </div>
@@ -43,8 +44,8 @@
             <div class="cta-content">
                 <!-- CTA Image -->
                 <div class="cta-image-wrapper">
-                    <img src="images/services/family.jpg" alt="Familia protegida" class="cta-image"
-                        [ngClass]="{ 'auto-zoom': autoZoom }">
+                    <img src="images/services/family.jpg" alt="Familia protegida" class="cta-image" width="800"
+                        height="600" loading="lazy" [ngClass]="{ 'auto-zoom': autoZoom }">
                 </div>
 
                 <!-- CTA Text and Button -->

@@ -9,7 +9,7 @@
                     ¡Cuida tu salud con nosotros!
                 </h1>
                 <div class="mt-4 md:mt-6 flex justify-center md:justify-start">
-                    <button
+                    <button type="button" (click)="onBeginClick()"
                         class="bg-red-700 hover:bg-red-800 text-white font-bold text-base md:text-lg py-3 md:py-4 px-8 md:px-12 rounded-lg shadow-lg transform hover:scale-110 transition-all duration-300">
                         ¡Inscríbete ya!
                     </button>
@@ -19,7 +19,8 @@
             <!-- Right Content - Image -->
             <div class="relative z-10 flex justify-center md:justify-end order-1 md:order-2 mb-6 md:mb-0">
                 <div class="w-50 md:w-full max-w-xs sm:max-w-sm md:max-w-md">
-                    <img src="images/doctor.png" alt="Doctor" class="w-full rounded-lg">
+                    <img src="images/doctor.png" alt="Doctor" class="w-full rounded-lg" width="500" height="500"
+                        loading="eager">
                 </div>
             </div>
         </div>

@@ -10,11 +10,13 @@
         <div class="insurance-ribbon-container">
             <div class="insurance-ribbon-track">
                 <div *ngFor="let company of companies" class="insurance-ribbon-item">
-                    <img [src]="company.image" [alt]="'Insurance company logo'" class="company-logo">
+                    <img [src]="company.image" [alt]="'Insurance company logo'" class="company-logo" width="150"
+                        height="75" loading="lazy">
                 </div>
                 <!-- Duplicar para loop infinito sin espacios -->
                 <div *ngFor="let company of companies" class="insurance-ribbon-item">
-                    <img [src]="company.image" [alt]="'Insurance company logo'" class="company-logo">
+                    <img [src]="company.image" [alt]="'Insurance company logo'" class="company-logo" width="150"
+                        height="75" loading="lazy">
                 </div>
             </div>
         </div>
