@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -50,11 +50,15 @@ export class AgentsReportComponent implements OnInit {
     constructor(
         private userService: UserService,
         private dialog: MatDialog,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        @Inject(PLATFORM_ID) private platformId: Object
     ) { }
 
     ngOnInit(): void {
-        this.loadData();
+        // Avoid firing authenticated requests during SSR since tokens live in localStorage
+        if (isPlatformBrowser(this.platformId)) {
+            this.loadData();
+        }
     }
 
     loadData(): void {
