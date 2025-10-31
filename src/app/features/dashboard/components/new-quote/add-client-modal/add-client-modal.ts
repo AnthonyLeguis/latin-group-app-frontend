@@ -1,16 +1,19 @@
 import { ChangeDetectorRef, Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { UserService } from '../../../../../core/services/user.service';
 import { FormSkeletonComponent } from '../../../../../shared/components/form-skeleton/form-skeleton';
+import { ConfirmDialogComponent } from '../../../../../shared/components/notification-dialog/confirm-dialog.component';
 
 @Component({
     selector: 'app-add-client-modal',
@@ -18,14 +21,16 @@ import { FormSkeletonComponent } from '../../../../../shared/components/form-ske
     imports: [
         CommonModule,
         ReactiveFormsModule,
+        FormsModule,
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
         MatCardModule,
         MatProgressSpinnerModule,
         MatIconModule,
-        MatSnackBarModule,
+        MatDialogModule,
         MatSelectModule,
+        MatCheckboxModule,
         FormSkeletonComponent
     ],
     templateUrl: './add-client-modal.html',
@@ -41,11 +46,13 @@ export class AddClientModalComponent implements OnInit {
     isAdmin = false;
     agents: any[] = [];
     currentUser: any;
+    isSelfAgent = false; // Checkbox para "Yo soy el agente"
 
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
-        private snackBar: MatSnackBar,
+        private userService: UserService,
+        private dialog: MatDialog,
         private cd: ChangeDetectorRef
     ) { }
 
@@ -70,31 +77,54 @@ export class AddClientModalComponent implements OnInit {
     }
 
     initForm(): void {
+        // Si isSelfAgent está marcado, no requerir agent_id
+        const agentValidators = this.isAdmin && !this.isSelfAgent ? [Validators.required] : [];
+
         this.clientForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
             password: ['latin1234*'],
             type: ['client'],
-            agent_id: [this.isAdmin ? '' : this.currentUser?.id, this.isAdmin ? [Validators.required] : []]
+            agent_id: [this.isAdmin ? '' : this.currentUser?.id, agentValidators]
         });
 
         if (!this.isAdmin) {
             this.clientForm.get('agent_id')?.disable();
         }
+
+        // Si isSelfAgent está marcado, deshabilitar y asignar el admin actual
+        if (this.isSelfAgent && this.isAdmin) {
+            this.clientForm.get('agent_id')?.setValue(this.currentUser?.id);
+            this.clientForm.get('agent_id')?.disable();
+        }
     }
 
     loadAgents(): void {
-        console.log('📋 Cargando agentes...');
-        // TODO: Reemplazar con llamada real al servicio
-        setTimeout(() => {
-            this.agents = [
-                { id: 2, name: 'Agent User', email: 'agent@example.com' }
-            ];
-            console.log('✅ Agentes cargados:', this.agents);
-            this.isInitializing = false;
-            console.log('✅ Formulario listo (admin)');
-            this.cd.detectChanges();
-        }, 500);
+        console.log('📋 Cargando agentes reales desde el backend...');
+        this.userService.getUsers({ type: 'agent' }).subscribe({
+            next: (response) => {
+                // La respuesta puede ser paginada, extraer los datos correctamente
+                this.agents = response.data || response;
+                console.log('✅ Agentes cargados:', this.agents);
+                this.isInitializing = false;
+                console.log('✅ Formulario listo (admin)');
+                this.cd.detectChanges();
+            },
+            error: (error) => {
+                console.error('❌ Error cargando agentes:', error);
+                this.dialog.open(ConfirmDialogComponent, {
+                    data: {
+                        title: 'Error',
+                        message: 'Error al cargar la lista de agentes',
+                        type: 'error',
+                        confirmButtonText: 'Cerrar'
+                    },
+                    width: '400px'
+                });
+                this.isInitializing = false;
+                this.cd.detectChanges();
+            }
+        });
     }
 
     onNameInput(): void {
@@ -113,7 +143,28 @@ export class AddClientModalComponent implements OnInit {
         }
     }
 
+    onSelfAgentChange(checked: boolean): void {
+        this.isSelfAgent = checked;
+        const agentControl = this.clientForm.get('agent_id');
+
+        if (checked) {
+            // Si marca "Yo soy el agente", establecer el ID del admin actual y remover validación required
+            agentControl?.setValue(this.currentUser?.id);
+            agentControl?.clearValidators();
+            agentControl?.disable();
+        } else {
+            // Si desmarca, limpiar, habilitar el select y agregar validación required
+            agentControl?.setValue('');
+            agentControl?.setValidators([Validators.required]);
+            agentControl?.enable();
+        }
+
+        agentControl?.updateValueAndValidity();
+        this.cd.detectChanges();
+    }
+
     onCancel(): void {
+        this.isSelfAgent = false;
         this.clientForm.reset();
         this.initForm();
         this.cancelModal.emit();
@@ -123,9 +174,14 @@ export class AddClientModalComponent implements OnInit {
     onSubmit(): void {
         if (this.clientForm.invalid) {
             this.markFormGroupTouched(this.clientForm);
-            this.snackBar.open('Por favor complete todos los campos requeridos', 'Cerrar', {
-                duration: 3000,
-                panelClass: ['error-snackbar']
+            this.dialog.open(ConfirmDialogComponent, {
+                data: {
+                    title: 'Formulario Incompleto',
+                    message: 'Por favor complete todos los campos requeridos',
+                    type: 'warning',
+                    confirmButtonText: 'Entendido'
+                },
+                width: '400px'
             });
             return;
         }
@@ -136,9 +192,16 @@ export class AddClientModalComponent implements OnInit {
         this.authService.register(formData).subscribe({
             next: (response) => {
                 this.loading = false;
-                this.snackBar.open('Cliente creado exitosamente', 'Cerrar', {
-                    duration: 3000,
-                    panelClass: ['success-snackbar']
+                this.dialog.open(ConfirmDialogComponent, {
+                    data: {
+                        title: '¡Éxito!',
+                        message: 'Cliente creado exitosamente',
+                        type: 'success',
+                        confirmButtonText: 'Entendido',
+                        autoClose: true,
+                        autoCloseDuration: 2000
+                    },
+                    width: '400px'
                 });
 
                 const createdUser = (response as any)?.user ?? response;
@@ -150,6 +213,7 @@ export class AddClientModalComponent implements OnInit {
                 // Emitir evento con el nuevo cliente creado
                 this.clientCreated.emit(emittedClient);
 
+                this.isSelfAgent = false;
                 this.clientForm.reset();
                 this.initForm();
                 setTimeout(() => this.cd.detectChanges(), 0);
@@ -157,9 +221,14 @@ export class AddClientModalComponent implements OnInit {
             error: (error) => {
                 this.loading = false;
                 const errorMessage = error.error?.message || error.error?.error || 'Error al crear cliente';
-                this.snackBar.open(errorMessage, 'Cerrar', {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
+                this.dialog.open(ConfirmDialogComponent, {
+                    data: {
+                        title: 'Error',
+                        message: errorMessage,
+                        type: 'error',
+                        confirmButtonText: 'Cerrar'
+                    },
+                    width: '400px'
                 });
                 setTimeout(() => this.cd.detectChanges(), 0);
             }

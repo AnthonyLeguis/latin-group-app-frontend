@@ -24,11 +24,13 @@
     box-sizing: border-box;
 }
 
-html,
-body {
-    height: 100%;
-    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-    overflow-x: hidden;
+html {
+    font-family: 'Inter', sans-serif;
+    background: #f7f7fa;
+    color: #222;
+    scroll-behavior: smooth;
+    font-size: 95%;
+    /* Simula zoom global del 95% */
 }
 
 body {

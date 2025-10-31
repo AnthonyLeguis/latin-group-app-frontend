@@ -41,18 +41,28 @@
                 </mat-form-field>
 
                 <!-- Agente (solo visible para admin) -->
-                <mat-form-field appearance="outline" class="full-width" *ngIf="isAdmin">
-                    <mat-label>Asignar Agente</mat-label>
-                    <mat-select formControlName="agent_id" required>
-                        <mat-option *ngFor="let agent of agents" [value]="agent.id">
-                            {{ agent.name }} ({{ agent.email }})
-                        </mat-option>
-                    </mat-select>
-                    <mat-icon matPrefix>assignment_ind</mat-icon>
-                    <mat-error *ngIf="clientForm.get('agent_id')?.invalid">
-                        Debe seleccionar un agente
-                    </mat-error>
-                </mat-form-field>
+                <div *ngIf="isAdmin" class="agent-section">
+                    <!-- Checkbox "Yo soy el agente" -->
+                    <mat-checkbox [(ngModel)]="isSelfAgent" [ngModelOptions]="{standalone: true}"
+                        (change)="onSelfAgentChange($event.checked)" class="self-agent-checkbox">
+                        <mat-icon class="checkbox-icon">person_pin</mat-icon>
+                        Yo soy el agente de este cliente
+                    </mat-checkbox>
+
+                    <!-- Select de agentes (se deshabilita si el checkbox está marcado) -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Asignar Agente</mat-label>
+                        <mat-select formControlName="agent_id" required>
+                            <mat-option *ngFor="let agent of agents" [value]="agent.id">
+                                {{ agent.name }} ({{ agent.email }})
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>assignment_ind</mat-icon>
+                        <mat-error *ngIf="clientForm.get('agent_id')?.invalid">
+                            Debe seleccionar un agente
+                        </mat-error>
+                    </mat-form-field>
+                </div>
 
                 <!-- Info de contraseña por defecto -->
                 <div class="password-info">
