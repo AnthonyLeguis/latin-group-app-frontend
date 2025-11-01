@@ -1,4 +1,4 @@
-import { Component, inject, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, Inject, OnInit, ChangeDetectorRef, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,7 +25,7 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
     templateUrl: './forms-list-modal.component.html',
     styleUrls: ['./forms-list-modal.component.scss']
 })
-export class FormsListModalComponent implements OnInit {
+export class FormsListModalComponent implements OnInit, OnDestroy {
     private formService = inject(ApplicationFormService);
     private dialog = inject(MatDialog);
 
@@ -35,6 +35,7 @@ export class FormsListModalComponent implements OnInit {
     loading = true;
     title = '';
     filterStatus = '';
+    readonly formsCountChange = new EventEmitter<number>();
 
     constructor(
         public dialogRef: MatDialogRef<FormsListModalComponent>,
@@ -57,11 +58,13 @@ export class FormsListModalComponent implements OnInit {
                 this.forms = response.data || response;
                 //console.log('Forms loaded:', this.forms.length);
                 this.loading = false;
+                this.formsCountChange.emit(this.forms.length);
                 this.cdr.detectChanges();
             },
             error: (error) => {
                 console.error('Error loading forms:', error);
                 this.loading = false;
+                this.formsCountChange.emit(0);
                 this.cdr.detectChanges();
             }
         });
@@ -110,5 +113,9 @@ export class FormsListModalComponent implements OnInit {
 
     onClose(): void {
         this.dialogRef.close();
+    }
+
+    ngOnDestroy(): void {
+        this.formsCountChange.complete();
     }
 }

@@ -45,13 +45,14 @@
                     <div class="stat-item warn clickable group relative" (click)="openPendingForms()">
                         <mat-icon>schedule</mat-icon>
                         <div class="stat-info">
-                            <span class="stat-value">{{ stats.pending_forms }}</span>
-                            <span class="stat-label">Planillas Pendientes</span>
+                            <span class="stat-label">
+                                Planillas Pendientes ({{ pendingFormsDisplayCount }})
+                            </span>
                         </div>
                         <!-- Indicador con Pulse -->
-                        <div class="notification-badge" *ngIf="stats.pending_forms > 0">
+                        <div class="notification-badge" *ngIf="pendingFormsDisplayCount > 0">
                             <span class="badge-pulse"></span>
-                            <span class="badge-content">{{ stats.pending_forms }}</span>
+                            <span class="badge-content">{{ pendingFormsDisplayCount }}</span>
                         </div>
                         <!-- Tooltip Tailwind -->
                         <div
@@ -65,8 +66,9 @@
                     <div class="stat-item success clickable group relative" (click)="openActiveForms()">
                         <mat-icon>check_circle</mat-icon>
                         <div class="stat-info">
-                            <span class="stat-value">{{ stats.active_forms }}</span>
-                            <span class="stat-label">Planillas Activas</span>
+                            <span class="stat-label">
+                                Planillas Activas ({{ activeFormsDisplayCount }})
+                            </span>
                         </div>
                         <!-- Tooltip Tailwind -->
                         <div

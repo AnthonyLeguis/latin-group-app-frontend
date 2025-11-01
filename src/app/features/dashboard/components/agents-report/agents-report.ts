@@ -15,6 +15,8 @@ import { UserService, Agent, UserStats } from '../../../../core/services/user.se
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 import { FormsListModalComponent } from '../forms-list-modal/forms-list-modal.component';
+import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'app-agents-report',
@@ -46,6 +48,8 @@ export class AgentsReportComponent implements OnInit {
     totalPendingChanges = 0;
     searchTerm = '';
     selectedStatus: string | null = null; // Estado seleccionado para filtrar
+    pendingFormsCount: number | null = null;
+    activeFormsCount: number | null = null;
 
     constructor(
         private userService: UserService,
@@ -68,6 +72,9 @@ export class AgentsReportComponent implements OnInit {
         this.userService.getStats().subscribe({
             next: (stats) => {
                 this.stats = stats;
+                // Resetear los contadores dinámicos para reflejar los datos oficiales
+                this.pendingFormsCount = null;
+                this.activeFormsCount = null;
             },
             error: (error) => {
                 console.error('Error al cargar estadísticas:', error);
@@ -265,7 +272,22 @@ export class AgentsReportComponent implements OnInit {
             panelClass: 'forms-list-dialog'
         });
 
+        let formsCountSubscription: Subscription | null = null;
+
+        dialogRef.afterOpened().pipe(take(1)).subscribe(() => {
+            const instance = dialogRef.componentInstance;
+            if (instance?.formsCountChange) {
+                formsCountSubscription = instance.formsCountChange.subscribe(count => {
+                    this.pendingFormsCount = count;
+                });
+            }
+        });
+
         dialogRef.afterClosed().subscribe(result => {
+            formsCountSubscription?.unsubscribe();
+            formsCountSubscription = null;
+            this.pendingFormsCount = null; // Volver a usar el valor oficial
+
             if (result?.updated) {
                 this.loadData();
             }
@@ -284,7 +306,22 @@ export class AgentsReportComponent implements OnInit {
             panelClass: 'forms-list-dialog'
         });
 
+        let formsCountSubscription: Subscription | null = null;
+
+        dialogRef.afterOpened().pipe(take(1)).subscribe(() => {
+            const instance = dialogRef.componentInstance;
+            if (instance?.formsCountChange) {
+                formsCountSubscription = instance.formsCountChange.subscribe(count => {
+                    this.activeFormsCount = count;
+                });
+            }
+        });
+
         dialogRef.afterClosed().subscribe(result => {
+            formsCountSubscription?.unsubscribe();
+            formsCountSubscription = null;
+            this.activeFormsCount = null;
+
             if (result?.updated) {
                 this.loadData();
             }
@@ -319,5 +356,13 @@ export class AgentsReportComponent implements OnInit {
             default:
                 return 'help';
         }
+    }
+
+    get pendingFormsDisplayCount(): number {
+        return this.pendingFormsCount ?? this.stats?.pending_forms ?? 0;
+    }
+
+    get activeFormsDisplayCount(): number {
+        return this.activeFormsCount ?? this.stats?.active_forms ?? 0;
     }
 }

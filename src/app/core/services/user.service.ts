@@ -11,6 +11,7 @@ export interface UserStats {
     total_clients: number;
     pending_forms: number;
     active_forms: number;
+    inactive_forms: number;
     rejected_forms: number;
 }
 
