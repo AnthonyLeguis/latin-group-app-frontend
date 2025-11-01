@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -10,13 +10,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { UserService } from '../../../../core/services/user.service';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { ApplicationDocument } from '../../../../core/models/application-document.interface';
 
 interface Client {
     id: number;
@@ -105,22 +106,6 @@ interface ApplicationForm {
     person6_is_applicant?: boolean;
 }
 
-interface ApplicationDocument {
-    id: number;
-    file_name: string;
-    original_name?: string;
-    file_path: string;
-    file_size: number;
-    file_type: string;
-    document_type?: string;
-    uploaded_at: string;
-    file_url?: string;
-    is_image?: boolean;
-    is_pdf?: boolean;
-    is_audio?: boolean;
-    file_size_formatted?: string;
-}
-
 @Component({
     selector: 'app-edit-client-modal',
     standalone: true,
@@ -136,7 +121,6 @@ interface ApplicationDocument {
         MatDatepickerModule,
         MatNativeDateModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         MatTabsModule,
         MatTooltipModule,
         MatCheckboxModule
@@ -144,7 +128,7 @@ interface ApplicationDocument {
     templateUrl: './edit-client-modal.html',
     styleUrls: ['./edit-client-modal.scss']
 })
-export class EditClientModalComponent implements OnInit {
+export class EditClientModalComponent implements OnInit, AfterViewInit {
     clientForm!: FormGroup;
     applicationForm!: FormGroup;
     isLoading = false;
@@ -177,7 +161,7 @@ export class EditClientModalComponent implements OnInit {
         private fb: FormBuilder,
         private userService: UserService,
         private applicationFormService: ApplicationFormService,
-        private snackBar: MatSnackBar,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private authService: AuthService
     ) {
@@ -207,8 +191,20 @@ export class EditClientModalComponent implements OnInit {
                 this.initializeApplicationForm();
             }
         }
+    }
 
-        this.loadDocuments();
+    ngAfterViewInit(): void {
+        if (!this.hasApplicationForm) {
+            setTimeout(() => {
+                this.isLoadingDocuments = false;
+            });
+            return;
+        }
+
+        // Defer la carga para evitar NG0100 en el primer ciclo
+        setTimeout(() => {
+            this.loadDocuments();
+        });
     }
 
     initializeApplicationForm(): void {
@@ -302,10 +298,7 @@ export class EditClientModalComponent implements OnInit {
 
         if (!hasApplicationForm) {
             //console.log('⚠️ Cliente no tiene application form');
-            setTimeout(() => {
-                this.isLoadingDocuments = false;
-                this.cdr.detectChanges();
-            });
+            this.isLoadingDocuments = false;
             return;
         }
 
@@ -315,27 +308,24 @@ export class EditClientModalComponent implements OnInit {
         // Cargar la application form completa con todos sus datos
         this.applicationFormService.getApplicationForm(this.data.client.application_form!.id).subscribe({
             next: (response: any) => {
-                //console.log('✅ Application form completa recibida:', response);
+                setTimeout(() => {
+                    if (response) {
+                        this.data.client.application_form = response;
+                        this.documents = response.documents || [];
 
-                // Actualizar los datos de la application form con los datos completos
-                if (response) {
-                    this.data.client.application_form = response;
-                    this.documents = response.documents || [];
-                    //console.log('📄 Documentos encontrados:', this.documents.length);
-
-                    // Reinicializar el formulario con los datos completos
-                    if (this.hasApplicationForm) {
-                        this.initializeApplicationForm();
+                        if (this.hasApplicationForm) {
+                            this.initializeApplicationForm();
+                        }
                     }
-                }
 
-                this.isLoadingDocuments = false;
-                this.cdr.detectChanges();
+                    this.isLoadingDocuments = false;
+                });
             },
             error: (error: any) => {
                 console.error('❌ Error loading application form:', error);
-                this.isLoadingDocuments = false;
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.isLoadingDocuments = false;
+                });
             }
         });
     }
@@ -354,14 +344,13 @@ export class EditClientModalComponent implements OnInit {
             return;
         }
 
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (this.selectedFile.size > maxSize) {
-            this.showMessage('El archivo es demasiado grande. Máximo 5MB', 'error');
-            this.selectedFile = null;
-            return;
-        }
+        // console.log('📤 Subiendo archivo:', {
+        //     name: this.selectedFile.name,
+        //     size: this.selectedFile.size,
+        //     type: this.selectedFile.type
+        // });
 
-        // Validar tipo de archivo
+        // Validar tipo de archivo primero
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'audio/mpeg', 'audio/mp3', 'audio/x-ms-wma'];
         const fileType = this.selectedFile.type.toLowerCase();
         const fileExtension = this.selectedFile.name.split('.').pop()?.toLowerCase();
@@ -375,6 +364,26 @@ export class EditClientModalComponent implements OnInit {
             return;
         }
 
+        // Determinar si es audio
+        const isAudio = fileType.startsWith('audio/') || ['mp3', 'wma'].includes(fileExtension || '');
+
+        // Validar tamaño según tipo de archivo
+        const maxSize = isAudio ? 15 * 1024 * 1024 : 5 * 1024 * 1024; // 15MB para audio, 5MB para otros
+        const maxSizeLabel = isAudio ? '15MB' : '5MB';
+
+        // console.log('✅ Validación:', {
+        //     isAudio,
+        //     maxSize,
+        //     maxSizeLabel,
+        //     fileSizeOK: this.selectedFile.size <= maxSize
+        // });
+
+        if (this.selectedFile.size > maxSize) {
+            this.showMessage(`El archivo es demasiado grande. Máximo ${maxSizeLabel}`, 'error');
+            this.selectedFile = null;
+            return;
+        }
+
         this.isUploading = true;
 
         this.applicationFormService.uploadDocument(
@@ -384,16 +393,27 @@ export class EditClientModalComponent implements OnInit {
             next: (response: any) => {
                 //console.log('✅ Document uploaded:', response);
                 this.showMessage('Documento subido exitosamente', 'success');
-                this.selectedFile = null;
-                this.isUploading = false;
-                this.loadDocuments();
+                const reloadDocs = () => {
+                    this.loadDocuments();
+                };
+                this.deferUploadReset(true, reloadDocs);
             },
             error: (error: any) => {
                 console.error('❌ Error uploading document:', error);
+                console.error('❌ Error details:', error.error);
                 const errorMsg = error.error?.error || error.error?.message || 'Error al subir el documento';
                 this.showMessage(errorMsg, 'error');
-                this.isUploading = false;
-                this.selectedFile = null;
+                this.deferUploadReset(false);
+            }
+        });
+    }
+
+    private deferUploadReset(reloadDocuments: boolean, afterReset?: () => void): void {
+        setTimeout(() => {
+            this.isUploading = false;
+            this.selectedFile = null;
+            if (reloadDocuments && afterReset) {
+                afterReset();
             }
         });
     }
@@ -497,14 +517,21 @@ export class EditClientModalComponent implements OnInit {
         }
 
         this.isSaving = true;
-        this.cdr.detectChanges(); // Forzar detección de cambios
+        this.cdr.detectChanges();
 
         let savedCount = 0;
         let totalToSave = 0;
         let requiresApproval = false;
 
-        if (hasClientChanges) totalToSave++;
-        if (hasApplicationChanges) totalToSave++;
+        // Si es agent, TODOS los cambios (client + application) van como pending_changes
+        // Si es admin, los cambios de client van directo, los de application dependen del status
+        if (this.isAdmin) {
+            if (hasClientChanges) totalToSave++;
+            if (hasApplicationChanges) totalToSave++;
+        } else {
+            // Agent: combinar ambos cambios en una sola actualización de application form
+            totalToSave = 1;
+        }
 
         const checkCompletion = () => {
             savedCount++;
@@ -522,50 +549,144 @@ export class EditClientModalComponent implements OnInit {
             }
         };
 
-        // Guardar cambios del cliente si hay
-        if (hasClientChanges) {
-            const clientData = this.clientForm.value;
-            this.userService.updateUser(this.data?.client?.id, clientData).subscribe({
-                next: (response) => {
-                    //console.log('✅ Cliente actualizado:', response);
-                    checkCompletion();
-                },
-                error: (error) => {
-                    console.error('❌ Error actualizando cliente:', error);
-                    setTimeout(() => {
-                        this.isSaving = false;
-                        this.showMessage('Error al actualizar el cliente', 'error');
-                        this.cdr.detectChanges();
-                    });
-                }
-            });
-        }
-
-        // Guardar cambios de la planilla si hay
-        if (hasApplicationChanges) {
-            const formData = this.applicationForm.value;
-            const applicationFormId = this.data.client.application_form!.id;
-
-            //console.log('📤 Enviando actualización de application form:', formData);
-
-            this.applicationFormService.updateForm(applicationFormId, formData).subscribe({
-                next: (response: any) => {
-                    //console.log('✅ Application form actualizada:', response);
-                    if (response.requires_approval) {
-                        requiresApproval = true;
+        // LÓGICA PARA ADMIN
+        if (this.isAdmin) {
+            // Admin: guardar cambios del cliente directamente
+            if (hasClientChanges) {
+                const clientData = this.clientForm.value;
+                this.userService.updateUser(this.data?.client?.id, clientData).subscribe({
+                    next: (response) => {
+                        checkCompletion();
+                    },
+                    error: (error) => {
+                        console.error('❌ Error actualizando cliente:', error);
+                        setTimeout(() => {
+                            this.isSaving = false;
+                            this.showMessage('Error al actualizar el cliente', 'error');
+                            this.cdr.detectChanges();
+                        });
                     }
-                    checkCompletion();
-                },
-                error: (error) => {
-                    console.error('❌ Error actualizando application form:', error);
-                    const errorMsg = error.error?.error || error.error?.message || 'Error al actualizar la planilla';
-                    setTimeout(() => {
-                        this.isSaving = false;
-                        this.showMessage(errorMsg, 'error');
-                        this.cdr.detectChanges();
+                });
+            }
+
+            // Admin: guardar cambios de la planilla (puede ser directo o pending según status)
+            if (hasApplicationChanges) {
+                const formData = this.applicationForm.value;
+                const applicationFormId = this.data.client.application_form!.id;
+
+                this.applicationFormService.updateForm(applicationFormId, formData).subscribe({
+                    next: (response: any) => {
+                        if (response.requires_approval) {
+                            requiresApproval = true;
+                        }
+                        checkCompletion();
+                    },
+                    error: (error) => {
+                        console.error('❌ Error actualizando application form:', error);
+                        const errorMsg = error.error?.error || error.error?.message || 'Error al actualizar la planilla';
+                        setTimeout(() => {
+                            this.isSaving = false;
+                            this.showMessage(errorMsg, 'error');
+                            this.cdr.detectChanges();
+                        });
+                    }
+                });
+            }
+        }
+        // LÓGICA PARA AGENT
+        else {
+            // Agent necesita que el cliente tenga una application form
+            if (!this.hasApplicationForm) {
+                this.isSaving = false;
+                this.showMessage('Este cliente no tiene una planilla asociada. No se pueden guardar cambios.', 'error');
+                return;
+            }
+
+            const applicationFormStatus = this.data.client.application_form?.status?.toLowerCase();
+            const isActive = applicationFormStatus === 'activo';
+
+            // Si la planilla está ACTIVA, todo va como pending_changes con prefijos client_
+            if (isActive) {
+                // Agent: combinar TODOS los cambios (client + application) en pending_changes
+                const combinedData: any = {};
+
+                // Incluir cambios del cliente si hay (con prefijo client_)
+                if (hasClientChanges) {
+                    const clientData = this.clientForm.value;
+                    if (clientData.name !== undefined) combinedData.client_name = clientData.name;
+                    if (clientData.email !== undefined) combinedData.client_email = clientData.email;
+                    if (clientData.phone !== undefined) combinedData.client_phone = clientData.phone;
+                    if (clientData.address !== undefined) combinedData.client_address = clientData.address;
+                }
+
+                // Incluir cambios de la planilla si hay
+                if (hasApplicationChanges) {
+                    Object.assign(combinedData, this.applicationForm.value);
+                }
+
+                const applicationFormId = this.data.client.application_form!.id;
+
+                this.applicationFormService.updateForm(applicationFormId, combinedData).subscribe({
+                    next: (response: any) => {
+                        requiresApproval = true; // Planilla activa requiere aprobación
+                        checkCompletion();
+                    },
+                    error: (error) => {
+                        console.error('❌ Error guardando cambios:', error);
+                        const errorMsg = error.error?.error || error.error?.message || 'Error al guardar los cambios';
+                        setTimeout(() => {
+                            this.isSaving = false;
+                            this.showMessage(errorMsg, 'error');
+                            this.cdr.detectChanges();
+                        });
+                    }
+                });
+            }
+            // Si la planilla NO está activa, el agent puede modificar directamente (como admin)
+            else {
+                totalToSave = 0;
+                if (hasClientChanges) totalToSave++;
+                if (hasApplicationChanges) totalToSave++;
+
+                // Guardar cambios del cliente directamente
+                if (hasClientChanges) {
+                    const clientData = this.clientForm.value;
+                    this.userService.updateUser(this.data?.client?.id, clientData).subscribe({
+                        next: (response) => {
+                            checkCompletion();
+                        },
+                        error: (error) => {
+                            console.error('❌ Error actualizando cliente:', error);
+                            setTimeout(() => {
+                                this.isSaving = false;
+                                this.showMessage('Error al actualizar el cliente', 'error');
+                                this.cdr.detectChanges();
+                            });
+                        }
                     });
                 }
-            });
+
+                // Guardar cambios de la planilla directamente
+                if (hasApplicationChanges) {
+                    const formData = this.applicationForm.value;
+                    const applicationFormId = this.data.client.application_form!.id;
+
+                    this.applicationFormService.updateForm(applicationFormId, formData).subscribe({
+                        next: (response: any) => {
+                            checkCompletion();
+                        },
+                        error: (error) => {
+                            console.error('❌ Error actualizando application form:', error);
+                            const errorMsg = error.error?.error || error.error?.message || 'Error al actualizar la planilla';
+                            setTimeout(() => {
+                                this.isSaving = false;
+                                this.showMessage(errorMsg, 'error');
+                                this.cdr.detectChanges();
+                            });
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -607,11 +728,10 @@ export class EditClientModalComponent implements OnInit {
     }
 
     private showMessage(message: string, type: 'success' | 'error'): void {
-        this.snackBar.open(message, 'Cerrar', {
-            duration: 4000,
-            panelClass: type === 'success' ? 'snackbar-success' : 'snackbar-error',
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-        });
+        if (type === 'success') {
+            this.notificationService.success(message);
+        } else {
+            this.notificationService.error(message);
+        }
     }
 }

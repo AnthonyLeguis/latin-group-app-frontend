@@ -113,10 +113,11 @@ interface Client {
 export class NewQuoteComponent implements OnInit {
     // Validador personalizado para teléfono formateado
     phoneValidator(control: any): { [key: string]: boolean } | null {
-        if (!control.value || control.value.trim() === '') {
-            return null; // Si está vacío, es válido (campo opcional)
+        // Si el valor es null, undefined, o string vacío, es válido (campo opcional)
+        if (!control.value || String(control.value).trim() === '') {
+            return null;
         }
-        const digits = control.value.replace(/\D/g, '');
+        const digits = String(control.value).replace(/\D/g, '');
         if (digits.length >= 10) {
             return null; // Válido si tiene 10 o más dígitos
         }
@@ -184,6 +185,12 @@ export class NewQuoteComponent implements OnInit {
     selectedPersonIndex = 1; // Persona actualmente visible (1-6)
     maxPersons = 6; // Máximo de personas adicionales
 
+    // Control de completado de pasos opcionales
+    employmentStepCompleted = false;
+    policyStepCompleted = false;
+    additionalPersonsStepCompleted = false;
+    paymentStepCompleted = false;
+
     // Formularios por paso
     clientSelectionForm!: FormGroup;
     applicantForm!: FormGroup;
@@ -247,6 +254,8 @@ export class NewQuoteComponent implements OnInit {
     ngOnInit(): void {
         this.initializeForms();
         this.loadAvailableClients();
+        this.loadSavedFormData(); // Cargar datos guardados si existen
+        this.setupAutoSave(); // Configurar autoguardado
     }
 
     initializeForms(): void {
@@ -291,6 +300,7 @@ export class NewQuoteComponent implements OnInit {
             final_cost: [null, Validators.min(0)],
             poliza_number: ['', Validators.maxLength(100)],
             poliza_category: ['', Validators.maxLength(100)],
+            poliza_key: ['', Validators.maxLength(100)], // Nuevo campo Clave
             poliza_amount: [null, Validators.min(0)],
             poliza_payment_day: [null, [Validators.pattern('^(?:[1-9]|[12][0-9]|3[01])?$')]],
             poliza_beneficiary: ['', Validators.maxLength(255)]
@@ -392,6 +402,120 @@ export class NewQuoteComponent implements OnInit {
         this.clientSelectionForm.get('clientSearch')?.valueChanges.subscribe(value => {
             this.filterClients(value);
         });
+    }
+
+    // Clave para localStorage
+    private readonly STORAGE_KEY = 'newQuoteFormData';
+
+    // Cargar datos guardados del localStorage
+    loadSavedFormData(): void {
+        try {
+            const savedData = localStorage.getItem(this.STORAGE_KEY);
+            if (!savedData) {
+                return;
+            }
+
+            const formData = JSON.parse(savedData);
+            console.log('📦 Restaurando datos guardados del formulario...');
+
+            // Restaurar selección de cliente
+            if (formData.clientSelection) {
+                this.clientSelectionForm.patchValue(formData.clientSelection, { emitEvent: false });
+
+                // Si hay un cliente seleccionado, buscarlo en la lista
+                if (formData.selectedClient) {
+                    this.selectedClient = formData.selectedClient;
+                }
+            }
+
+            // Restaurar formularios
+            if (formData.applicant) {
+                // Convertir la fecha de string a Date si existe
+                if (formData.applicant.dob) {
+                    formData.applicant.dob = new Date(formData.applicant.dob);
+                }
+                this.applicantForm.patchValue(formData.applicant, { emitEvent: false });
+            }
+
+            if (formData.employment) {
+                this.employmentForm.patchValue(formData.employment, { emitEvent: false });
+            }
+
+            if (formData.policy) {
+                this.policyForm.patchValue(formData.policy, { emitEvent: false });
+            }
+
+            if (formData.additionalPersons) {
+                // Convertir fechas de personas adicionales
+                for (let i = 1; i <= 6; i++) {
+                    const dobField = `person${i}_dob`;
+                    if (formData.additionalPersons[dobField]) {
+                        formData.additionalPersons[dobField] = new Date(formData.additionalPersons[dobField]);
+                    }
+                }
+                this.additionalPersonsForm.patchValue(formData.additionalPersons, { emitEvent: false });
+            }
+
+            if (formData.payment) {
+                this.paymentForm.patchValue(formData.payment, { emitEvent: false });
+            }
+
+            console.log('✅ Datos restaurados exitosamente');
+        } catch (error) {
+            console.error('❌ Error al cargar datos guardados:', error);
+            // Si hay error, limpiar el localStorage corrupto
+            localStorage.removeItem(this.STORAGE_KEY);
+        }
+    }
+
+    // Configurar autoguardado en todos los formularios
+    setupAutoSave(): void {
+        // Autoguardar cada vez que cambie algún formulario
+        const forms = [
+            this.clientSelectionForm,
+            this.applicantForm,
+            this.employmentForm,
+            this.policyForm,
+            this.additionalPersonsForm,
+            this.paymentForm
+        ];
+
+        forms.forEach(form => {
+            form.valueChanges.subscribe(() => {
+                this.saveFormData();
+            });
+        });
+    }
+
+    // Guardar datos del formulario en localStorage
+    saveFormData(): void {
+        try {
+            const formData = {
+                clientSelection: this.clientSelectionForm.value,
+                selectedClient: this.selectedClient,
+                applicant: this.applicantForm.value,
+                employment: this.employmentForm.value,
+                policy: this.policyForm.value,
+                additionalPersons: this.additionalPersonsForm.value,
+                payment: this.paymentForm.value,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(formData));
+        } catch (error) {
+            console.error('❌ Error al guardar datos:', error);
+        }
+    }
+
+    // Limpiar datos guardados
+    clearSavedFormData(): void {
+        localStorage.removeItem(this.STORAGE_KEY);
+        console.log('🗑️ Datos del formulario eliminados del almacenamiento');
+    }
+
+    // Verificar si hay datos guardados
+    hasSavedData(): boolean {
+        return localStorage.getItem(this.STORAGE_KEY) !== null;
     }
 
     loadAvailableClients(): void {
@@ -604,6 +728,9 @@ export class NewQuoteComponent implements OnInit {
 
                 this.isSubmitting = false;
 
+                // Limpiar datos guardados del localStorage
+                this.clearSavedFormData();
+
                 // Redirigir después de cerrar el dialog
                 dialogRef.afterClosed().subscribe(() => {
                     this.router.navigate(['/dashboard/agents-report']);
@@ -721,8 +848,47 @@ export class NewQuoteComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
+                // Limpiar datos guardados al cancelar
+                this.clearSavedFormData();
                 this.router.navigate(['/dashboard/agents-report']);
             }
         });
+    }
+
+    // Método temporal de debug para el formulario de empleo
+    debugEmploymentForm(): void {
+        console.log('📋 Estado del formulario de empleo:');
+        console.log('Valid:', this.employmentForm.valid);
+        console.log('Invalid:', this.employmentForm.invalid);
+        console.log('Errors:', this.employmentForm.errors);
+        console.log('Values:', this.employmentForm.value);
+
+        // Revisar cada control individual
+        Object.keys(this.employmentForm.controls).forEach(key => {
+            const control = this.employmentForm.get(key);
+            if (control && control.invalid) {
+                console.log(`❌ Campo inválido: ${key}`, {
+                    value: control.value,
+                    errors: control.errors
+                });
+            }
+        });
+    }
+
+    // Marcar steps opcionales como completados
+    markEmploymentStepCompleted(): void {
+        this.employmentStepCompleted = true;
+    }
+
+    markPolicyStepCompleted(): void {
+        this.policyStepCompleted = true;
+    }
+
+    markAdditionalPersonsStepCompleted(): void {
+        this.additionalPersonsStepCompleted = true;
+    }
+
+    markPaymentStepCompleted(): void {
+        this.paymentStepCompleted = true;
     }
 }

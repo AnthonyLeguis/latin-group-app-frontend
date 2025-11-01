@@ -1,3 +1,5 @@
+import { ApplicationDocument } from './application-document.interface';
+
 export interface ApplicationForm {
     id: number;
     client_id: number;
@@ -114,6 +116,7 @@ export interface ApplicationForm {
 
     // PDF Sheet (generated document)
     pdf_path?: string; // Ruta relativa del PDF confirmado
+    documents?: ApplicationDocument[];
 
     // Timestamps
     created_at: string;

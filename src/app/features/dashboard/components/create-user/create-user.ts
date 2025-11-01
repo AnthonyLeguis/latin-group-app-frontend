@@ -8,11 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
     selector: 'app-create-user',
@@ -26,7 +26,6 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
         MatCardModule,
         MatProgressSpinnerModule,
         MatIconModule,
-        MatSnackBarModule,
         MatSelectModule,
         MatRadioModule,
         FormSkeletonComponent
@@ -66,7 +65,7 @@ export class CreateUserComponent implements OnInit {
         private fb: FormBuilder,
         private authService: AuthService,
         private router: Router,
-        private snackBar: MatSnackBar
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit(): void {
@@ -74,10 +73,7 @@ export class CreateUserComponent implements OnInit {
 
         // Verificar que sea admin
         if (this.currentUser?.type !== 'admin') {
-            this.snackBar.open('No tiene permisos para acceder a esta sección', 'Cerrar', {
-                duration: 3000,
-                panelClass: ['error-snackbar']
-            });
+            this.notificationService.error('No tiene permisos para acceder a esta sección');
             this.router.navigate(['/dashboard']);
             return;
         }
@@ -102,10 +98,7 @@ export class CreateUserComponent implements OnInit {
     onSubmit(): void {
         if (this.userForm.invalid) {
             this.markFormGroupTouched(this.userForm);
-            this.snackBar.open('Por favor complete todos los campos requeridos', 'Cerrar', {
-                duration: 3000,
-                panelClass: ['error-snackbar']
-            });
+            this.notificationService.error('Por favor complete todos los campos requeridos');
             return;
         }
 
@@ -116,20 +109,14 @@ export class CreateUserComponent implements OnInit {
             next: (response) => {
                 this.loading = false;
                 const userTypeLabel = this.userTypes.find(t => t.value === formData.type)?.label;
-                this.snackBar.open(`${userTypeLabel} creado exitosamente`, 'Cerrar', {
-                    duration: 3000,
-                    panelClass: ['success-snackbar']
-                });
+                this.notificationService.success(`${userTypeLabel} creado exitosamente`);
                 this.userForm.reset();
                 this.initForm(); // Reiniciar form con valores por defecto
             },
             error: (error) => {
                 this.loading = false;
                 const errorMessage = error.error?.message || error.error?.error || 'Error al crear usuario';
-                this.snackBar.open(errorMessage, 'Cerrar', {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
-                });
+                this.notificationService.error(errorMessage);
             }
         });
     }

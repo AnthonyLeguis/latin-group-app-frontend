@@ -94,13 +94,17 @@
                             <h4>Rechazar Cambios Propuestos</h4>
                         </div>
                         <form [formGroup]="rejectionForm">
-                            <mat-form-field appearance="outline" class="full-width">
-                                <mat-label>Motivo del rechazo</mat-label>
-                                <textarea matInput formControlName="rejection_reason" rows="4"
-                                    placeholder="Explica por qué rechazas estos cambios..." maxlength="500"></textarea>
-                                <mat-hint align="end">{{ rejectionForm.get('rejection_reason')?.value?.length || 0
-                                    }}/500</mat-hint>
-                            </mat-form-field>
+                            <div class="custom-label-group full-width">
+                                <label class="custom-label-required">Motivo del rechazo:</label>
+                                <mat-form-field appearance="outline" class="full-width">
+                                    <textarea matInput formControlName="rejection_reason" rows="4"
+                                        placeholder="Explica por qué rechazas estos cambios..."
+                                        maxlength="500"></textarea>
+                                    <mat-icon matPrefix>comment</mat-icon>
+                                    <mat-hint align="end">{{ rejectionForm.get('rejection_reason')?.value?.length || 0
+                                        }}/500</mat-hint>
+                                </mat-form-field>
+                            </div>
                             <div class="rejection-actions">
                                 <button mat-stroked-button (click)="onCancelRejection()" [disabled]="submitting">
                                     <mat-icon>close</mat-icon>
@@ -431,6 +435,70 @@
                     </div>
                 </div>
 
+                <!-- Section 4.1: Documentos Asociados -->
+                <div class="form-section documents-section">
+                    <div class="section-header">
+                        <mat-icon>folder</mat-icon>
+                        <h3>Documentos Asociados</h3>
+                        <span class="documents-badge" *ngIf="documents.length > 0">{{ documents.length }} {{
+                            documents.length === 1 ? 'archivo' : 'archivos' }}</span>
+                    </div>
+                    <div class="section-content documents-content">
+                        <div *ngIf="!hasDocuments()" class="no-documents-card">
+                            <mat-icon>topic</mat-icon>
+                            <div class="no-documents-text">
+                                <h4>No hay documentos registrados</h4>
+                                <p>Los documentos asociados a esta planilla aparecerán aquí.</p>
+                            </div>
+                        </div>
+
+                        <div *ngIf="hasDocuments()" class="documents-grid">
+                            <div *ngFor="let doc of documents" class="document-card">
+                                <div class="document-icon" [class.has-image]="doc.is_image && doc.file_url">
+                                    <img *ngIf="doc.is_image && doc.file_url" [src]="doc.file_url"
+                                        [alt]="doc.original_name || doc.file_name" loading="lazy"
+                                        class="document-thumb" />
+                                    <mat-icon *ngIf="!doc.is_image || !doc.file_url" [class.pdf]="doc.is_pdf"
+                                        [class.image]="doc.is_image" [class.audio]="doc.is_audio">{{
+                                        getDocumentIcon(doc) }}</mat-icon>
+                                </div>
+                                <div class="document-details flex flex-col justify-center">
+
+                                    <div class="document-info">
+                                        <div class="document-title" [title]="doc.original_name || doc.file_name">{{
+                                            doc.original_name || doc.file_name }}</div>
+                                        <div class="document-meta">
+                                            <span>{{ getDocumentTypeLabel(doc) }}</span>
+                                            <span>•</span>
+                                            <span>{{ getDocumentSize(doc) }}</span>
+                                        </div>
+                                        <div class="document-date">
+                                            <mat-icon>schedule</mat-icon>
+                                            <span>{{ formatDocumentDate(doc.uploaded_at) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="document-actions flex items-center justify-center">
+                                        <button mat-icon-button (click)="viewDocument(doc)" [disabled]="doc.is_audio"
+                                            title="Ver documento">
+                                            <mat-icon>visibility</mat-icon>
+                                        </button>
+                                        <button mat-icon-button (click)="downloadDocument(doc)" title="Descargar">
+                                            <mat-icon>download</mat-icon>
+                                        </button>
+                                        <button *ngIf="isAdmin" mat-icon-button color="warn"
+                                            (click)="deleteDocument(doc)" title="Eliminar"
+                                            [disabled]="deletingDocumentId === doc.id">
+                                            <mat-icon *ngIf="deletingDocumentId !== doc.id">delete</mat-icon>
+                                            <mat-icon *ngIf="deletingDocumentId === doc.id"
+                                                class="deleting-icon">hourglass_top</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section 5: Información del Agente -->
                 <div class="form-section">
                     <div class="section-header">
@@ -517,6 +585,68 @@
                                 <mat-icon>schedule</mat-icon>
                                 {{ formatDate(form.reviewed_at) }}
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Historial Completo de Cambios (Admin y Agent Creador) -->
+                <div class="form-section" *ngIf="canViewHistory() && history.length > 0">
+                    <div class="section-header">
+                        <mat-icon>view_timeline</mat-icon>
+                        <h3>Historial Completo de Cambios</h3>
+                        <span class="history-badge">{{ history.length }} {{ history.length === 1 ? 'evento' : 'eventos'
+                            }}</span>
+                    </div>
+                    <div class="section-content">
+                        <!-- Loading State -->
+                        <div *ngIf="loadingHistory" class="history-loading">
+                            <mat-spinner diameter="24"></mat-spinner>
+                            <p>Cargando historial...</p>
+                        </div>
+
+                        <!-- Timeline de Historial -->
+                        <div *ngIf="!loadingHistory" class="history-timeline">
+                            <div *ngFor="let event of history; let i = index" class="history-event"
+                                [ngClass]="getHistoryActionClass(event.action)">
+                                <div class="event-icon">
+                                    <mat-icon>{{ getHistoryIcon(event.action) }}</mat-icon>
+                                </div>
+                                <div class="event-content">
+                                    <div class="event-header">
+                                        <h4 class="event-title">{{ getHistoryActionLabel(event.action) }}</h4>
+                                        <span class="event-date">{{ formatDate(event.created_at) }}</span>
+                                    </div>
+                                    <div class="event-user">
+                                        <mat-icon>person</mat-icon>
+                                        <span>{{ event.user?.name || 'Usuario desconocido' }}</span>
+                                    </div>
+                                    <p class="event-comment" *ngIf="event.comment">{{ event.comment }}</p>
+
+                                    <!-- Información adicional para cambios de estado -->
+                                    <div class="event-metadata" *ngIf="event.old_status && event.new_status">
+                                        <div class="status-change-info">
+                                            <span class="old-status">{{ event.old_status }}</span>
+                                            <mat-icon>arrow_forward</mat-icon>
+                                            <span class="new-status">{{ event.new_status }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Información adicional para rechazos (destacado) -->
+                                    <div class="rejection-highlight"
+                                        *ngIf="event.action === 'pending_changes_rejected'">
+                                        <mat-icon>info</mat-icon>
+                                        <div class="rejection-info">
+                                            <strong>Motivo del rechazo:</strong>
+                                            <p>{{ event.comment }}</p>
+                                            <span class="rejected-by" *ngIf="event.metadata?.rejected_by">
+                                                Rechazado por: {{ event.metadata.rejected_by }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Línea de conexión (no mostrar en el último elemento) -->
+                                <div class="event-line" *ngIf="i < history.length - 1"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

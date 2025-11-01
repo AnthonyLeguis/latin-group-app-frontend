@@ -581,7 +581,7 @@
                                 {{ isUploading ? 'Subiendo...' : 'Subir Documento' }}
                             </button>
 
-                            <p class="upload-hint">PDF, JPG, PNG, MP3, WMA - Máximo 5MB</p>
+                            <p class="upload-hint">PDF, JPG, PNG hasta 5MB • MP3, WMA hasta 15MB</p>
 
                             <div *ngIf="isUploading" class="upload-progress">
                                 <mat-spinner diameter="24"></mat-spinner>
@@ -626,15 +626,15 @@
                                     </div>
                                 </div>
                                 <div class="document-actions">
-                                    <button mat-icon-button (click)="viewDocument(doc)" matTooltip="Ver"
+                                    <button mat-icon-button (click)="viewDocument(doc)" title="Ver"
                                         [disabled]="doc.is_audio">
                                         <mat-icon>visibility</mat-icon>
                                     </button>
-                                    <button mat-icon-button (click)="downloadDocument(doc)" matTooltip="Descargar">
+                                    <button mat-icon-button (click)="downloadDocument(doc)" title="Descargar">
                                         <mat-icon>download</mat-icon>
                                     </button>
                                     <button *ngIf="isAdmin" mat-icon-button color="warn"
-                                        (click)="deleteDocument(doc.id)" matTooltip="Eliminar">
+                                        (click)="deleteDocument(doc.id)" title="Eliminar">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>

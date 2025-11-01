@@ -5,6 +5,11 @@
             <div>
                 <h1>Nueva Cotización</h1>
                 <p class="subtitle">Crea una nueva planilla de aplicación para un cliente</p>
+                <!-- Indicador de datos guardados -->
+                <div *ngIf="hasSavedData()" class="saved-data-indicator">
+                    <mat-icon>save</mat-icon>
+                    <span>Datos guardados automáticamente</span>
+                </div>
             </div>
         </div>
         <button mat-stroked-button color="warn" (click)="cancel()" class="cancel-btn">
@@ -38,7 +43,7 @@
 
     <!-- Main form -->
     <div *ngIf="!isLoadingClients" class="stepper-container">
-        <mat-stepper linear #stepper>
+        <mat-stepper #stepper>
             <!-- Paso 0: Selección de Cliente -->
             <mat-step [stepControl]="clientSelectionForm" label="Cliente">
                 <form [formGroup]="clientSelectionForm">
@@ -298,7 +303,8 @@
             </mat-step>
 
             <!-- Paso 2: Información de Empleo -->
-            <mat-step [stepControl]="employmentForm" label="Empleo">
+            <mat-step [stepControl]="employmentForm" label="Empleo" [optional]="true"
+                [completed]="employmentStepCompleted">
                 <form [formGroup]="employmentForm">
                     <div class="step-content">
                         <h2>Información de Empleo</h2>
@@ -320,7 +326,7 @@
 
                             <!-- Nombre de la empresa -->
                             <div class="custom-label-group">
-                                <label class="custom-label">Nombre de la Empresa (Opcional):</label>
+                                <label class="custom-label-required">Nombre de la Empresa (Opcional):</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="employment_company_name" placeholder="ABC Corp">
                                     <mat-icon matPrefix>business</mat-icon>
@@ -329,7 +335,7 @@
 
                             <!-- Teléfono del trabajo -->
                             <div class="custom-label-group">
-                                <label class="custom-label">Teléfono del Trabajo (Opcional):</label>
+                                <label class="custom-label-required">Teléfono del Trabajo (Opcional):</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="work_phone" placeholder="(305) 555-1234"
                                         inputmode="numeric" maxlength="14"
@@ -345,9 +351,8 @@
                             <div class="custom-label-group">
                                 <label class="custom-label-required">Salario:</label>
                                 <mat-form-field appearance="outline">
-                                    <input matInput type="number" formControlName="wages" placeholder="0.00"
-                                        inputmode="numeric" pattern="[0-9]*"
-                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                    <input matInput type="number" formControlName="wages" placeholder="0.00" step="0.01"
+                                        min="0" inputmode="decimal">
                                     <mat-icon matPrefix>attach_money</mat-icon>
                                 </mat-form-field>
                             </div>
@@ -371,7 +376,8 @@
                                 <mat-icon>arrow_back</mat-icon>
                                 Anterior
                             </button>
-                            <button mat-raised-button matStepperNext color="primary">
+                            <button mat-raised-button matStepperNext color="primary"
+                                (click)="markEmploymentStepCompleted()">
                                 Siguiente
                                 <mat-icon>arrow_forward</mat-icon>
                             </button>
@@ -381,7 +387,7 @@
             </mat-step>
 
             <!-- Paso 3: Póliza y Seguro -->
-            <mat-step [stepControl]="policyForm" label="Póliza" [optional]="true">
+            <mat-step [stepControl]="policyForm" label="Póliza" [optional]="true" [completed]="policyStepCompleted">
                 <form [formGroup]="policyForm">
                     <div class="step-content">
                         <h2>Información de Póliza y Seguro</h2>
@@ -411,8 +417,7 @@
                                 <label class="custom-label-required">Subsidio (Opcional):</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput type="number" formControlName="subsidy" placeholder="0.00"
-                                        inputmode="numeric" pattern="[0-9]*"
-                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                        step="0.01" min="0" inputmode="decimal">
                                     <mat-icon matPrefix>attach_money</mat-icon>
                                 </mat-form-field>
                             </div>
@@ -422,8 +427,7 @@
                                 <label class="custom-label-required">Costo de la Prima:</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput type="number" formControlName="final_cost" placeholder="0.00"
-                                        inputmode="numeric" pattern="[0-9]*"
-                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                        step="0.01" min="0" inputmode="decimal">
                                     <mat-icon matPrefix>attach_money</mat-icon>
                                 </mat-form-field>
                             </div>
@@ -446,13 +450,21 @@
                                 </mat-form-field>
                             </div>
 
+                            <!-- Clave -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Clave (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_key" placeholder="Ingrese la clave">
+                                    <mat-icon matPrefix>key</mat-icon>
+                                </mat-form-field>
+                            </div>
+
                             <!-- Monto Prima Dental -->
                             <div class="custom-label-group">
                                 <label class="custom-label-required">Monto Prima Dental:</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput type="number" formControlName="poliza_amount" placeholder="0.00"
-                                        inputmode="numeric" pattern="[0-9]*"
-                                        oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                                        step="0.01" min="0" inputmode="decimal">
                                     <mat-icon matPrefix>attach_money</mat-icon>
                                 </mat-form-field>
                             </div>
@@ -469,7 +481,7 @@
                             </div>
 
                             <!-- Beneficiario -->
-                            <div class="custom-label-group span-2">
+                            <div class="custom-label-group">
                                 <label class="custom-label-required">Beneficiario:</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="poliza_beneficiary"
@@ -484,7 +496,8 @@
                                 <mat-icon>arrow_back</mat-icon>
                                 Anterior
                             </button>
-                            <button mat-raised-button matStepperNext color="primary">
+                            <button mat-raised-button matStepperNext color="primary"
+                                (click)="markPolicyStepCompleted()">
                                 Siguiente
                                 <mat-icon>arrow_forward</mat-icon>
                             </button>
@@ -494,7 +507,8 @@
             </mat-step>
 
             <!-- Paso 4: Personas Adicionales -->
-            <mat-step [stepControl]="additionalPersonsForm" label="Adicionales">
+            <mat-step [stepControl]="additionalPersonsForm" label="Adicionales" [optional]="true"
+                [completed]="additionalPersonsStepCompleted">
                 <form [formGroup]="additionalPersonsForm">
                     <div class="step-content">
                         <h2>Personas Adicionales</h2>
@@ -607,9 +621,24 @@
                                         </mat-form-field>
                                     </div>
 
+                                    <!-- Legal Status -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Estatus Legal:</label>
+                                        <mat-form-field appearance="outline">
+                                            <mat-select
+                                                [formControlName]="'person' + selectedPersonIndex + '_legal_status'">
+                                                <mat-option *ngFor="let status of legalStatusOptions"
+                                                    [value]="status.value">
+                                                    {{ status.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-icon matPrefix>gavel</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+
                                     <!-- SSN -->
                                     <div class="custom-label-group">
-                                        <label class="custom-label-required">SSN:</label>
+                                        <label class="custom-label-required">SSN (Opcional):</label>
                                         <mat-form-field appearance="outline">
                                             <input matInput [formControlName]="'person' + selectedPersonIndex + '_ssn'"
                                                 placeholder="Ingrese su SSN" inputmode="numeric" maxlength="9"
@@ -624,7 +653,7 @@
 
                                     <!-- Número de Documento -->
                                     <div class="custom-label-group">
-                                        <label class="custom-label-required">Número de Documento:</label>
+                                        <label class="custom-label-required">Número de Documento (Opcional):</label>
                                         <mat-form-field appearance="outline">
                                             <input matInput
                                                 [formControlName]="'person' + selectedPersonIndex + '_document_number'">
@@ -632,11 +661,18 @@
                                         </mat-form-field>
                                     </div>
 
-                                    <!-- Checkbox: Es el aplicante principal -->
-                                    <mat-checkbox [formControlName]="'person' + selectedPersonIndex + '_is_applicant'"
-                                        class="span-2">
-                                        Es el aplicante principal
-                                    </mat-checkbox>
+                                    <!-- ¿Es el aplicante principal? -->
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">¿Es aplicante?</label>
+                                        <mat-form-field appearance="outline">
+                                            <mat-select
+                                                [formControlName]="'person' + selectedPersonIndex + '_is_applicant'">
+                                                <mat-option [value]="true">Sí</mat-option>
+                                                <mat-option [value]="false">No</mat-option>
+                                            </mat-select>
+                                            <mat-icon matPrefix>how_to_reg</mat-icon>
+                                        </mat-form-field>
+                                    </div>
                                 </div>
                             </mat-card-content>
                         </mat-card>
@@ -646,7 +682,8 @@
                                 <mat-icon>arrow_back</mat-icon>
                                 Anterior
                             </button>
-                            <button mat-raised-button matStepperNext color="primary">
+                            <button mat-raised-button matStepperNext color="primary"
+                                (click)="markAdditionalPersonsStepCompleted()">
                                 Siguiente
                                 <mat-icon>arrow_forward</mat-icon>
                             </button>
@@ -656,7 +693,7 @@
             </mat-step>
 
             <!-- Paso 5: Método de Pago -->
-            <mat-step [stepControl]="paymentForm" label="Pago" [optional]="true">
+            <mat-step [stepControl]="paymentForm" label="Pago" [optional]="true" [completed]="paymentStepCompleted">
                 <form [formGroup]="paymentForm">
                     <div class="step-content">
                         <h2>Método de Pago</h2>

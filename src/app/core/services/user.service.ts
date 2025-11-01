@@ -101,7 +101,7 @@ export class UserService {
         }
 
         const url = `${environment.apiUrl}/users${params.toString() ? '?' + params.toString() : ''}`;
-        console.log('Solicitando usuarios desde:', url);
+        //console.log('Solicitando usuarios desde:', url);
 
         return this.http.get<any>(url, { headers: this.getHeaders() });
     }

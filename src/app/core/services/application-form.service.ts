@@ -78,6 +78,13 @@ export class ApplicationFormService {
     }
 
     /**
+     * Obtener historial de cambios de una planilla
+     */
+    getFormHistory(id: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/${id}/history`);
+    }
+
+    /**
      * Actualizar planilla completa
      */
     updateForm(id: number, data: Partial<ApplicationForm>): Observable<any> {

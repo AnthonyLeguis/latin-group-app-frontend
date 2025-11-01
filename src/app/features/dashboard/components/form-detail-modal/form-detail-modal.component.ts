@@ -8,12 +8,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApplicationForm } from '../../../../core/models/application-form.interface';
+import { ApplicationDocument } from '../../../../core/models/application-document.interface';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
+import { environment } from '../../../../core/config/environment';
 
 @Component({
     selector: 'app-form-detail-modal',
@@ -28,7 +30,6 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
         MatSelectModule,
         MatInputModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         MatTooltipModule,
         FormSkeletonComponent
     ],
@@ -38,7 +39,7 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
 export class FormDetailModalComponent implements OnInit {
     private fb = inject(FormBuilder);
     private formService = inject(ApplicationFormService);
-    private snackBar = inject(MatSnackBar);
+    private notificationService = inject(NotificationService);
     private authService = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
 
@@ -52,6 +53,11 @@ export class FormDetailModalComponent implements OnInit {
     viewingPendingChanges = false;
     currentStatus: { value: string; label: string; icon: string; color: string } | undefined;
     isAdmin = false;
+    isAgent = false;
+    history: any[] = [];
+    loadingHistory = false;
+    documents: ApplicationDocument[] = [];
+    deletingDocumentId: number | null = null;
 
     statuses = [
         { value: 'pendiente', label: 'Pendiente', icon: 'schedule', color: '#f59e0b' },
@@ -64,8 +70,9 @@ export class FormDetailModalComponent implements OnInit {
         public dialogRef: MatDialogRef<FormDetailModalComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { formId: number }
     ) {
-        // Verificar si el usuario es admin
+        // Verificar si el usuario es admin o agent
         this.isAdmin = this.authService.currentUser?.type === 'admin';
+        this.isAgent = this.authService.currentUser?.type === 'agent';
 
         this.statusForm = this.fb.group({
             status: ['', Validators.required],
@@ -84,6 +91,7 @@ export class FormDetailModalComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadFormData();
+        this.loadHistory();
     }
 
     loadFormData(): void {
@@ -95,6 +103,7 @@ export class FormDetailModalComponent implements OnInit {
                 //console.log('Form status:', form.status);
                 //console.log('Form status lowercase:', form.status?.toLowerCase());
                 this.form = form;
+                this.documents = form.documents || [];
                 this.currentStatus = this.statuses.find(s => s.value === form.status);
                 //console.log('Current status:', this.currentStatus);
                 this.statusForm.patchValue({
@@ -109,10 +118,7 @@ export class FormDetailModalComponent implements OnInit {
                 this.error = error.error?.message || error.error?.error || 'Error al cargar la planilla. Por favor intenta de nuevo.';
                 this.loading = false;
                 this.cdr.detectChanges();
-                this.snackBar.open(this.error!, 'Cerrar', {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
-                });
+                this.notificationService.error(this.error!);
             }
         });
     }
@@ -130,10 +136,7 @@ export class FormDetailModalComponent implements OnInit {
         this.formService.updateStatus(this.form.id, formData).subscribe({
             next: (response) => {
                 this.submitting = false;
-                this.snackBar.open('Estado actualizado exitosamente', 'Cerrar', {
-                    duration: 3000,
-                    panelClass: ['success-snackbar']
-                });
+                this.notificationService.success('Estado actualizado exitosamente');
                 setTimeout(() => {
                     this.dialogRef.close({ updated: true, form: response.form });
                 });
@@ -142,10 +145,7 @@ export class FormDetailModalComponent implements OnInit {
                 this.submitting = false;
                 console.error('Error updating status:', error);
                 const errorMsg = error.error?.message || error.error?.error || 'Error al actualizar el estado';
-                this.snackBar.open(errorMsg, 'Cerrar', {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
-                });
+                this.notificationService.error(errorMsg);
             }
         });
     }
@@ -167,10 +167,9 @@ export class FormDetailModalComponent implements OnInit {
         this.formService.approvePendingChanges(this.form.id).subscribe({
             next: (response) => {
                 this.submitting = false;
-                this.snackBar.open('Cambios aprobados y aplicados exitosamente', 'Cerrar', {
-                    duration: 3000,
-                    panelClass: ['success-snackbar']
-                });
+                this.notificationService.success('Cambios aprobados y aplicados exitosamente');
+                // Recargar el historial después de aprobar
+                this.loadHistory();
                 setTimeout(() => {
                     this.dialogRef.close({ updated: true, form: response.form });
                 });
@@ -179,10 +178,7 @@ export class FormDetailModalComponent implements OnInit {
                 this.submitting = false;
                 console.error('Error approving changes:', error);
                 const errorMsg = error.error?.message || error.error?.error || 'Error al aprobar los cambios';
-                this.snackBar.open(errorMsg, 'Cerrar', {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
-                });
+                this.notificationService.error(errorMsg);
             }
         });
     }
@@ -208,10 +204,9 @@ export class FormDetailModalComponent implements OnInit {
         this.formService.rejectPendingChanges(this.form.id, reason).subscribe({
             next: (response) => {
                 this.submitting = false;
-                this.snackBar.open('Cambios rechazados exitosamente', 'Cerrar', {
-                    duration: 3000,
-                    panelClass: ['success-snackbar']
-                });
+                this.notificationService.success('Cambios rechazados exitosamente');
+                // Recargar el historial después de rechazar
+                this.loadHistory();
                 setTimeout(() => {
                     this.dialogRef.close({ updated: true, form: response.form });
                 });
@@ -220,10 +215,7 @@ export class FormDetailModalComponent implements OnInit {
                 this.submitting = false;
                 console.error('Error rejecting changes:', error);
                 const errorMsg = error.error?.message || error.error?.error || 'Error al rechazar los cambios';
-                this.snackBar.open(errorMsg, 'Cerrar', {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
-                });
+                this.notificationService.error(errorMsg);
             }
         });
     }
@@ -240,7 +232,16 @@ export class FormDetailModalComponent implements OnInit {
         }
 
         const pendingValue = this.getPendingValue(field);
-        const currentValue = (this.form as any)[field];
+        let currentValue: any;
+
+        // Si es un campo del cliente (con prefijo client_), obtener del objeto client
+        if (field.startsWith('client_')) {
+            const clientField = field.replace('client_', ''); // Remover prefijo
+            currentValue = this.form.client ? (this.form.client as any)[clientField] : undefined;
+        } else {
+            // Campo de la application form
+            currentValue = (this.form as any)[field];
+        }
 
         // Normalizar valores para comparación
         const normalizePending = this.normalizeValue(pendingValue);
@@ -272,7 +273,16 @@ export class FormDetailModalComponent implements OnInit {
 
     // Obtener valor de un campo del form de forma segura (para acceso dinámico)
     getFormValue(field: string): any {
-        return this.form ? (this.form as any)[field] : undefined;
+        if (!this.form) return undefined;
+
+        // Si es un campo del cliente (con prefijo client_), obtener del objeto client
+        if (field.startsWith('client_')) {
+            const clientField = field.replace('client_', ''); // Remover prefijo
+            return this.form.client ? (this.form.client as any)[clientField] : undefined;
+        }
+
+        // Campo de la application form
+        return (this.form as any)[field];
     }
 
     // Obtener todos los cambios pendientes organizados
@@ -286,6 +296,12 @@ export class FormDetailModalComponent implements OnInit {
 
         // Definir mapeo de campos con sus etiquetas
         const fieldLabels: { [key: string]: { label: string; category?: string } } = {
+            // Información del Cliente (campos con prefijo client_)
+            'client_name': { label: 'Nombre del Cliente', category: 'client' },
+            'client_email': { label: 'Email del Cliente', category: 'client' },
+            'client_phone': { label: 'Teléfono del Cliente', category: 'client' },
+            'client_address': { label: 'Dirección del Cliente', category: 'client' },
+
             // Información del Aplicante
             'applicant_name': { label: 'Nombre Completo', category: 'applicant' },
             'email': { label: 'Email', category: 'applicant' },
@@ -389,6 +405,118 @@ export class FormDetailModalComponent implements OnInit {
         }).format(value);
     }
 
+    hasDocuments(): boolean {
+        return this.documents && this.documents.length > 0;
+    }
+
+    getDocumentIcon(document: ApplicationDocument): string {
+        if (document.is_audio) {
+            return 'audiotrack';
+        }
+        if (document.is_image) {
+            return 'image';
+        }
+        if (document.is_pdf) {
+            return 'picture_as_pdf';
+        }
+        return 'insert_drive_file';
+    }
+
+    getDocumentTypeLabel(document: ApplicationDocument): string {
+        if (document.is_audio) {
+            return 'Audio';
+        }
+        if (document.is_image) {
+            return 'Imagen';
+        }
+        if (document.is_pdf) {
+            return 'PDF';
+        }
+        if (document.document_type) {
+            return document.document_type;
+        }
+        return document.file_type?.toUpperCase() || 'Documento';
+    }
+
+    getDocumentSize(document: ApplicationDocument): string {
+        if (document.file_size_formatted) {
+            return document.file_size_formatted;
+        }
+        if (typeof document.file_size === 'number') {
+            const sizeInKb = document.file_size / 1024;
+            if (sizeInKb >= 1024) {
+                const sizeInMb = sizeInKb / 1024;
+                return `${sizeInMb.toFixed(1)} MB`;
+            }
+            return `${sizeInKb.toFixed(0)} KB`;
+        }
+        return 'Sin tamaño';
+    }
+
+    formatDocumentDate(date: string | undefined): string {
+        if (!date) {
+            return 'Sin fecha';
+        }
+        return new Date(date).toLocaleString('es-ES', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    viewDocument(document: ApplicationDocument): void {
+        if (!this.form?.id || document.is_audio) {
+            return;
+        }
+
+        if (document.is_image && document.file_url) {
+            window.open(document.file_url, '_blank');
+            return;
+        }
+
+        const url = `${environment.apiUrl}/application-forms/${this.form.id}/documents/${document.id}/view`;
+        window.open(url, '_blank');
+    }
+
+    downloadDocument(document: ApplicationDocument): void {
+        if (!this.form?.id) {
+            return;
+        }
+
+        const url = `${environment.apiUrl}/application-forms/${this.form.id}/documents/${document.id}/download`;
+        window.open(url, '_blank');
+    }
+
+    deleteDocument(document: ApplicationDocument): void {
+        if (!this.isAdmin || !this.form?.id) {
+            return;
+        }
+
+        const confirmed = confirm('¿Estás seguro de que deseas eliminar este documento?');
+        if (!confirmed) {
+            return;
+        }
+
+        this.deletingDocumentId = document.id;
+        this.formService.deleteDocument(this.form.id, document.id).subscribe({
+            next: () => {
+                this.notificationService.success('Documento eliminado exitosamente');
+                this.documents = this.documents.filter(item => item.id !== document.id);
+                this.deletingDocumentId = null;
+                this.cdr.detectChanges();
+            },
+            error: (error) => {
+                console.error('Error deleting document:', error);
+                const errorMsg = error.error?.error || error.error?.message || 'Error al eliminar el documento';
+                this.notificationService.error(errorMsg);
+                this.deletingDocumentId = null;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
     hasAdditionalPersons(): boolean {
         if (!this.form) return false;
         return !!(
@@ -424,4 +552,79 @@ export class FormDetailModalComponent implements OnInit {
         }
         return persons;
     }
+
+    /**
+     * Cargar historial de cambios de la planilla
+     */
+    loadHistory(): void {
+        if (!this.data.formId) return;
+
+        this.loadingHistory = true;
+        this.formService.getFormHistory(this.data.formId).subscribe({
+            next: (response: any) => {
+                this.history = response.history || [];
+                this.loadingHistory = false;
+                this.cdr.detectChanges();
+            },
+            error: (error) => {
+                console.error('Error loading history:', error);
+                this.loadingHistory = false;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    /**
+     * Determinar si se debe mostrar el historial (admin o agent creador)
+     */
+    canViewHistory(): boolean {
+        if (!this.form) return false;
+        return this.isAdmin || (this.isAgent && this.form.agent_id === this.authService.currentUser?.id);
+    }
+
+    /**
+     * Obtener el ícono según el tipo de acción
+     */
+    getHistoryIcon(action: string): string {
+        const icons: { [key: string]: string } = {
+            'status_changed': 'swap_horiz',
+            'pending_changes_proposed': 'edit',
+            'pending_changes_approved': 'check_circle',
+            'pending_changes_rejected': 'cancel',
+            'created': 'add_circle',
+            'updated': 'update'
+        };
+        return icons[action] || 'history';
+    }
+
+    /**
+     * Obtener el título legible de la acción
+     */
+    getHistoryActionLabel(action: string): string {
+        const labels: { [key: string]: string } = {
+            'status_changed': 'Cambio de Estado',
+            'pending_changes_proposed': 'Propuesta de Cambios',
+            'pending_changes_approved': 'Cambios Aprobados',
+            'pending_changes_rejected': 'Cambios Rechazados',
+            'created': 'Planilla Creada',
+            'updated': 'Actualización General'
+        };
+        return labels[action] || 'Acción';
+    }
+
+    /**
+     * Obtener la clase CSS según el tipo de acción
+     */
+    getHistoryActionClass(action: string): string {
+        const classes: { [key: string]: string } = {
+            'status_changed': 'status-change',
+            'pending_changes_proposed': 'proposed',
+            'pending_changes_approved': 'approved',
+            'pending_changes_rejected': 'rejected',
+            'created': 'created',
+            'updated': 'updated'
+        };
+        return classes[action] || '';
+    }
 }
+

@@ -6,28 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
 import { AuthService } from '../../../../core/services/auth.service';
-
-interface Document {
-    id: number;
-    file_name: string;
-    file_path: string;
-    file_size: number;
-    file_type: string;
-    uploaded_at: string;
-    file_url?: string;
-    is_image?: boolean;
-    is_pdf?: boolean;
-    file_size_formatted?: string;
-}
-
-interface ApplicationForm {
-    id: number;
-    applicant_name: string;
-    documents: Document[];
-}
+import { NotificationService } from '../../../../core/services/notification.service';
+import { ApplicationDocument } from '../../../../core/models/application-document.interface';
+import { ApplicationForm } from '../../../../core/models/application-form.interface';
 
 @Component({
     selector: 'app-client-documents',
@@ -39,8 +22,7 @@ interface ApplicationForm {
         MatButtonModule,
         MatProgressSpinnerModule,
         MatChipsModule,
-        MatDialogModule,
-        MatSnackBarModule
+        MatDialogModule
     ],
     templateUrl: './client-documents.html',
     styleUrls: ['./client-documents.scss']
@@ -48,7 +30,7 @@ interface ApplicationForm {
 export class ClientDocumentsComponent implements OnInit {
     isLoading = true;
     applicationForm: ApplicationForm | null = null;
-    documents: Document[] = [];
+    documents: ApplicationDocument[] = [];
     selectedFile: File | null = null;
     isUploading = false;
 
@@ -56,7 +38,7 @@ export class ClientDocumentsComponent implements OnInit {
         private applicationFormService: ApplicationFormService,
         private authService: AuthService,
         private dialog: MatDialog,
-        private snackBar: MatSnackBar
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit(): void {
@@ -159,19 +141,19 @@ export class ClientDocumentsComponent implements OnInit {
         });
     }
 
-    downloadDocument(document: Document): void {
+    downloadDocument(document: ApplicationDocument): void {
         if (document.file_url) {
             window.open(document.file_url, '_blank');
         }
     }
 
-    viewDocument(document: Document): void {
+    viewDocument(document: ApplicationDocument): void {
         if (document.file_url) {
             window.open(document.file_url, '_blank');
         }
     }
 
-    getFileIcon(document: Document): string {
+    getFileIcon(document: ApplicationDocument): string {
         if (document.is_image) {
             return 'image';
         } else if (document.is_pdf) {
@@ -181,7 +163,7 @@ export class ClientDocumentsComponent implements OnInit {
         }
     }
 
-    getFileTypeLabel(document: Document): string {
+    getFileTypeLabel(document: ApplicationDocument): string {
         if (document.is_image) {
             return 'Imagen';
         } else if (document.is_pdf) {
@@ -203,11 +185,10 @@ export class ClientDocumentsComponent implements OnInit {
     }
 
     private showMessage(message: string, type: 'success' | 'error'): void {
-        this.snackBar.open(message, 'Cerrar', {
-            duration: 4000,
-            panelClass: type === 'success' ? 'snackbar-success' : 'snackbar-error',
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-        });
+        if (type === 'success') {
+            this.notificationService.success(message);
+        } else {
+            this.notificationService.error(message);
+        }
     }
 }
