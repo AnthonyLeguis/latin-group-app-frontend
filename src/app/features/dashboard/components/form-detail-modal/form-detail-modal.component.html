@@ -478,20 +478,37 @@
                                         </div>
                                     </div>
                                     <div class="document-actions flex items-center justify-center">
-                                        <button mat-icon-button (click)="viewDocument(doc)" [disabled]="doc.is_audio"
-                                            title="Ver documento">
-                                            <mat-icon>visibility</mat-icon>
-                                        </button>
-                                        <button mat-icon-button (click)="downloadDocument(doc)" title="Descargar">
-                                            <mat-icon>download</mat-icon>
-                                        </button>
-                                        <button *ngIf="isAdmin" mat-icon-button color="warn"
-                                            (click)="deleteDocument(doc)" title="Eliminar"
-                                            [disabled]="deletingDocumentId === doc.id">
-                                            <mat-icon *ngIf="deletingDocumentId !== doc.id">delete</mat-icon>
-                                            <mat-icon *ngIf="deletingDocumentId === doc.id"
-                                                class="deleting-icon">hourglass_top</mat-icon>
-                                        </button>
+                                        <div class="relative group inline-block">
+                                            <button mat-icon-button (click)="viewDocument(doc)"
+                                                [disabled]="doc.is_audio">
+                                                <mat-icon>visibility</mat-icon>
+                                            </button>
+                                            <div
+                                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                                Ver documento
+                                            </div>
+                                        </div>
+                                        <div class="relative group inline-block">
+                                            <button mat-icon-button (click)="downloadDocument(doc)">
+                                                <mat-icon>download</mat-icon>
+                                            </button>
+                                            <div
+                                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                                Descargar
+                                            </div>
+                                        </div>
+                                        <div *ngIf="isAdmin" class="relative group inline-block">
+                                            <button mat-icon-button color="warn" (click)="deleteDocument(doc)"
+                                                [disabled]="deletingDocumentId === doc.id">
+                                                <mat-icon *ngIf="deletingDocumentId !== doc.id">delete</mat-icon>
+                                                <mat-icon *ngIf="deletingDocumentId === doc.id"
+                                                    class="deleting-icon">hourglass_top</mat-icon>
+                                            </button>
+                                            <div
+                                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                                Eliminar
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

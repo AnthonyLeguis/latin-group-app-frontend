@@ -99,25 +99,19 @@ export class FormDetailModalComponent implements OnInit {
         this.error = null;
         this.formService.getApplicationForm(this.data.formId).subscribe({
             next: (form) => {
-                //console.log('Form data loaded:', form);
-                //console.log('Form status:', form.status);
-                //console.log('Form status lowercase:', form.status?.toLowerCase());
                 this.form = form;
                 this.documents = form.documents || [];
                 this.currentStatus = this.statuses.find(s => s.value === form.status);
-                //console.log('Current status:', this.currentStatus);
                 this.statusForm.patchValue({
                     status: form.status,
                     status_comment: form.status_comment || ''
                 });
                 this.loading = false;
-                this.cdr.detectChanges();
             },
             error: (error) => {
                 console.error('Error loading form:', error);
                 this.error = error.error?.message || error.error?.error || 'Error al cargar la planilla. Por favor intenta de nuevo.';
                 this.loading = false;
-                this.cdr.detectChanges();
                 this.notificationService.error(this.error!);
             }
         });
@@ -485,8 +479,25 @@ export class FormDetailModalComponent implements OnInit {
             return;
         }
 
-        const url = `${environment.apiUrl}/application-forms/${this.form.id}/documents/${document.id}/download`;
-        window.open(url, '_blank');
+        this.formService.downloadDocument(this.form.id, document.id).subscribe({
+            next: (blob: Blob) => {
+                // Crear un enlace temporal para descargar el archivo
+                const url = window.URL.createObjectURL(blob);
+                const link = window.document.createElement('a');
+                link.href = url;
+                link.download = document.original_name || document.file_name;
+                window.document.body.appendChild(link);
+                link.click();
+                window.document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                this.notificationService.success('Documento descargado exitosamente');
+            },
+            error: (error: any) => {
+                console.error('Error downloading document:', error);
+                const errorMsg = error.error?.error || error.error?.message || 'Error al descargar el documento';
+                this.notificationService.error(errorMsg);
+            }
+        });
     }
 
     deleteDocument(document: ApplicationDocument): void {
@@ -494,26 +505,30 @@ export class FormDetailModalComponent implements OnInit {
             return;
         }
 
-        const confirmed = confirm('¿Estás seguro de que deseas eliminar este documento?');
-        if (!confirmed) {
-            return;
-        }
-
-        this.deletingDocumentId = document.id;
-        this.formService.deleteDocument(this.form.id, document.id).subscribe({
-            next: () => {
-                this.notificationService.success('Documento eliminado exitosamente');
-                this.documents = this.documents.filter(item => item.id !== document.id);
-                this.deletingDocumentId = null;
-                this.cdr.detectChanges();
-            },
-            error: (error) => {
-                console.error('Error deleting document:', error);
-                const errorMsg = error.error?.error || error.error?.message || 'Error al eliminar el documento';
-                this.notificationService.error(errorMsg);
-                this.deletingDocumentId = null;
-                this.cdr.detectChanges();
+        this.notificationService.confirm(
+            `¿Estás seguro de que deseas eliminar el documento "${document.original_name || document.file_name}"? Esta acción no se puede deshacer.`,
+            'Confirmar eliminación'
+        ).then((confirmed) => {
+            if (!confirmed) {
+                return;
             }
+
+            this.deletingDocumentId = document.id;
+            this.formService.deleteDocument(this.form.id, document.id).subscribe({
+                next: () => {
+                    this.notificationService.success('Documento eliminado exitosamente');
+                    this.documents = this.documents.filter(item => item.id !== document.id);
+                    this.deletingDocumentId = null;
+                    this.cdr.detectChanges();
+                },
+                error: (error) => {
+                    console.error('Error deleting document:', error);
+                    const errorMsg = error.error?.error || error.error?.message || 'Error al eliminar el documento';
+                    this.notificationService.error(errorMsg);
+                    this.deletingDocumentId = null;
+                    this.cdr.detectChanges();
+                }
+            });
         });
     }
 

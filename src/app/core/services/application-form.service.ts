@@ -123,6 +123,15 @@ export class ApplicationFormService {
     }
 
     /**
+     * Descargar documento de una planilla
+     */
+    downloadDocument(formId: number, documentId: number): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/${formId}/documents/${documentId}/download`, {
+            responseType: 'blob'
+        });
+    }
+
+    /**
      * Renovar token de confirmación (extender 3 días más)
      */
     renewToken(formId: number): Observable<{ message: string; token: string; expires_at: string; confirmation_link: string }> {
