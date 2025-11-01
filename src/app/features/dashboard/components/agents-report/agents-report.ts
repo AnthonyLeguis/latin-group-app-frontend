@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -12,11 +12,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService, Agent, UserStats } from '../../../../core/services/user.service';
+import { OnlineAgentsService } from '../../../../core/services/online-agents.service';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 import { FormsListModalComponent } from '../forms-list-modal/forms-list-modal.component';
-import { Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { AgentsOnlineModalComponent } from '../agents-online-modal/agents-online-modal.component';
+import { Subscription, Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-agents-report',
@@ -38,7 +40,7 @@ import { take } from 'rxjs/operators';
     templateUrl: './agents-report.html',
     styleUrls: ['./agents-report.scss']
 })
-export class AgentsReportComponent implements OnInit {
+export class AgentsReportComponent implements OnInit, OnDestroy {
     isLoading = true;
     agents: Agent[] = [];
     filteredAgents: Agent[] = [];
@@ -50,9 +52,12 @@ export class AgentsReportComponent implements OnInit {
     selectedStatus: string | null = null; // Estado seleccionado para filtrar
     pendingFormsCount: number | null = null;
     activeFormsCount: number | null = null;
+    onlineAgentsCount = 0;
+    totalAgentsCount = 0;
 
     constructor(
         private userService: UserService,
+        private onlineAgentsService: OnlineAgentsService,
         private dialog: MatDialog,
         private cdr: ChangeDetectorRef,
         @Inject(PLATFORM_ID) private platformId: Object
@@ -62,7 +67,24 @@ export class AgentsReportComponent implements OnInit {
         // Avoid firing authenticated requests during SSR since tokens live in localStorage
         if (isPlatformBrowser(this.platformId)) {
             this.loadData();
+            this.subscribeToOnlineAgents();
         }
+    }
+
+    subscribeToOnlineAgents(): void {
+        this.onlineAgentsService.getOnlineAgents()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(data => {
+                this.onlineAgentsCount = data.online_agents;
+                this.totalAgentsCount = data.total_agents;
+            });
+    }
+
+    private destroy$ = new Subject<void>();
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     loadData(): void {
@@ -291,6 +313,15 @@ export class AgentsReportComponent implements OnInit {
             if (result?.updated) {
                 this.loadData();
             }
+        });
+    }
+
+    // Abrir modal con agentes conectados
+    openOnlineAgents(): void {
+        this.dialog.open(AgentsOnlineModalComponent, {
+            width: '600px',
+            maxWidth: '95vw',
+            panelClass: 'agents-online-dialog'
         });
     }
 

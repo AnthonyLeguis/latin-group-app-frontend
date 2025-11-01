@@ -1,0 +1,104 @@
+<div class="agents-online-modal">
+    <!-- Header -->
+    <div class="modal-header">
+        <h2 mat-dialog-title>
+            <mat-icon class="pulse-icon">wifi</mat-icon>
+            <span *ngIf="!loading && data">
+                Hay {{ data.online_agents }} {{ data.online_agents === 1 ? 'agente conectado' : 'agentes conectados' }}
+                en este momento
+            </span>
+            <span *ngIf="loading">Cargando...</span>
+        </h2>
+        <button mat-icon-button (click)="onClose()" class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Obteniendo estado de agentes...</p>
+    </div>
+
+    <!-- Content -->
+    <mat-dialog-content *ngIf="!loading && data">
+        <!-- Agentes Online -->
+        <div class="agents-section" *ngIf="onlineAgents.length > 0">
+            <h3 class="section-title online">
+                <mat-icon>check_circle</mat-icon>
+                En Línea ({{ onlineAgents.length }})
+            </h3>
+            <div class="agents-list">
+                <div class="agent-card online" *ngFor="let agent of onlineAgents">
+                    <div class="agent-avatar">
+                        <img *ngIf="agent.avatar" [src]="agent.avatar" [alt]="agent.name">
+                        <mat-icon *ngIf="!agent.avatar">person</mat-icon>
+                        <span class="status-indicator online"></span>
+                    </div>
+                    <div class="agent-info">
+                        <span class="agent-name">{{ agent.name }}</span>
+                        <span class="agent-email">{{ agent.email }}</span>
+                        <span class="agent-status online">
+                            <mat-icon>fiber_manual_record</mat-icon>
+                            En línea
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje si no hay agentes online -->
+        <div class="no-agents" *ngIf="onlineAgents.length === 0">
+            <mat-icon>wifi_off</mat-icon>
+            <h3>No hay agentes conectados</h3>
+            <p>Ningún agente está activo en este momento</p>
+        </div>
+
+        <!-- Agentes Offline -->
+        <div class="agents-section" *ngIf="offlineAgents.length > 0">
+            <h3 class="section-title offline">
+                <mat-icon>cancel</mat-icon>
+                Desconectados ({{ offlineAgents.length }})
+            </h3>
+            <div class="agents-list">
+                <div class="agent-card offline" *ngFor="let agent of offlineAgents">
+                    <div class="agent-avatar">
+                        <img *ngIf="agent.avatar" [src]="agent.avatar" [alt]="agent.name">
+                        <mat-icon *ngIf="!agent.avatar">person</mat-icon>
+                        <span class="status-indicator offline"></span>
+                    </div>
+                    <div class="agent-info">
+                        <span class="agent-name">{{ agent.name }}</span>
+                        <span class="agent-email">{{ agent.email }}</span>
+                        <span class="agent-status offline">
+                            <mat-icon>schedule</mat-icon>
+                            {{ getTimeAgo(agent.minutes_ago) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer con última actualización -->
+        <div class="update-info">
+            <mat-icon>update</mat-icon>
+            <span>
+                <ng-container *ngIf="!isRefreshing; else refreshingLabel">
+                    Actualizado hace {{ lastUpdatedSeconds }} segundo{{ lastUpdatedSeconds === 1 ? '' : 's' }}
+                </ng-container>
+            </span>
+            <button mat-icon-button (click)="refresh()" class="refresh-button" title="Actualizar ahora"
+                [disabled]="isRefreshing">
+                <mat-icon [class.spin]="isRefreshing">refresh</mat-icon>
+            </button>
+            <ng-template #refreshingLabel>
+                Actualizando...
+            </ng-template>
+        </div>
+    </mat-dialog-content>
+
+    <!-- Actions -->
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="onClose()">Cerrar</button>
+    </mat-dialog-actions>
+</div>

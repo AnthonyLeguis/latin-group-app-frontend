@@ -28,11 +28,19 @@
                             <span class="stat-label">Administradores</span>
                         </div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item clickable group relative" (click)="openOnlineAgents()">
                         <mat-icon>support_agent</mat-icon>
                         <div class="stat-info">
-                            <span class="stat-value">{{ stats.total_agents }}</span>
+                            <span class="stat-value">{{ onlineAgentsCount }}/{{ totalAgentsCount }}</span>
                             <span class="stat-label">Agentes</span>
+                        </div>
+                        <!-- Tooltip Tailwind -->
+                        <div
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                            Click para ver agentes conectados
+                            <div
+                                class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900">
+                            </div>
                         </div>
                     </div>
                     <div class="stat-item">

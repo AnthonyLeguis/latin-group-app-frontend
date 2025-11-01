@@ -1,0 +1,354 @@
+.agents-online-modal {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    max-height: 80vh;
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 24px 24px 16px;
+        border-bottom: 1px solid #e0e0e0;
+
+        h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            flex: 1;
+
+            .pulse-icon {
+                color: #10b981;
+                animation: pulse 2s ease-in-out infinite;
+                z-index: 1;
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.5;
+                }
+            }
+        }
+
+        .close-button {
+            margin-top: -8px;
+        }
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 24px;
+        gap: 16px;
+
+        p {
+            color: #64748b;
+            margin: 0;
+        }
+    }
+
+    mat-dialog-content {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+
+        .agents-section {
+            margin-bottom: 32px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .section-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 16px;
+                padding-bottom: 8px;
+                border-bottom: 2px solid;
+
+                &.online {
+                    color: #10b981;
+                    border-color: #10b981;
+
+                    mat-icon {
+                        color: #10b981;
+                    }
+                }
+
+                &.offline {
+                    color: #64748b;
+                    border-color: #e2e8f0;
+
+                    mat-icon {
+                        color: #64748b;
+                    }
+                }
+            }
+
+            .agents-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+
+                .agent-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                    padding: 16px;
+                    border-radius: 12px;
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    transition: all 0.2s;
+
+                    &.online {
+                        background: #f0fdf4;
+                        border-color: #86efac;
+
+                        &:hover {
+                            background: #dcfce7;
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);
+                        }
+                    }
+
+                    &.offline {
+                        opacity: 0.7;
+
+                        &:hover {
+                            opacity: 1;
+                            background: #f1f5f9;
+                        }
+                    }
+
+                    .agent-avatar {
+                        position: relative;
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 50%;
+                        overflow: visible; // Cambiar de hidden a visible para que el indicador no se corte
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+
+                        // Contenedor interno para la imagen con overflow hidden
+                        &::before {
+                            content: '';
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            border-radius: 50%;
+                            overflow: hidden;
+                            z-index: 0;
+                        }
+
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            border-radius: 50%;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        mat-icon {
+                            color: white;
+                            font-size: 28px;
+                            width: 28px;
+                            height: 28px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .status-indicator {
+                            position: absolute;
+                            bottom: -2px; // Ajustar posición para que sobresalga ligeramente
+                            right: -2px; // Ajustar posición para que sobresalga ligeramente
+                            width: 14px; // Aumentar tamaño ligeramente
+                            height: 14px; // Aumentar tamaño ligeramente
+                            border-radius: 50%;
+                            border: 3px solid white; // Borde más grueso
+                            z-index: 10; // Z-index alto para estar sobre todo
+
+                            &.online {
+                                background: #10b981;
+                                box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+                            }
+
+                            &.offline {
+                                background: #94a3b8;
+                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                            }
+                        }
+                    }
+
+                    .agent-info {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                        flex: 1;
+
+                        .agent-name {
+                            font-weight: 600;
+                            font-size: 15px;
+                            color: #1e293b;
+                        }
+
+                        .agent-email {
+                            font-size: 13px;
+                            color: #64748b;
+                        }
+
+                        .agent-status {
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            font-size: 12px;
+                            margin-top: 4px;
+
+                            mat-icon {
+                                font-size: 14px;
+                                width: 14px;
+                                height: 14px;
+                            }
+
+                            &.online {
+                                color: #10b981;
+                                font-weight: 600;
+                            }
+
+                            &.offline {
+                                color: #64748b;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .no-agents {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            text-align: center;
+
+            mat-icon {
+                font-size: 64px;
+                width: 64px;
+                height: 64px;
+                color: #cbd5e1;
+                margin-bottom: 16px;
+            }
+
+            h3 {
+                font-size: 18px;
+                font-weight: 600;
+                color: #475569;
+                margin: 0 0 8px 0;
+            }
+
+            p {
+                color: #94a3b8;
+                margin: 0;
+            }
+        }
+
+        .update-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #64748b;
+
+            mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+            }
+
+            .refresh-button {
+                margin-left: 8px;
+
+                mat-icon {
+                    transition: transform 0.3s;
+                }
+
+                &:hover:not([disabled]) mat-icon {
+                    transform: rotate(180deg);
+                }
+
+                &[disabled] {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+
+                mat-icon.spin {
+                    animation: rotate 1s linear infinite;
+                }
+            }
+        }
+    }
+
+    mat-dialog-actions {
+        padding: 16px 24px;
+        border-top: 1px solid #e0e0e0;
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .agents-online-modal {
+        .modal-header h2 {
+            font-size: 18px;
+        }
+
+        mat-dialog-content {
+            padding: 16px;
+
+            .agents-section .agents-list .agent-card {
+                padding: 12px;
+                gap: 12px;
+
+                .agent-avatar {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+        }
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

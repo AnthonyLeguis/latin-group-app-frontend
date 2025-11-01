@@ -13,6 +13,7 @@ export interface UserStats {
     active_forms: number;
     inactive_forms: number;
     rejected_forms: number;
+    online_agents: number;
 }
 
 export interface ApplicationForm {
