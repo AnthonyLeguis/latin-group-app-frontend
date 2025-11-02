@@ -1096,3 +1096,84 @@
         padding: 1rem;
     }
 }
+
+// ========== Estilos para Datepicker (Calendario) ==========
+::ng-deep {
+
+    // Contenedor principal del calendario
+    .mat-datepicker-content {
+        background-color: white !important;
+        border: 1px solid red !important;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    // Calendario completo
+    .mat-calendar {
+        background-color: white !important;
+    }
+
+    // Header del calendario (navegación de mes/año)
+    .mat-calendar-header {
+        background-color: white !important;
+        padding: 8px;
+    }
+
+    // Cuerpo del calendario
+    .mat-calendar-body {
+        background-color: white !important;
+    }
+
+    // Tabla de días
+    .mat-calendar-table {
+        background-color: white !important;
+    }
+
+    // Encabezados (L, M, M, J, V, S, D)
+    .mat-calendar-table-header {
+        background-color: white !important;
+    }
+
+    // Botones de navegación (anterior/siguiente/selector de mes)
+    .mat-calendar-previous-button,
+    .mat-calendar-next-button,
+    .mat-calendar-period-button {
+        background-color: transparent !important;
+
+        &:hover {
+            background-color: rgba(220, 38, 38, 0.1) !important;
+        }
+    }
+
+    // Celdas de días
+    .mat-calendar-body-cell {
+        background-color: white !important;
+    }
+
+    // Contenido de las celdas (números)
+    .mat-calendar-body-cell-content {
+        background-color: white !important;
+
+        &:hover {
+            background-color: rgba(220, 38, 38, 0.1) !important;
+        }
+    }
+
+    // Día seleccionado
+    .mat-calendar-body-selected {
+        background-color: #dc2626 !important;
+        color: white !important;
+    }
+
+    // Día actual (hoy)
+    .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+        border-color: #dc2626 !important;
+        background-color: white !important;
+    }
+
+    // Vista de año y mes
+    .mat-calendar-body-in-range::before {
+        background-color: rgba(220, 38, 38, 0.1) !important;
+    }
+}

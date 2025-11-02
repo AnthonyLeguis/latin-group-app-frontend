@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, ChangeDetectorRef, AfterViewInit, LOCALE_ID } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,16 +8,81 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
+import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Injectable } from '@angular/core';
 import { UserService } from '../../../../core/services/user.service';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ApplicationDocument } from '../../../../core/models/application-document.interface';
+import localeEs from '@angular/common/locales/es';
+
+// Registrar locale español
+registerLocaleData(localeEs);
+
+// Adaptador de fecha personalizado para español
+@Injectable()
+export class SpanishDateAdapter extends NativeDateAdapter {
+    override getFirstDayOfWeek(): number {
+        return 1; // Lunes como primer día de la semana
+    }
+
+    override getDayOfWeekNames(style: 'long' | 'short' | 'narrow'): string[] {
+        // Angular Material espera Domingo como primer día
+        if (style === 'long') {
+            return ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        }
+        if (style === 'short') {
+            return ['dom.', 'lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.'];
+        }
+        // narrow
+        return ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+    }
+
+    override getMonthNames(style: 'long' | 'short' | 'narrow'): string[] {
+        if (style === 'long') {
+            return [
+                'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+            ];
+        }
+        if (style === 'short') {
+            return [
+                'ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
+                'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'
+            ];
+        }
+        // narrow
+        return ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    }
+
+    override format(date: Date, displayFormat: string): string {
+        if (displayFormat === 'MMM-DD-YYYY') {
+            const monthNames = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const month = monthNames[date.getMonth()];
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+        return super.format(date, displayFormat);
+    }
+}
+
+// Formato de fecha personalizado
+export const MY_FORMATS = {
+    parse: {
+        dateInput: 'MMM-DD-YYYY',
+    },
+    display: {
+        dateInput: 'MMM-DD-YYYY',
+        monthYearLabel: 'MMM YYYY',
+        dateA11yLabel: 'LL',
+        monthYearA11yLabel: 'MMMM YYYY',
+    },
+};
 
 interface Client {
     id: number;
@@ -73,36 +138,42 @@ interface ApplicationForm {
     person1_dob?: string;
     person1_gender?: string;
     person1_ssn?: string;
+    person1_legal_status?: string;
     person1_is_applicant?: boolean;
     person2_name?: string;
     person2_relation?: string;
     person2_dob?: string;
     person2_gender?: string;
     person2_ssn?: string;
+    person2_legal_status?: string;
     person2_is_applicant?: boolean;
     person3_name?: string;
     person3_relation?: string;
     person3_dob?: string;
     person3_gender?: string;
     person3_ssn?: string;
+    person3_legal_status?: string;
     person3_is_applicant?: boolean;
     person4_name?: string;
     person4_relation?: string;
     person4_dob?: string;
     person4_gender?: string;
     person4_ssn?: string;
+    person4_legal_status?: string;
     person4_is_applicant?: boolean;
     person5_name?: string;
     person5_relation?: string;
     person5_dob?: string;
     person5_gender?: string;
     person5_ssn?: string;
+    person5_legal_status?: string;
     person5_is_applicant?: boolean;
     person6_name?: string;
     person6_relation?: string;
     person6_dob?: string;
     person6_gender?: string;
     person6_ssn?: string;
+    person6_legal_status?: string;
     person6_is_applicant?: boolean;
 }
 
@@ -149,12 +220,13 @@ export const CUSTOM_DATE_FORMATS = {
         MatNativeDateModule,
         MatProgressSpinnerModule,
         MatTabsModule,
-        MatTooltipModule,
         MatCheckboxModule
     ],
     providers: [
-        { provide: DateAdapter, useClass: CustomDateAdapter },
-        { provide: MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS }
+        { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
+        { provide: LOCALE_ID, useValue: 'es-ES' },
+        { provide: DateAdapter, useClass: SpanishDateAdapter },
+        { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }
     ],
     templateUrl: './edit-client-modal.html',
     styleUrls: ['./edit-client-modal.scss']
@@ -290,6 +362,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             person1_dob: [appForm?.person1_dob || ''],
             person1_gender: [appForm?.person1_gender || ''],
             person1_ssn: [appForm?.person1_ssn || ''],
+            person1_legal_status: [appForm?.person1_legal_status || ''],
             person1_is_applicant: [appForm?.person1_is_applicant || false],
 
             person2_name: [appForm?.person2_name || ''],
@@ -297,6 +370,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             person2_dob: [appForm?.person2_dob || ''],
             person2_gender: [appForm?.person2_gender || ''],
             person2_ssn: [appForm?.person2_ssn || ''],
+            person2_legal_status: [appForm?.person2_legal_status || ''],
             person2_is_applicant: [appForm?.person2_is_applicant || false],
 
             person3_name: [appForm?.person3_name || ''],
@@ -304,6 +378,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             person3_dob: [appForm?.person3_dob || ''],
             person3_gender: [appForm?.person3_gender || ''],
             person3_ssn: [appForm?.person3_ssn || ''],
+            person3_legal_status: [appForm?.person3_legal_status || ''],
             person3_is_applicant: [appForm?.person3_is_applicant || false],
 
             person4_name: [appForm?.person4_name || ''],
@@ -311,6 +386,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             person4_dob: [appForm?.person4_dob || ''],
             person4_gender: [appForm?.person4_gender || ''],
             person4_ssn: [appForm?.person4_ssn || ''],
+            person4_legal_status: [appForm?.person4_legal_status || ''],
             person4_is_applicant: [appForm?.person4_is_applicant || false],
 
             person5_name: [appForm?.person5_name || ''],
@@ -318,6 +394,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             person5_dob: [appForm?.person5_dob || ''],
             person5_gender: [appForm?.person5_gender || ''],
             person5_ssn: [appForm?.person5_ssn || ''],
+            person5_legal_status: [appForm?.person5_legal_status || ''],
             person5_is_applicant: [appForm?.person5_is_applicant || false],
 
             person6_name: [appForm?.person6_name || ''],
@@ -325,6 +402,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             person6_dob: [appForm?.person6_dob || ''],
             person6_gender: [appForm?.person6_gender || ''],
             person6_ssn: [appForm?.person6_ssn || ''],
+            person6_legal_status: [appForm?.person6_legal_status || ''],
             person6_is_applicant: [appForm?.person6_is_applicant || false]
         });
     }
@@ -347,24 +425,22 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
         // Cargar la application form completa con todos sus datos
         this.applicationFormService.getApplicationForm(this.data.client.application_form!.id).subscribe({
             next: (response: any) => {
-                setTimeout(() => {
-                    if (response) {
-                        this.data.client.application_form = response;
-                        this.documents = response.documents || [];
+                if (response) {
+                    this.data.client.application_form = response;
+                    this.documents = response.documents || [];
 
-                        if (this.hasApplicationForm) {
-                            this.initializeApplicationForm();
-                        }
+                    if (this.hasApplicationForm) {
+                        this.initializeApplicationForm();
                     }
+                }
 
-                    this.isLoadingDocuments = false;
-                });
+                this.isLoadingDocuments = false;
+                this.cdr.markForCheck();
             },
             error: (error: any) => {
                 console.error('❌ Error loading application form:', error);
-                setTimeout(() => {
-                    this.isLoadingDocuments = false;
-                });
+                this.isLoadingDocuments = false;
+                this.cdr.markForCheck();
             }
         });
     }
@@ -516,20 +592,6 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
         } else {
             return 'insert_drive_file';
         }
-    }
-
-    formatDate(dateString: string | undefined): string {
-        if (!dateString) {
-            return 'N/A';
-        }
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
     }
 
     onSave(): void {
@@ -735,6 +797,28 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
         }
         // Mostrar el valor numérico sin formato de moneda para mantener consistencia con el input
         return value.toString();
+    }
+
+    formatDate(dateString: string | null | undefined): string {
+        if (!dateString) {
+            return 'N/A';
+        }
+
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return 'N/A';
+            }
+
+            const monthNames = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const month = monthNames[date.getMonth()];
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+
+            return `${month}-${day}-${year}`;
+        } catch (error) {
+            return 'N/A';
+        }
     }
 
     // Métodos para navegación de personas adicionales

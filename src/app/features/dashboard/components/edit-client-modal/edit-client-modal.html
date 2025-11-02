@@ -146,11 +146,13 @@
                             <div class="form-field-row">
                                 <div class="current-value">
                                     <label>Fecha de nacimiento:</label>
-                                    <span>{{ data.client.application_form?.dob || 'N/A' }}</span>
+                                    <span>{{ formatDate(data.client.application_form?.dob) }}</span>
                                 </div>
                                 <mat-form-field appearance="outline" class="edit-input">
                                     <mat-label>Nuevo valor</mat-label>
-                                    <input matInput type="date" formControlName="dob">
+                                    <input matInput [matDatepicker]="dobPicker" formControlName="dob">
+                                    <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #dobPicker></mat-datepicker>
                                 </mat-form-field>
                             </div>
 
@@ -488,8 +490,9 @@
                                     <div class="form-field-row">
                                         <div class="current-value">
                                             <label>Fecha de nacimiento:</label>
-                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
-                                                '_dob'] || 'N/A' }}</span>
+                                            <span>{{ formatDate(data.client.application_form?.['person' +
+                                                selectedPersonIndex +
+                                                '_dob']) }}</span>
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
