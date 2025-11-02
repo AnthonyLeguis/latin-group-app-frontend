@@ -85,17 +85,37 @@ export class AgentsReportComponent implements OnInit, OnDestroy {
      * Suscribirse a actualizaciones en tiempo real vía WebSocket
      */
     subscribeToWebSocket(): void {
+        // Suscribirse a eventos de Pusher
         this.webSocketService.agentStats$
             .pipe(takeUntil(this.destroy$))
             .subscribe(stats => {
                 if (stats) {
-                    console.log('Dashboard: Actualizando stats desde WebSocket', stats);
+                    console.log('Dashboard: Actualizando stats desde Pusher', stats);
                     this.onlineAgentsCount = stats.online_agents;
                     this.totalAgentsCount = stats.total_agents;
                     // Forzar detección de cambios para actualizar UI
                     this.cdr.detectChanges();
                 }
             });
+
+        // Polling cada 15 segundos como respaldo
+        // (Pusher solo dispara cuando hay actividad de agentes)
+        if (isPlatformBrowser(this.platformId)) {
+            setInterval(() => {
+                this.userService.getStats()
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe({
+                        next: (stats) => {
+                            this.onlineAgentsCount = stats.online_agents;
+                            this.totalAgentsCount = stats.total_agents;
+                            this.cdr.detectChanges();
+                        },
+                        error: (error) => {
+                            console.error('Error en polling de stats:', error);
+                        }
+                    });
+            }, 15000); // 15 segundos
+        }
     }
 
     private destroy$ = new Subject<void>();
