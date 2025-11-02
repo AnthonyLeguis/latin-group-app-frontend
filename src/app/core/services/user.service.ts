@@ -128,4 +128,15 @@ export class UserService {
             { headers: this.getHeaders() }
         );
     }
+
+    /**
+     * Alternar restricción de acceso de un usuario
+     */
+    toggleRestriction(userId: number): Observable<any> {
+        return this.http.post<any>(
+            `${environment.apiUrl}/users/${userId}/toggle-restriction`,
+            {},
+            { headers: this.getHeaders() }
+        );
+    }
 }

@@ -19,7 +19,7 @@ export interface TokenExpiryInfo {
 })
 export class SessionMonitorService {
     private readonly checkInterval = 60_000; // 60 segundos
-    private readonly warningThreshold = 180; // En los últimos 3 minutos (180 segundos) mostramos alerta
+    private readonly warningThreshold = 300; // En los últimos 5 minutos (300 segundos) mostramos alerta
     private readonly sessionWarning$ = new Subject<TokenExpiryInfo>();
     private monitoringSubscription: Subscription | null = null;
 

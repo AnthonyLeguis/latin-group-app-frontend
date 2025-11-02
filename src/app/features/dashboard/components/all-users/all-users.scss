@@ -531,8 +531,12 @@
 }
 
 // Botones de acción
+.actions-header {
+    text-align: center;
+}
+
 .actions-cell {
-    text-align: right;
+    text-align: center;
     white-space: nowrap;
     overflow: visible !important;
     position: relative;
@@ -542,7 +546,7 @@
 .edit-action-buttons {
     display: flex;
     gap: 0.25rem;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
 
     .group {
@@ -800,4 +804,194 @@
             }
         }
     }
+}
+
+// Estilos para columna de restricción
+.restriction-header {
+    text-align: center;
+}
+
+.restriction-cell {
+    text-align: center;
+    padding: 0.65rem 0.5rem !important;
+
+    @media (max-width: 768px) {
+        padding: 0.55rem 0.3rem !important;
+    }
+}
+
+.restriction-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.restriction-toggle-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem 0.4rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(212, 227, 255, 0.45), rgba(226, 232, 240, 0.65));
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+
+    @media (max-width: 768px) {
+        padding: 0.25rem 0.35rem;
+    }
+
+    &.restricted {
+        background: linear-gradient(135deg, rgba(254, 226, 226, 0.55), rgba(252, 165, 165, 0.65));
+        border-color: rgba(248, 113, 113, 0.45);
+        box-shadow: 0 4px 14px rgba(248, 113, 113, 0.25);
+    }
+
+    &:not(.restricted) {
+        background: linear-gradient(135deg, rgba(187, 247, 208, 0.55), rgba(167, 243, 208, 0.65));
+        border-color: rgba(74, 222, 128, 0.45);
+        box-shadow: 0 4px 14px rgba(74, 222, 128, 0.23);
+    }
+
+    .restriction-toggle.modern {
+        ::ng-deep {
+
+            // Eliminar padding/margin por defecto de Material
+            .mdc-form-field,
+            .mat-internal-form-field {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .mdc-switch {
+                width: 40px;
+                height: 20px;
+                margin: 0;
+
+                @media (max-width: 768px) {
+                    width: 36px;
+                    height: 18px;
+                }
+
+                .mdc-switch__track {
+                    height: 20px;
+                    width: 40px;
+                    border-radius: 999px;
+                    opacity: 1 !important;
+                    background: linear-gradient(135deg, #c8d9f1, #cbd5f5);
+                    transition: background 0.3s ease;
+                    border: none !important;
+                    outline: none !important;
+
+                    @media (max-width: 768px) {
+                        height: 18px;
+                        width: 36px;
+                    }
+
+                    &::before,
+                    &::after {
+                        border: none !important;
+                        outline: none !important;
+                    }
+                }
+
+                .mdc-switch__handle {
+                    width: 14px;
+                    height: 14px;
+                    top: 50%;
+                    left: -2.5px;
+                    transform: translateY(-50%);
+                    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.15);
+                    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+                    border: none !important;
+                    outline: none !important;
+
+                    @media (max-width: 768px) {
+                        width: 12px;
+                        height: 12px;
+                    }
+
+                    &::before,
+                    &::after {
+                        background-color: #ffffff;
+                        border-radius: 50%;
+                        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+                        border: none !important;
+                        outline: none !important;
+                    }
+                }
+
+                .mdc-switch__icons {
+                    display: none;
+                }
+            }
+
+            .mdc-switch__ripple {
+                display: none;
+            }
+
+            &.mat-mdc-slide-toggle-checked {
+                .mdc-switch__track {
+                    background: linear-gradient(135deg, #22c55e, #16a34a);
+                }
+
+                .mdc-switch__handle {
+                    left: calc(100% - 12px);
+                    box-shadow: 0 3px 10px rgba(34, 197, 94, 0.3);
+
+                    @media (max-width: 768px) {
+                        left: calc(100% - 10px);
+                    }
+                }
+            }
+        }
+    }
+
+    &.restricted {
+        .restriction-toggle.modern {
+            ::ng-deep {
+                .mdc-switch__track {
+                    background: linear-gradient(135deg, #f87171, #ef4444) !important;
+                    border: none !important;
+                    outline: none !important;
+                }
+
+                .mdc-switch__handle {
+                    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.3);
+                    border: none !important;
+                    outline: none !important;
+                }
+            }
+        }
+    }
+}
+
+.restriction-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #16a34a;
+    transition: color 0.25s ease;
+
+    @media (max-width: 768px) {
+        font-size: 0.6rem;
+    }
+
+    &.restricted {
+        color: #dc2626;
+    }
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

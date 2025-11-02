@@ -51,22 +51,33 @@ export class SpanishDateAdapter extends NativeDateAdapter {
         }
         if (style === 'short') {
             return [
-                'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-                'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+                'ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
+                'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'
             ];
         }
         // narrow
         return ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    }
+
+    override format(date: Date, displayFormat: string): string {
+        if (displayFormat === 'MMM-DD-YYYY') {
+            const monthNames = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const month = monthNames[date.getMonth()];
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+        return super.format(date, displayFormat);
     }
 }
 
 // Formato de fecha personalizado
 export const MY_FORMATS = {
     parse: {
-        dateInput: 'DD/MM/YYYY',
+        dateInput: 'MMM-DD-YYYY',
     },
     display: {
-        dateInput: 'DD/MM/YYYY',
+        dateInput: 'MMM-DD-YYYY',
         monthYearLabel: 'MMM YYYY',
         dateA11yLabel: 'LL',
         monthYearA11yLabel: 'MMMM YYYY',

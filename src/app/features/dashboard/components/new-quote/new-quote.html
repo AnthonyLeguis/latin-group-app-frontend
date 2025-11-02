@@ -19,7 +19,8 @@
     </div>
 
     <!-- Botón para agregar un nuevo cliente en modal -->
-    <div class="add-client-button-container" *ngIf="!isLoadingClients && availableClients.length > 0">
+    <div class="add-client-button-container"
+        *ngIf="!isLoadingClients && availableClients.length > 0 && !selectedClient">
         <button mat-raised-button color="accent" (click)="openAddClientModal()">
             <mat-icon>person_add</mat-icon>
             Ingresar Cliente

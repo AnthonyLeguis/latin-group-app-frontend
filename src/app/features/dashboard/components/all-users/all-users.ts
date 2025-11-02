@@ -12,6 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -23,6 +24,7 @@ interface User {
     email: string;
     type: 'admin' | 'agent' | 'client';
     created_at: string;
+    is_restricted?: boolean; // Usuario restringido/bloqueado
     created_by?: {
         id: number;
         name: string;
@@ -50,6 +52,7 @@ interface User {
         MatChipsModule,
         MatDialogModule,
         MatSelectModule,
+        MatSlideToggleModule,
         FormSkeletonComponent
     ],
     templateUrl: './all-users.html',
@@ -72,7 +75,7 @@ export class AllUsersComponent implements OnInit {
         { value: 'client', label: 'Cliente', icon: 'person', class: 'filter-client' }
     ];
 
-    displayedColumns: string[] = ['name', 'created_by', 'type', 'actions'];
+    displayedColumns: string[] = ['name', 'created_by', 'restriction', 'type', 'actions'];
     userTypes = [
         { value: 'admin', label: 'Administrador' },
         { value: 'agent', label: 'Agente' },
@@ -317,7 +320,7 @@ export class AllUsersComponent implements OnInit {
     // Obtener label del tipo de usuario
     getUserTypeLabel(type: string): string {
         switch (type) {
-            case 'admin': return 'Administrador';
+            case 'admin': return 'Admin';
             case 'agent': return 'Agente';
             case 'client': return 'Cliente';
             default: return type;
@@ -332,6 +335,76 @@ export class AllUsersComponent implements OnInit {
             case 'client': return 'type-client';
             default: return '';
         }
+    }
+
+    // Alternar restricción de usuario (bloquear/desbloquear acceso)
+    toggleRestriction(user: User, change: MatSlideToggleChange): void {
+        // Revertimos visualmente el toggle hasta confirmar la acción
+        change.source.checked = !user.is_restricted;
+
+        const intendedAllowed = change.checked; // true = permitir acceso
+        const newStatus = !intendedAllowed; // true = restringir acceso
+        const action = newStatus ? 'restringir' : 'desbloquear';
+        const actionPast = newStatus ? 'restringido' : 'desbloqueado';
+
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: `Confirmar ${action} usuario`,
+                message: newStatus
+                    ? `¿Está seguro que desea RESTRINGIR el acceso de ${user.name}? El usuario será desconectado inmediatamente y no podrá iniciar sesión.`
+                    : `¿Está seguro que desea DESBLOQUEAR el acceso de ${user.name}? El usuario podrá volver a iniciar sesión.`,
+                type: newStatus ? 'error' : 'warning',
+                confirmButtonText: newStatus ? 'Restringir' : 'Desbloquear',
+                cancelButtonText: 'Cancelar'
+            },
+            width: '450px',
+            panelClass: 'custom-dialog-container'
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.userService.toggleRestriction(user.id).subscribe({
+                    next: (response: any) => {
+                        user.is_restricted = newStatus;
+                        change.source.checked = !newStatus;
+
+                        this.dialog.open(ConfirmDialogComponent, {
+                            data: {
+                                title: `Usuario ${actionPast}`,
+                                message: `El usuario ${user.name} ha sido ${actionPast} exitosamente.`,
+                                type: 'success',
+                                confirmButtonText: 'Aceptar',
+                                autoClose: true,
+                                autoCloseDuration: 3000
+                            },
+                            width: '400px',
+                            panelClass: 'custom-dialog-container'
+                        });
+
+                        this.cd.detectChanges();
+                    },
+                    error: (error: any) => {
+                        const errorMessage = error.error?.error || `Error al ${action} usuario`;
+                        this.dialog.open(ConfirmDialogComponent, {
+                            data: {
+                                title: `Error al ${action}`,
+                                message: errorMessage,
+                                type: 'error',
+                                confirmButtonText: 'Cerrar'
+                            },
+                            width: '400px',
+                            panelClass: 'custom-dialog-container'
+                        });
+
+                        // Revertir visualmente el toggle al estado anterior
+                        change.source.checked = !user.is_restricted;
+                    }
+                });
+            } else {
+                // Revertir visualmente el toggle al cancelar la acción
+                change.source.checked = !user.is_restricted;
+            }
+        });
     }
 
     formatDate(date: string): string {

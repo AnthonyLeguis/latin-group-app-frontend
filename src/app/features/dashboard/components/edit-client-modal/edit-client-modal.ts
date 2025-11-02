@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -106,6 +106,33 @@ interface ApplicationForm {
     person6_is_applicant?: boolean;
 }
 
+// Adaptador personalizado para formato de fecha MMM-DD-YYYY
+export class CustomDateAdapter extends NativeDateAdapter {
+    override format(date: Date, displayFormat: string): string {
+        if (displayFormat === 'MMM-DD-YYYY') {
+            const monthNames = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            const month = monthNames[date.getMonth()];
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}-${day}-${year}`;
+        }
+        return super.format(date, displayFormat);
+    }
+}
+
+// Formato de fecha personalizado
+export const CUSTOM_DATE_FORMATS = {
+    parse: {
+        dateInput: 'MMM-DD-YYYY',
+    },
+    display: {
+        dateInput: 'MMM-DD-YYYY',
+        monthYearLabel: 'MMM YYYY',
+        dateA11yLabel: 'LL',
+        monthYearA11yLabel: 'MMMM YYYY',
+    },
+};
+
 @Component({
     selector: 'app-edit-client-modal',
     standalone: true,
@@ -124,6 +151,10 @@ interface ApplicationForm {
         MatTabsModule,
         MatTooltipModule,
         MatCheckboxModule
+    ],
+    providers: [
+        { provide: DateAdapter, useClass: CustomDateAdapter },
+        { provide: MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS }
     ],
     templateUrl: './edit-client-modal.html',
     styleUrls: ['./edit-client-modal.scss']
@@ -152,6 +183,14 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
         { value: 'Hijo/a', label: 'Hijo/a' },
         { value: 'Padre/Madre', label: 'Padre/Madre' },
         { value: 'Hermano/a', label: 'Hermano/a' },
+        { value: 'Otro', label: 'Otro' }
+    ];
+
+    legalStatusOptions = [
+        { value: 'Ciudadano', label: 'Ciudadano' },
+        { value: 'Residente Permanente', label: 'Residente Permanente' },
+        { value: 'Visa de Trabajo', label: 'Visa de Trabajo' },
+        { value: 'Visa de Estudiante', label: 'Visa de Estudiante' },
         { value: 'Otro', label: 'Otro' }
     ];
 
@@ -692,12 +731,10 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
 
     formatCurrency(value: number | null | undefined): string {
         if (value === null || value === undefined) {
-            return '$0.00';
+            return 'N/A';
         }
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(value);
+        // Mostrar el valor numérico sin formato de moneda para mantener consistencia con el input
+        return value.toString();
     }
 
     // Métodos para navegación de personas adicionales

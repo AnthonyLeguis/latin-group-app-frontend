@@ -493,8 +493,11 @@
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
-                                            <input matInput type="date"
+                                            <input matInput [matDatepicker]="dobPickerPerson"
                                                 [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                            <mat-datepicker-toggle matSuffix
+                                                [for]="dobPickerPerson"></mat-datepicker-toggle>
+                                            <mat-datepicker #dobPickerPerson></mat-datepicker>
                                         </mat-form-field>
                                     </div>
 
@@ -513,6 +516,25 @@
                                             <mat-select [formControlName]="'person' + selectedPersonIndex + '_gender'">
                                                 <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
                                                     {{ gender.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Estatus Legal -->
+                                    <div class="form-field-row">
+                                        <div class="current-value">
+                                            <label>Estatus Legal:</label>
+                                            <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
+                                                '_legal_status'] || 'N/A' }}</span>
+                                        </div>
+                                        <mat-form-field appearance="outline" class="edit-input">
+                                            <mat-label>Nuevo valor</mat-label>
+                                            <mat-select
+                                                [formControlName]="'person' + selectedPersonIndex + '_legal_status'">
+                                                <mat-option *ngFor="let status of legalStatusOptions"
+                                                    [value]="status.value">
+                                                    {{ status.label }}
                                                 </mat-option>
                                             </mat-select>
                                         </mat-form-field>
