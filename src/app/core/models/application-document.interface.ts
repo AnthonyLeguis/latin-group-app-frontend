@@ -8,6 +8,7 @@ export interface ApplicationDocument {
     document_type?: string;
     uploaded_at: string;
     file_url?: string;
+    download_url?: string;
     is_image?: boolean;
     is_pdf?: boolean;
     is_audio?: boolean;

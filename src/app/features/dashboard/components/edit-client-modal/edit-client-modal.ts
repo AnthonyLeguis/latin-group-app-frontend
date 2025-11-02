@@ -563,14 +563,13 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        // Para imágenes, usar file_url que viene del backend
-        if (document.is_image && document.file_url) {
-            window.open(document.file_url, '_blank');
-        } else if (!document.is_audio) {
-            // Para PDFs y otros documentos, usar la ruta de view
-            const url = `http://127.0.0.1:8000/api/v1/application-forms/${this.data.client.application_form.id}/documents/${document.id}/view`;
-            window.open(url, '_blank');
+        const previewUrl = document.file_url;
+        if (!previewUrl) {
+            this.showMessage('No se pudo obtener la URL del documento', 'error');
+            return;
         }
+
+        window.open(previewUrl, '_blank');
     }
 
     downloadDocument(document: ApplicationDocument): void {
@@ -578,8 +577,27 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        const url = `http://127.0.0.1:8000/api/v1/application-forms/${this.data.client.application_form.id}/documents/${document.id}/download`;
-        window.open(url, '_blank');
+        this.applicationFormService.downloadDocument(
+            this.data.client.application_form.id,
+            document.id
+        ).subscribe({
+            next: (blob: Blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const link = window.document.createElement('a');
+                link.href = url;
+                link.download = document.original_name || document.file_name;
+                window.document.body.appendChild(link);
+                link.click();
+                window.document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                this.showMessage('Documento descargado exitosamente', 'success');
+            },
+            error: (error: any) => {
+                console.error('❌ Error descargando documento:', error);
+                const errorMsg = error.error?.error || error.error?.message || 'Error al descargar el documento';
+                this.showMessage(errorMsg, 'error');
+            }
+        });
     }
 
     getFileIcon(document: ApplicationDocument): string {
