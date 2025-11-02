@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { environment } from '../config/environment';
 
 // Declarar Pusher en el window object
 declare global {
@@ -42,15 +43,13 @@ export class WebSocketService {
             // Hacer Pusher disponible globalmente
             window.Pusher = Pusher;
 
-            // Inicializar Echo
+            // Inicializar Echo con Pusher
             this.echo = new Echo({
-                broadcaster: 'reverb',
-                key: 'eegnqtrbjxppeyadeoua', // REVERB_APP_KEY del .env
-                wsHost: 'localhost',
-                wsPort: 8080,
-                wssPort: 8080,
-                forceTLS: false,
-                enabledTransports: ['ws', 'wss'],
+                broadcaster: 'pusher',
+                key: environment.pusher.key,
+                cluster: environment.pusher.cluster,
+                forceTLS: environment.pusher.forceTLS,
+                encrypted: environment.pusher.encrypted,
                 disableStats: true,
             });
 
@@ -66,7 +65,7 @@ export class WebSocketService {
                 });
 
             this.isInitialized = true;
-            console.log('WebSocket: Conexión establecida con Laravel Reverb');
+            console.log('WebSocket: Conexión establecida con Pusher');
 
         } catch (error) {
             console.error('WebSocket: Error al inicializar Echo', error);
