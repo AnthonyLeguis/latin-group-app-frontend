@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService, Agent, UserStats } from '../../../../core/services/user.service';
 import { OnlineAgentsService } from '../../../../core/services/online-agents.service';
+import { WebSocketService } from '../../../../core/services/websocket.service';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 import { FormsListModalComponent } from '../forms-list-modal/forms-list-modal.component';
@@ -58,6 +59,7 @@ export class AgentsReportComponent implements OnInit, OnDestroy {
     constructor(
         private userService: UserService,
         private onlineAgentsService: OnlineAgentsService,
+        private webSocketService: WebSocketService,
         private dialog: MatDialog,
         private cdr: ChangeDetectorRef,
         @Inject(PLATFORM_ID) private platformId: Object
@@ -67,16 +69,32 @@ export class AgentsReportComponent implements OnInit, OnDestroy {
         // Avoid firing authenticated requests during SSR since tokens live in localStorage
         if (isPlatformBrowser(this.platformId)) {
             this.loadData();
-            this.subscribeToOnlineAgents();
+            this.loadInitialStats();
+            this.subscribeToWebSocket();
         }
     }
 
-    subscribeToOnlineAgents(): void {
-        this.onlineAgentsService.getOnlineAgents()
+    /**
+     * Cargar estadísticas iniciales
+     */
+    private loadInitialStats(): void {
+        this.fetchStats();
+    }
+
+    /**
+     * Suscribirse a actualizaciones en tiempo real vía WebSocket
+     */
+    subscribeToWebSocket(): void {
+        this.webSocketService.agentStats$
             .pipe(takeUntil(this.destroy$))
-            .subscribe(data => {
-                this.onlineAgentsCount = data.online_agents;
-                this.totalAgentsCount = data.total_agents;
+            .subscribe(stats => {
+                if (stats) {
+                    console.log('Dashboard: Actualizando stats desde WebSocket', stats);
+                    this.onlineAgentsCount = stats.online_agents;
+                    this.totalAgentsCount = stats.total_agents;
+                    // Forzar detección de cambios para actualizar UI
+                    this.cdr.detectChanges();
+                }
             });
     }
 
@@ -91,17 +109,7 @@ export class AgentsReportComponent implements OnInit, OnDestroy {
         this.isLoading = true;
 
         // Cargar estadísticas
-        this.userService.getStats().subscribe({
-            next: (stats) => {
-                this.stats = stats;
-                // Resetear los contadores dinámicos para reflejar los datos oficiales
-                this.pendingFormsCount = null;
-                this.activeFormsCount = null;
-            },
-            error: (error) => {
-                console.error('Error al cargar estadísticas:', error);
-            }
-        });
+        this.fetchStats();
 
         // Cargar reporte de agentes
         this.userService.getAgentsReport().subscribe({
@@ -280,6 +288,24 @@ export class AgentsReportComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+    private fetchStats(): void {
+        this.userService.getStats()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (stats) => {
+                    this.stats = stats;
+                    // Resetear los contadores dinámicos para reflejar los datos oficiales
+                    this.pendingFormsCount = null;
+                    this.activeFormsCount = null;
+                    this.onlineAgentsCount = stats.online_agents;
+                    this.totalAgentsCount = stats.total_agents;
+                },
+                error: (error) => {
+                    console.error('Error al cargar estadísticas:', error);
+                }
+            });
     }
 
     // Abrir modal con lista de planillas pendientes

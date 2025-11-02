@@ -9,9 +9,15 @@
             </span>
             <span *ngIf="loading">Cargando...</span>
         </h2>
-        <button mat-icon-button (click)="onClose()" class="close-button">
-            <mat-icon>close</mat-icon>
-        </button>
+        <div class="header-actions">
+            <span class="realtime-badge">
+                <mat-icon>bolt</mat-icon>
+                Tiempo real
+            </span>
+            <button mat-icon-button (click)="onClose()" class="close-button">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
     </div>
 
     <!-- Loading -->
@@ -77,23 +83,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Footer con última actualización -->
-        <div class="update-info">
-            <mat-icon>update</mat-icon>
-            <span>
-                <ng-container *ngIf="!isRefreshing; else refreshingLabel">
-                    Actualizado hace {{ lastUpdatedSeconds }} segundo{{ lastUpdatedSeconds === 1 ? '' : 's' }}
-                </ng-container>
-            </span>
-            <button mat-icon-button (click)="refresh()" class="refresh-button" title="Actualizar ahora"
-                [disabled]="isRefreshing">
-                <mat-icon [class.spin]="isRefreshing">refresh</mat-icon>
-            </button>
-            <ng-template #refreshingLabel>
-                Actualizando...
-            </ng-template>
         </div>
     </mat-dialog-content>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OnlineAgentsService, OnlineAgentsResponse, OnlineAgent } from '../../../../core/services/online-agents.service';
+import { WebSocketService } from '../../../../core/services/websocket.service';
 
 @Component({
     selector: 'app-agents-online-modal',
@@ -23,49 +24,47 @@ import { OnlineAgentsService, OnlineAgentsResponse, OnlineAgent } from '../../..
 })
 export class AgentsOnlineModalComponent implements OnInit, OnDestroy {
     private onlineAgentsService = inject(OnlineAgentsService);
+    private webSocketService = inject(WebSocketService);
+    private cdr = inject(ChangeDetectorRef);
     private destroy$ = new Subject<void>();
 
     loading = true;
-    isRefreshing = false;
     data: OnlineAgentsResponse | null = null;
-    lastUpdatedSeconds = 0;
-    private updateInterval: any;
 
     constructor(
         public dialogRef: MatDialogRef<AgentsOnlineModalComponent>
     ) { }
 
     ngOnInit(): void {
-        // Activar polling en tiempo real (cada 10s)
-        this.onlineAgentsService.startRealtimeTracking();
+        // Cargar datos iniciales
+        this.loadOnlineAgents();
 
-        // Suscribirse a los datos de agentes online
+        // Suscribirse a actualizaciones en tiempo real vía WebSocket
+        this.webSocketService.agentStats$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(stats => {
+                if (stats) {
+                    console.log('Modal: Recibiendo actualización WebSocket, recargando lista');
+                    // Cuando llegue actualización, recargar la lista completa
+                    this.loadOnlineAgents();
+                }
+            });
+    }
+
+    private loadOnlineAgents(): void {
         this.onlineAgentsService.getOnlineAgents()
             .pipe(takeUntil(this.destroy$))
             .subscribe(data => {
                 this.data = data;
                 this.loading = false;
-                this.isRefreshing = false;
-                this.lastUpdatedSeconds = 0;
+                this.cdr.detectChanges();
             });
-
-        // Actualizar el contador de "hace X segundos"
-        this.updateInterval = setInterval(() => {
-            this.lastUpdatedSeconds++;
-        }, 1000);
     }
 
     ngOnDestroy(): void {
-        // Volver a polling normal
-        this.onlineAgentsService.stopRealtimeTracking();
-
         // Limpiar
         this.destroy$.next();
         this.destroy$.complete();
-
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-        }
     }
 
     getTimeAgo(minutesAgo: number | null): string {
@@ -81,15 +80,6 @@ export class AgentsOnlineModalComponent implements OnInit, OnDestroy {
             const hours = Math.floor(minutesAgo / 60);
             return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
         }
-    }
-
-    refresh(): void {
-        if (this.isRefreshing) {
-            return;
-        }
-
-        this.isRefreshing = true;
-        this.onlineAgentsService.refresh();
     }
 
     onClose(): void {

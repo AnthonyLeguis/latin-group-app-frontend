@@ -27,9 +27,10 @@ export interface OnlineAgentsResponse {
     providedIn: 'root'
 })
 export class OnlineAgentsService {
-    private readonly normalInterval = 30_000; // 30 segundos
-    private readonly realtimeInterval = 10_000; // 10 segundos
+    private readonly normalInterval = 10_000; // 10 segundos para dashboard
+    private readonly realtimeInterval = 3_000; // 3 segundos cuando modal está abierto
     private currentInterval = this.normalInterval;
+    private realtimeConsumers = 0;
 
     private pollingSubject$ = new Subject<number>();
     private onlineAgents$: Observable<OnlineAgentsResponse>;
@@ -59,9 +60,10 @@ export class OnlineAgentsService {
      * Útil cuando el modal está abierto
      */
     startRealtimeTracking(): void {
-        if (this.currentInterval !== this.realtimeInterval) {
-            this.currentInterval = this.realtimeInterval;
-            this.pollingSubject$.next(this.realtimeInterval);
+        this.realtimeConsumers++;
+
+        if (this.realtimeConsumers === 1) {
+            this.setPollingInterval(this.realtimeInterval);
         }
     }
 
@@ -70,9 +72,12 @@ export class OnlineAgentsService {
      * Se llama al cerrar el modal
      */
     stopRealtimeTracking(): void {
-        if (this.currentInterval !== this.normalInterval) {
-            this.currentInterval = this.normalInterval;
-            this.pollingSubject$.next(this.normalInterval);
+        if (this.realtimeConsumers > 0) {
+            this.realtimeConsumers--;
+        }
+
+        if (this.realtimeConsumers === 0 && this.currentInterval !== this.normalInterval) {
+            this.setPollingInterval(this.normalInterval);
         }
     }
 
@@ -81,6 +86,11 @@ export class OnlineAgentsService {
      */
     refresh(): void {
         this.pollingSubject$.next(0);
+    }
+
+    private setPollingInterval(interval: number): void {
+        this.currentInterval = interval;
+        this.pollingSubject$.next(interval);
     }
 
     /**

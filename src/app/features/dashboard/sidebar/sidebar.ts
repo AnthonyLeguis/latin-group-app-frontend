@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../../core/services/auth.service';
+import { SessionMonitorService } from '../../../core/services/session-monitor.service';
 import { SidebarService } from '../services/sidebar.service';
 import { ConfirmDialogComponent } from '../../../shared/components/notification-dialog/confirm-dialog.component';
 
@@ -102,6 +103,7 @@ export class SidebarComponent implements OnInit {
 
     constructor(
         private authService: AuthService,
+        private sessionMonitor: SessionMonitorService,
         private router: Router,
         private dialog: MatDialog,
         private sidebarService: SidebarService,
@@ -263,8 +265,19 @@ export class SidebarComponent implements OnInit {
             if (result) {
                 // Usuario confirmó el cierre de sesión
                 //console.log('🚪 Cerrando sesión...');
-                this.authService.logout();
-                this.router.navigate(['/home']);
+
+                // Notificar al backend ANTES de limpiar el localStorage
+                this.sessionMonitor.logout().subscribe({
+                    next: () => {
+                        this.authService.logout();
+                        this.router.navigate(['/home']);
+                    },
+                    error: () => {
+                        // Incluso si hay error, cerramos sesión localmente
+                        this.authService.logout();
+                        this.router.navigate(['/home']);
+                    }
+                });
             }
         });
     }
