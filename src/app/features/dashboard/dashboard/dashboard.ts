@@ -221,8 +221,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const seconds = Math.max(this.remainingSeconds, 0);
     const minutes = Math.floor(seconds / 60);
     const secondsPart = seconds % 60;
+
+    // Truncar segundos a máximo 2 dígitos
+    const displaySeconds = secondsPart.toString().padStart(2, '0');
+
     const minutesLabel = minutes > 0 ? `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}` : '';
-    const secondsLabel = `${secondsPart} ${secondsPart === 1 ? 'segundo' : 'segundos'}`;
+    const secondsLabel = `${displaySeconds} segundos`;
     const timeLabel = minutesLabel ? `${minutesLabel} y ${secondsLabel}` : secondsLabel;
 
     this.warningDialogData.message = `Tu sesión expirará en ${timeLabel}. ¿Deseas mantenerla activa?`;

@@ -135,9 +135,11 @@
 
 .dialog-actions {
     display: flex;
+    flex-direction: row; // Siempre en fila, nunca en columna
     justify-content: center;
     gap: 12px;
     padding: 10px 20px 0 20px;
+    flex-wrap: nowrap; // Evitar que los botones se envuelvan a una nueva línea
 }
 
 .cancel-btn {
