@@ -427,7 +427,7 @@ export class NewQuoteComponent implements OnInit {
             }
 
             const formData = JSON.parse(savedData);
-            console.log('📦 Restaurando datos guardados del formulario...');
+            //console.log('📦 Restaurando datos guardados del formulario...');
 
             // Restaurar selección de cliente
             if (formData.clientSelection) {
@@ -471,7 +471,7 @@ export class NewQuoteComponent implements OnInit {
                 this.paymentForm.patchValue(formData.payment, { emitEvent: false });
             }
 
-            console.log('✅ Datos restaurados exitosamente');
+            //console.log('✅ Datos restaurados exitosamente');
         } catch (error) {
             console.error('❌ Error al cargar datos guardados:', error);
             // Si hay error, limpiar el localStorage corrupto
@@ -521,7 +521,7 @@ export class NewQuoteComponent implements OnInit {
     // Limpiar datos guardados
     clearSavedFormData(): void {
         localStorage.removeItem(this.STORAGE_KEY);
-        console.log('🗑️ Datos del formulario eliminados del almacenamiento');
+        //console.log('🗑️ Datos del formulario eliminados del almacenamiento');
     }
 
     // Verificar si hay datos guardados
@@ -868,20 +868,20 @@ export class NewQuoteComponent implements OnInit {
 
     // Método temporal de debug para el formulario de empleo
     debugEmploymentForm(): void {
-        console.log('📋 Estado del formulario de empleo:');
-        console.log('Valid:', this.employmentForm.valid);
-        console.log('Invalid:', this.employmentForm.invalid);
-        console.log('Errors:', this.employmentForm.errors);
-        console.log('Values:', this.employmentForm.value);
+        //console.log('📋 Estado del formulario de empleo:');
+        //console.log('Valid:', this.employmentForm.valid);
+        //console.log('Invalid:', this.employmentForm.invalid);
+        //console.log('Errors:', this.employmentForm.errors);
+        //console.log('Values:', this.employmentForm.value);
 
         // Revisar cada control individual
         Object.keys(this.employmentForm.controls).forEach(key => {
             const control = this.employmentForm.get(key);
             if (control && control.invalid) {
-                console.log(`❌ Campo inválido: ${key}`, {
-                    value: control.value,
-                    errors: control.errors
-                });
+                // console.log(`❌ Campo inválido: ${key}`, {
+                //     value: control.value,
+                //     errors: control.errors
+                // });
             }
         });
     }

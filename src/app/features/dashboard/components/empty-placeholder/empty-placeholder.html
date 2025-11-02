@@ -1,22 +1,27 @@
 <div class="empty-placeholder-container">
-    <div class="placeholder-card">
-        <mat-icon class="placeholder-icon">calculate</mat-icon>
+    <div class="cotizadores-grid">
+        @for (cotizador of cotizadores; track cotizador.title) {
+        <div class="placeholder-card">
+            <mat-icon class="placeholder-icon" [style.color]="cotizador.color">calculate</mat-icon>
 
-        <h2 class="placeholder-title">Cotizador mercado de salud</h2>
+            <h2 class="placeholder-title">{{ cotizador.title }}</h2>
 
-        <p class="placeholder-description">
-            Accede a nuestro cotizador en línea para explorar planes de salud y obtener cotizaciones personalizadas.
-        </p>
+            <p class="placeholder-description">
+                {{ cotizador.description }}
+            </p>
 
-        <div class="placeholder-actions">
-            <button mat-raised-button color="primary" (click)="goToCotizador()" class="cotizador-btn">
-                <mat-icon>open_in_new</mat-icon>
-                Ir al Cotizador
-            </button>
+            <div class="placeholder-actions">
+                <button mat-raised-button [style.background-color]="cotizador.color" [style.color]="'white'"
+                    (click)="goToCotizador(cotizador.url)" class="cotizador-btn">
+                    <mat-icon>open_in_new</mat-icon>
+                    Ir al Cotizador
+                </button>
+            </div>
+
+            <p class="placeholder-note">
+                Se abrirá en una nueva pestaña
+            </p>
         </div>
-
-        <p class="placeholder-note">
-            Se abrirá en una nueva pestaña
-        </p>
+        }
     </div>
 </div>

@@ -57,11 +57,11 @@ export class AddClientModalComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        console.log('🔧 AddClientModal: Iniciando...');
+        //console.log('🔧 AddClientModal: Iniciando...');
         this.currentUser = this.authService.currentUser;
         this.isAdmin = this.currentUser?.type === 'admin';
-        console.log('👤 Usuario actual:', this.currentUser);
-        console.log('🔑 Es admin?', this.isAdmin);
+        //console.log('👤 Usuario actual:', this.currentUser);
+        //console.log('🔑 Es admin?', this.isAdmin);
 
         this.initForm();
 
@@ -69,7 +69,7 @@ export class AddClientModalComponent implements OnInit {
             this.loadAgents();
         } else {
             setTimeout(() => {
-                console.log('✅ Formulario listo (no-admin)');
+                //console.log('✅ Formulario listo (no-admin)');
                 this.isInitializing = false;
                 this.cd.detectChanges();
             }, 300);
@@ -100,14 +100,14 @@ export class AddClientModalComponent implements OnInit {
     }
 
     loadAgents(): void {
-        console.log('📋 Cargando agentes reales desde el backend...');
+        //console.log('📋 Cargando agentes reales desde el backend...');
         this.userService.getUsers({ type: 'agent' }).subscribe({
             next: (response) => {
                 // La respuesta puede ser paginada, extraer los datos correctamente
                 this.agents = response.data || response;
-                console.log('✅ Agentes cargados:', this.agents);
+                //console.log('✅ Agentes cargados:', this.agents);
                 this.isInitializing = false;
-                console.log('✅ Formulario listo (admin)');
+                //console.log('✅ Formulario listo (admin)');
                 this.cd.detectChanges();
             },
             error: (error) => {
