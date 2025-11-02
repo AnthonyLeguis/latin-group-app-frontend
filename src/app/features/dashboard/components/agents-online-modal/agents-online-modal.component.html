@@ -44,11 +44,22 @@
                     <div class="agent-info">
                         <span class="agent-name">{{ agent.name }}</span>
                         <span class="agent-email">{{ agent.email }}</span>
-                        <span class="agent-status online">
-                            <mat-icon>fiber_manual_record</mat-icon>
-                            En línea
-                        </span>
+                        <div class="agent-status-row">
+                            <span class="agent-status online">
+                                <mat-icon>fiber_manual_record</mat-icon>
+                                En línea
+                            </span>
+                            <span class="active-time-badge" *ngIf="agent.total_active_time">
+                                <mat-icon>schedule</mat-icon>
+                                {{ formatActiveTime(agent.total_active_time) }}
+                            </span>
+                        </div>
                     </div>
+                    <button *ngIf="isAdmin && agent.total_active_time && agent.total_active_time > 0" mat-icon-button
+                        class="reset-button" (click)="resetActiveTime(agent, $event)"
+                        matTooltip="Resetear tiempo activo" matTooltipPosition="left">
+                        <mat-icon>refresh</mat-icon>
+                    </button>
                 </div>
             </div>
         </div>
@@ -76,11 +87,22 @@
                     <div class="agent-info">
                         <span class="agent-name">{{ agent.name }}</span>
                         <span class="agent-email">{{ agent.email }}</span>
-                        <span class="agent-status offline">
-                            <mat-icon>schedule</mat-icon>
-                            {{ getTimeAgo(agent.minutes_ago) }}
-                        </span>
+                        <div class="agent-status-row">
+                            <span class="agent-status offline">
+                                <mat-icon>schedule</mat-icon>
+                                {{ getTimeAgo(agent.minutes_ago) }}
+                            </span>
+                            <span class="active-time-badge" *ngIf="agent.total_active_time">
+                                <mat-icon>schedule</mat-icon>
+                                {{ formatActiveTime(agent.total_active_time) }}
+                            </span>
+                        </div>
                     </div>
+                    <button *ngIf="isAdmin && agent.total_active_time && agent.total_active_time > 0" mat-icon-button
+                        class="reset-button" (click)="resetActiveTime(agent, $event)"
+                        matTooltip="Resetear tiempo activo" matTooltipPosition="left">
+                        <mat-icon>refresh</mat-icon>
+                    </button>
                 </div>
             </div>
         </div>

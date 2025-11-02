@@ -13,6 +13,7 @@ export interface OnlineAgent {
     last_activity: string | null;
     is_online: boolean;
     minutes_ago: number | null;
+    total_active_time?: number; // Total de minutos acumulados activo
 }
 
 export interface OnlineAgentsResponse {

@@ -8,6 +8,9 @@ export interface User {
     created_at: string;
     updated_at: string;
     created_by?: number;
+    total_active_time?: number; // Total de minutos acumulados activo
+    current_session_start?: string; // Timestamp del inicio de sesión actual
+    last_session_duration?: number; // Duración de la última sesión en minutos
 }
 
 export interface AuthResponse {
