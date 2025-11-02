@@ -17,6 +17,7 @@ import { ApplicationForm } from '../../../../core/models/application-form.interf
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 import { TokenAuthorizationModalComponent } from '../token-authorization-modal/token-authorization-modal.component';
+import { environment } from '../../../../core/config/environment';
 
 @Component({
     selector: 'app-quotes-history',
@@ -43,6 +44,7 @@ export class QuotesHistoryComponent implements OnInit {
     private formService = inject(ApplicationFormService);
     private authService = inject(AuthService);
     private dialog = inject(MatDialog);
+    private readonly apiBase = environment.apiUrl.replace(/\/$/, '');
 
     isLoading = true;
     forms: ApplicationForm[] = [];
@@ -203,7 +205,12 @@ export class QuotesHistoryComponent implements OnInit {
 
         // Hacer request al endpoint de descarga
         const token = this.authService.getToken();
-        const url = `http://127.0.0.1:8000/api/v1/forms/${form.id}/download-pdf`;
+        if (!token) {
+            alert('No se pudo obtener el token de autenticación para descargar el PDF');
+            return;
+        }
+
+        const url = `${this.apiBase}/forms/${form.id}/download-pdf`;
 
         // ////console.log('🔍 Intentando descargar PDF:', {
         //     url,
@@ -262,7 +269,12 @@ export class QuotesHistoryComponent implements OnInit {
 
         // Abrir en nueva pestaña para visualizar
         const token = this.authService.getToken();
-        const url = `http://127.0.0.1:8000/api/v1/forms/${form.id}/view-pdf?token=${token}`;
+        if (!token) {
+            alert('No se pudo obtener el token de autenticación para visualizar el PDF');
+            return;
+        }
+
+        const url = `${this.apiBase}/forms/${form.id}/view-pdf?token=${encodeURIComponent(token)}`;
         window.open(url, '_blank');
     }
 
