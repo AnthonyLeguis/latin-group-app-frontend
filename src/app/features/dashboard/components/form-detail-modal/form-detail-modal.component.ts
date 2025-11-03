@@ -107,12 +107,14 @@ export class FormDetailModalComponent implements OnInit {
                     status_comment: form.status_comment || ''
                 });
                 this.loading = false;
+                this.cdr.detectChanges();
             },
             error: (error) => {
                 console.error('Error loading form:', error);
                 this.error = error.error?.message || error.error?.error || 'Error al cargar la planilla. Por favor intenta de nuevo.';
                 this.loading = false;
                 this.notificationService.error(this.error!);
+                this.cdr.detectChanges();
             }
         });
     }
