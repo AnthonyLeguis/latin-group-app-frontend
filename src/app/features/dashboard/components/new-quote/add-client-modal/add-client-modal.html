@@ -29,10 +29,10 @@
                     </mat-error>
                 </mat-form-field>
 
-                <!-- Email -->
+                <!-- Email (ahora opcional) -->
                 <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Correo Electrónico</mat-label>
-                    <input matInput type="email" formControlName="email" placeholder="cliente@ejemplo.com" required
+                    <mat-label>Correo Electrónico (Opcional)</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="cliente@ejemplo.com"
                         (input)="onEmailInput()">
                     <mat-icon matPrefix>email</mat-icon>
                     <mat-error *ngIf="clientForm.get('email')?.invalid">

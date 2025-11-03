@@ -82,7 +82,7 @@ export class AddClientModalComponent implements OnInit {
 
         this.clientForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(3)]],
-            email: ['', [Validators.required, Validators.email]],
+            email: ['', [Validators.email]], // Email ahora opcional para clients
             password: ['latin1234*'],
             type: ['client'],
             agent_id: [this.isAdmin ? '' : this.currentUser?.id, agentValidators]

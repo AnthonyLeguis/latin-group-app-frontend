@@ -287,7 +287,7 @@ export class NewQuoteComponent implements OnInit {
             zip_code: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
             phone: ['', [Validators.required, this.phoneValidator.bind(this)]],
             phone2: ['', this.phoneValidator.bind(this)],
-            email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+            email: ['', [Validators.email, Validators.maxLength(255)]], // Email ahora opcional para clients
             gender: ['', Validators.required],
             ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
             legal_status: ['', [Validators.required, Validators.maxLength(100)]],
