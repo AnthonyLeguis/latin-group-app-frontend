@@ -1,7 +1,7 @@
 import { Component, OnInit, LOCALE_ID, inject } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -196,6 +196,14 @@ export class NewQuoteComponent implements OnInit {
     // Control de personas adicionales
     selectedPersonIndex = 1; // Persona actualmente visible (1-6)
     maxPersons = 6; // Máximo de personas adicionales
+
+    // FormGroups individuales para cada persona adicional
+    person1Form!: FormGroup;
+    person2Form!: FormGroup;
+    person3Form!: FormGroup;
+    person4Form!: FormGroup;
+    person5Form!: FormGroup;
+    person6Form!: FormGroup;
 
     // Control de completado de pasos opcionales
     employmentStepCompleted = false;
@@ -397,6 +405,73 @@ export class NewQuoteComponent implements OnInit {
             person6_gender: [''],
             person6_wages: [null, Validators.min(0)],
             person6_frequency: ['']
+        });
+
+        // Crear FormGroups separados para cada persona
+        this.person1Form = this.fb.group({
+            name: this.additionalPersonsForm.get('person1_name'),
+            relation: this.additionalPersonsForm.get('person1_relation'),
+            is_applicant: this.additionalPersonsForm.get('person1_is_applicant'),
+            legal_status: this.additionalPersonsForm.get('person1_legal_status'),
+            document_number: this.additionalPersonsForm.get('person1_document_number'),
+            dob: this.additionalPersonsForm.get('person1_dob'),
+            ssn: this.additionalPersonsForm.get('person1_ssn'),
+            gender: this.additionalPersonsForm.get('person1_gender')
+        });
+
+        this.person2Form = this.fb.group({
+            name: this.additionalPersonsForm.get('person2_name'),
+            relation: this.additionalPersonsForm.get('person2_relation'),
+            is_applicant: this.additionalPersonsForm.get('person2_is_applicant'),
+            legal_status: this.additionalPersonsForm.get('person2_legal_status'),
+            document_number: this.additionalPersonsForm.get('person2_document_number'),
+            dob: this.additionalPersonsForm.get('person2_dob'),
+            ssn: this.additionalPersonsForm.get('person2_ssn'),
+            gender: this.additionalPersonsForm.get('person2_gender')
+        });
+
+        this.person3Form = this.fb.group({
+            name: this.additionalPersonsForm.get('person3_name'),
+            relation: this.additionalPersonsForm.get('person3_relation'),
+            is_applicant: this.additionalPersonsForm.get('person3_is_applicant'),
+            legal_status: this.additionalPersonsForm.get('person3_legal_status'),
+            document_number: this.additionalPersonsForm.get('person3_document_number'),
+            dob: this.additionalPersonsForm.get('person3_dob'),
+            ssn: this.additionalPersonsForm.get('person3_ssn'),
+            gender: this.additionalPersonsForm.get('person3_gender')
+        });
+
+        this.person4Form = this.fb.group({
+            name: this.additionalPersonsForm.get('person4_name'),
+            relation: this.additionalPersonsForm.get('person4_relation'),
+            is_applicant: this.additionalPersonsForm.get('person4_is_applicant'),
+            legal_status: this.additionalPersonsForm.get('person4_legal_status'),
+            document_number: this.additionalPersonsForm.get('person4_document_number'),
+            dob: this.additionalPersonsForm.get('person4_dob'),
+            ssn: this.additionalPersonsForm.get('person4_ssn'),
+            gender: this.additionalPersonsForm.get('person4_gender')
+        });
+
+        this.person5Form = this.fb.group({
+            name: this.additionalPersonsForm.get('person5_name'),
+            relation: this.additionalPersonsForm.get('person5_relation'),
+            is_applicant: this.additionalPersonsForm.get('person5_is_applicant'),
+            legal_status: this.additionalPersonsForm.get('person5_legal_status'),
+            document_number: this.additionalPersonsForm.get('person5_document_number'),
+            dob: this.additionalPersonsForm.get('person5_dob'),
+            ssn: this.additionalPersonsForm.get('person5_ssn'),
+            gender: this.additionalPersonsForm.get('person5_gender')
+        });
+
+        this.person6Form = this.fb.group({
+            name: this.additionalPersonsForm.get('person6_name'),
+            relation: this.additionalPersonsForm.get('person6_relation'),
+            is_applicant: this.additionalPersonsForm.get('person6_is_applicant'),
+            legal_status: this.additionalPersonsForm.get('person6_legal_status'),
+            document_number: this.additionalPersonsForm.get('person6_document_number'),
+            dob: this.additionalPersonsForm.get('person6_dob'),
+            ssn: this.additionalPersonsForm.get('person6_ssn'),
+            gender: this.additionalPersonsForm.get('person6_gender')
         });
 
         // Paso 5: Método de Pago
@@ -788,6 +863,18 @@ export class NewQuoteComponent implements OnInit {
 
     getPersonsArray(): number[] {
         return Array.from({ length: this.maxPersons }, (_, i) => i + 1);
+    }
+
+    getCurrentPersonForm(): FormGroup {
+        switch (this.selectedPersonIndex) {
+            case 1: return this.person1Form;
+            case 2: return this.person2Form;
+            case 3: return this.person3Form;
+            case 4: return this.person4Form;
+            case 5: return this.person5Form;
+            case 6: return this.person6Form;
+            default: return this.person1Form;
+        }
     }
 
     showSuccess(message: string): void {

@@ -256,7 +256,7 @@
 
                             <!-- Email (Opcional) -->
                             <div class="custom-label-group span-2">
-                                <label class="custom-label">Email (Opcional):</label>
+                                <label class="custom-label-required">Email (Opcional):</label>
                                 <mat-form-field appearance="outline">
                                     <input matInput formControlName="email" type="email"
                                         placeholder="ejemplo@email.com">
@@ -534,13 +534,12 @@
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
-                                <div class="form-grid">
+                                <div class="form-grid" [formGroup]="getCurrentPersonForm()">
                                     <!-- Nombre Completo -->
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Nombre Completo:</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput
-                                                [formControlName]="'person' + selectedPersonIndex + '_name'">
+                                            <input matInput formControlName="name">
                                             <mat-icon matPrefix>person</mat-icon>
                                         </mat-form-field>
                                     </div>
@@ -549,8 +548,7 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Relación:</label>
                                         <mat-form-field appearance="outline">
-                                            <mat-select
-                                                [formControlName]="'person' + selectedPersonIndex + '_relation'">
+                                            <mat-select formControlName="relation">
                                                 <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
                                                     {{ rel.label }}
                                                 </mat-option>
@@ -564,23 +562,17 @@
                                         <label class="custom-label-required">Fecha de Nacimiento:</label>
                                         <mat-form-field appearance="outline">
                                             <input matInput [matDatepicker]="dobPickerPerson1"
-                                                *ngIf="selectedPersonIndex === 1"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                *ngIf="selectedPersonIndex === 1" formControlName="dob">
                                             <input matInput [matDatepicker]="dobPickerPerson2"
-                                                *ngIf="selectedPersonIndex === 2"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                *ngIf="selectedPersonIndex === 2" formControlName="dob">
                                             <input matInput [matDatepicker]="dobPickerPerson3"
-                                                *ngIf="selectedPersonIndex === 3"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                *ngIf="selectedPersonIndex === 3" formControlName="dob">
                                             <input matInput [matDatepicker]="dobPickerPerson4"
-                                                *ngIf="selectedPersonIndex === 4"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                *ngIf="selectedPersonIndex === 4" formControlName="dob">
                                             <input matInput [matDatepicker]="dobPickerPerson5"
-                                                *ngIf="selectedPersonIndex === 5"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                *ngIf="selectedPersonIndex === 5" formControlName="dob">
                                             <input matInput [matDatepicker]="dobPickerPerson6"
-                                                *ngIf="selectedPersonIndex === 6"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                *ngIf="selectedPersonIndex === 6" formControlName="dob">
                                             <mat-icon matPrefix>cake</mat-icon>
                                             <mat-datepicker-toggle matSuffix [for]="dobPickerPerson1"
                                                 *ngIf="selectedPersonIndex === 1">
@@ -613,7 +605,7 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Género:</label>
                                         <mat-form-field appearance="outline">
-                                            <mat-select [formControlName]="'person' + selectedPersonIndex + '_gender'">
+                                            <mat-select formControlName="gender">
                                                 <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
                                                     {{ gender.label }}
                                                 </mat-option>
@@ -626,8 +618,7 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Estatus Legal:</label>
                                         <mat-form-field appearance="outline">
-                                            <mat-select
-                                                [formControlName]="'person' + selectedPersonIndex + '_legal_status'">
+                                            <mat-select formControlName="legal_status">
                                                 <mat-option *ngFor="let status of legalStatusOptions"
                                                     [value]="status.value">
                                                     {{ status.label }}
@@ -641,12 +632,11 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">SSN (Opcional):</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput [formControlName]="'person' + selectedPersonIndex + '_ssn'"
-                                                placeholder="Ingrese su SSN" inputmode="numeric" maxlength="9"
-                                                (input)="enforceDigits(additionalPersonsForm, 'person' + selectedPersonIndex + '_ssn', 9)">
+                                            <input matInput formControlName="ssn" placeholder="Ingrese su SSN"
+                                                inputmode="numeric" maxlength="9"
+                                                (input)="enforceDigits(getCurrentPersonForm(), 'ssn', 9)">
                                             <mat-icon matPrefix>badge</mat-icon>
-                                            <mat-error
-                                                *ngIf="additionalPersonsForm.get('person' + selectedPersonIndex + '_ssn')?.hasError('pattern')">
+                                            <mat-error *ngIf="getCurrentPersonForm().get('ssn')?.hasError('pattern')">
                                                 Debe ingresar 4 o 9 dígitos
                                             </mat-error>
                                         </mat-form-field>
@@ -656,8 +646,7 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">Número de Documento (Opcional):</label>
                                         <mat-form-field appearance="outline">
-                                            <input matInput
-                                                [formControlName]="'person' + selectedPersonIndex + '_document_number'">
+                                            <input matInput formControlName="document_number">
                                             <mat-icon matPrefix>credit_card</mat-icon>
                                         </mat-form-field>
                                     </div>
@@ -666,8 +655,7 @@
                                     <div class="custom-label-group">
                                         <label class="custom-label-required">¿Es aplicante?</label>
                                         <mat-form-field appearance="outline">
-                                            <mat-select
-                                                [formControlName]="'person' + selectedPersonIndex + '_is_applicant'">
+                                            <mat-select formControlName="is_applicant">
                                                 <mat-option [value]="true">Sí</mat-option>
                                                 <mat-option [value]="false">No</mat-option>
                                             </mat-select>
