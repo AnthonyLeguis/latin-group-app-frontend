@@ -21,6 +21,7 @@ import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/notification-dialog/confirm-dialog.component';
 import { AddClientModalComponent } from './add-client-modal/add-client-modal';
+import { environment } from '../../../../core/config/environment';
 
 // Registrar el locale español
 registerLocaleData(localeEs);
@@ -709,6 +710,13 @@ export class NewQuoteComponent implements OnInit {
             }
         });
 
+        // Convertir strings vacíos en null para evitar errores en el backend
+        Object.keys(formData).forEach(key => {
+            if (formData[key] === '' || formData[key] === undefined) {
+                formData[key] = null;
+            }
+        });
+
         // Enviar al backend
         this.applicationFormService.createApplicationForm(formData).subscribe({
             next: (response) => {
@@ -718,8 +726,8 @@ export class NewQuoteComponent implements OnInit {
                 const token = response.confirmation_token;
                 const expiresAt = response.token_expires_at;
 
-                // Generar el link de confirmación con el TOKEN
-                const confirmationLink = `${window.location.origin}/confirm/${token}`;
+                // Generar el link de confirmación con el TOKEN usando la URL de producción
+                const confirmationLink = `${environment.frontendUrl}/confirm/${token}`;
 
                 // Mostrar notificación con link
                 const dialogRef = this.dialog.open(ConfirmDialogComponent, {
