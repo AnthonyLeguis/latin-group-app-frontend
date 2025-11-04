@@ -130,8 +130,8 @@ export class AllClientsComponent implements OnInit {
         } else {
             const searchLower = this.searchTerm.toLowerCase().trim();
             this.filteredClients = this.clients.filter(client =>
-                client.name.toLowerCase().includes(searchLower) ||
-                client.email.toLowerCase().includes(searchLower)
+                (client.name && client.name.toLowerCase().includes(searchLower)) ||
+                (client.email && client.email.toLowerCase().includes(searchLower))
             );
         }
         this.cdr.detectChanges();

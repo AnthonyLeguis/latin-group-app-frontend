@@ -142,10 +142,10 @@ export class AllUsersComponent implements OnInit {
         if (this.searchTerm.trim()) {
             const term = this.searchTerm.toLowerCase();
             filtered = filtered.filter(user =>
-                user.name.toLowerCase().includes(term) ||
-                user.email.toLowerCase().includes(term) ||
-                user.type.toLowerCase().includes(term) ||
-                user.created_by?.name.toLowerCase().includes(term)
+                user.name?.toLowerCase().includes(term) ||
+                user.email?.toLowerCase().includes(term) ||
+                user.type?.toLowerCase().includes(term) ||
+                (user.created_by?.name && user.created_by.name.toLowerCase().includes(term))
             );
         }
 
