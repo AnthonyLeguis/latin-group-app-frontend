@@ -1,7 +1,7 @@
 import { Component, OnInit, LOCALE_ID, inject } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -90,6 +90,20 @@ interface Client {
     name: string;
     email: string;
     agent_id?: number;
+}
+
+interface AdditionalPersonFormValue {
+    name: string;
+    relation: string;
+    is_applicant: boolean;
+    legal_status: string;
+    document_number: string;
+    dob: Date | null;
+    company_name: string;
+    ssn: string;
+    gender: string;
+    wages: number | null;
+    frequency: string;
 }
 
 @Component({
@@ -197,14 +211,6 @@ export class NewQuoteComponent implements OnInit {
     selectedPersonIndex = 1; // Persona actualmente visible (1-6)
     maxPersons = 6; // Máximo de personas adicionales
 
-    // FormGroups individuales para cada persona adicional
-    person1Form!: FormGroup;
-    person2Form!: FormGroup;
-    person3Form!: FormGroup;
-    person4Form!: FormGroup;
-    person5Form!: FormGroup;
-    person6Form!: FormGroup;
-
     // Control de completado de pasos opcionales
     employmentStepCompleted = false;
     policyStepCompleted = false;
@@ -218,6 +224,7 @@ export class NewQuoteComponent implements OnInit {
     policyForm!: FormGroup;
     additionalPersonsForm!: FormGroup;
     paymentForm!: FormGroup;
+    currentAdditionalPersonGroup: FormGroup | null = null;
 
     // Estados de género y opciones
     genderOptions = [
@@ -326,153 +333,17 @@ export class NewQuoteComponent implements OnInit {
             poliza_beneficiary: ['', Validators.maxLength(255)]
         });
 
-        // Paso 4: Personas Adicionales (4 personas opcionales)
+        // Paso 4: Personas Adicionales (hasta 6 personas opcionales)
         this.additionalPersonsForm = this.fb.group({
-            // Persona 1
-            person1_name: ['', Validators.maxLength(255)],
-            person1_relation: [''],
-            person1_is_applicant: [false],
-            person1_legal_status: ['', Validators.maxLength(100)],
-            person1_document_number: ['', Validators.maxLength(50)],
-            person1_dob: [''],
-            person1_company_name: ['', Validators.maxLength(255)],
-            person1_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
-            person1_gender: [''],
-            person1_wages: [null, Validators.min(0)],
-            person1_frequency: [''],
-
-            // Persona 2
-            person2_name: ['', Validators.maxLength(255)],
-            person2_relation: [''],
-            person2_is_applicant: [false],
-            person2_legal_status: ['', Validators.maxLength(100)],
-            person2_document_number: ['', Validators.maxLength(50)],
-            person2_dob: [''],
-            person2_company_name: ['', Validators.maxLength(255)],
-            person2_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
-            person2_gender: [''],
-            person2_wages: [null, Validators.min(0)],
-            person2_frequency: [''],
-
-            // Persona 3
-            person3_name: ['', Validators.maxLength(255)],
-            person3_relation: [''],
-            person3_is_applicant: [false],
-            person3_legal_status: ['', Validators.maxLength(100)],
-            person3_document_number: ['', Validators.maxLength(50)],
-            person3_dob: [''],
-            person3_company_name: ['', Validators.maxLength(255)],
-            person3_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
-            person3_gender: [''],
-            person3_wages: [null, Validators.min(0)],
-            person3_frequency: [''],
-
-            // Persona 4
-            person4_name: ['', Validators.maxLength(255)],
-            person4_relation: [''],
-            person4_is_applicant: [false],
-            person4_legal_status: ['', Validators.maxLength(100)],
-            person4_document_number: ['', Validators.maxLength(50)],
-            person4_dob: [''],
-            person4_company_name: ['', Validators.maxLength(255)],
-            person4_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
-            person4_gender: [''],
-            person4_wages: [null, Validators.min(0)],
-            person4_frequency: [''],
-
-            // Persona 5
-            person5_name: ['', Validators.maxLength(255)],
-            person5_relation: [''],
-            person5_is_applicant: [false],
-            person5_legal_status: ['', Validators.maxLength(100)],
-            person5_document_number: ['', Validators.maxLength(50)],
-            person5_dob: [''],
-            person5_company_name: ['', Validators.maxLength(255)],
-            person5_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
-            person5_gender: [''],
-            person5_wages: [null, Validators.min(0)],
-            person5_frequency: [''],
-
-            // Persona 6
-            person6_name: ['', Validators.maxLength(255)],
-            person6_relation: [''],
-            person6_is_applicant: [false],
-            person6_legal_status: ['', Validators.maxLength(100)],
-            person6_document_number: ['', Validators.maxLength(50)],
-            person6_dob: [''],
-            person6_company_name: ['', Validators.maxLength(255)],
-            person6_ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
-            person6_gender: [''],
-            person6_wages: [null, Validators.min(0)],
-            person6_frequency: ['']
+            persons: this.fb.array([])
         });
 
-        // Crear FormGroups separados para cada persona
-        this.person1Form = this.fb.group({
-            name: this.additionalPersonsForm.get('person1_name'),
-            relation: this.additionalPersonsForm.get('person1_relation'),
-            is_applicant: this.additionalPersonsForm.get('person1_is_applicant'),
-            legal_status: this.additionalPersonsForm.get('person1_legal_status'),
-            document_number: this.additionalPersonsForm.get('person1_document_number'),
-            dob: this.additionalPersonsForm.get('person1_dob'),
-            ssn: this.additionalPersonsForm.get('person1_ssn'),
-            gender: this.additionalPersonsForm.get('person1_gender')
-        });
+        const personsArray = this.getAdditionalPersonsArray();
+        for (let i = 0; i < this.maxPersons; i++) {
+            personsArray.push(this.createAdditionalPersonGroup());
+        }
 
-        this.person2Form = this.fb.group({
-            name: this.additionalPersonsForm.get('person2_name'),
-            relation: this.additionalPersonsForm.get('person2_relation'),
-            is_applicant: this.additionalPersonsForm.get('person2_is_applicant'),
-            legal_status: this.additionalPersonsForm.get('person2_legal_status'),
-            document_number: this.additionalPersonsForm.get('person2_document_number'),
-            dob: this.additionalPersonsForm.get('person2_dob'),
-            ssn: this.additionalPersonsForm.get('person2_ssn'),
-            gender: this.additionalPersonsForm.get('person2_gender')
-        });
-
-        this.person3Form = this.fb.group({
-            name: this.additionalPersonsForm.get('person3_name'),
-            relation: this.additionalPersonsForm.get('person3_relation'),
-            is_applicant: this.additionalPersonsForm.get('person3_is_applicant'),
-            legal_status: this.additionalPersonsForm.get('person3_legal_status'),
-            document_number: this.additionalPersonsForm.get('person3_document_number'),
-            dob: this.additionalPersonsForm.get('person3_dob'),
-            ssn: this.additionalPersonsForm.get('person3_ssn'),
-            gender: this.additionalPersonsForm.get('person3_gender')
-        });
-
-        this.person4Form = this.fb.group({
-            name: this.additionalPersonsForm.get('person4_name'),
-            relation: this.additionalPersonsForm.get('person4_relation'),
-            is_applicant: this.additionalPersonsForm.get('person4_is_applicant'),
-            legal_status: this.additionalPersonsForm.get('person4_legal_status'),
-            document_number: this.additionalPersonsForm.get('person4_document_number'),
-            dob: this.additionalPersonsForm.get('person4_dob'),
-            ssn: this.additionalPersonsForm.get('person4_ssn'),
-            gender: this.additionalPersonsForm.get('person4_gender')
-        });
-
-        this.person5Form = this.fb.group({
-            name: this.additionalPersonsForm.get('person5_name'),
-            relation: this.additionalPersonsForm.get('person5_relation'),
-            is_applicant: this.additionalPersonsForm.get('person5_is_applicant'),
-            legal_status: this.additionalPersonsForm.get('person5_legal_status'),
-            document_number: this.additionalPersonsForm.get('person5_document_number'),
-            dob: this.additionalPersonsForm.get('person5_dob'),
-            ssn: this.additionalPersonsForm.get('person5_ssn'),
-            gender: this.additionalPersonsForm.get('person5_gender')
-        });
-
-        this.person6Form = this.fb.group({
-            name: this.additionalPersonsForm.get('person6_name'),
-            relation: this.additionalPersonsForm.get('person6_relation'),
-            is_applicant: this.additionalPersonsForm.get('person6_is_applicant'),
-            legal_status: this.additionalPersonsForm.get('person6_legal_status'),
-            document_number: this.additionalPersonsForm.get('person6_document_number'),
-            dob: this.additionalPersonsForm.get('person6_dob'),
-            ssn: this.additionalPersonsForm.get('person6_ssn'),
-            gender: this.additionalPersonsForm.get('person6_gender')
-        });
+        this.currentAdditionalPersonGroup = this.getPersonGroup(this.selectedPersonIndex);
 
         // Paso 5: Método de Pago
         this.paymentForm = this.fb.group({
@@ -533,14 +404,7 @@ export class NewQuoteComponent implements OnInit {
             }
 
             if (formData.additionalPersons) {
-                // Convertir fechas de personas adicionales
-                for (let i = 1; i <= 6; i++) {
-                    const dobField = `person${i}_dob`;
-                    if (formData.additionalPersons[dobField]) {
-                        formData.additionalPersons[dobField] = new Date(formData.additionalPersons[dobField]);
-                    }
-                }
-                this.additionalPersonsForm.patchValue(formData.additionalPersons, { emitEvent: false });
+                this.restoreAdditionalPersons(formData.additionalPersons);
             }
 
             if (formData.payment) {
@@ -583,7 +447,7 @@ export class NewQuoteComponent implements OnInit {
                 applicant: this.applicantForm.value,
                 employment: this.employmentForm.value,
                 policy: this.policyForm.value,
-                additionalPersons: this.additionalPersonsForm.value,
+                additionalPersons: this.getAdditionalPersonsArray().value,
                 payment: this.paymentForm.value,
                 timestamp: new Date().toISOString()
             };
@@ -715,6 +579,8 @@ export class NewQuoteComponent implements OnInit {
 
         this.isSubmitting = true;
 
+        const personsArray = this.getAdditionalPersonsArray();
+
         // Combinar todos los datos
         const formData = {
             client_id: this.selectedClient?.id,
@@ -722,7 +588,6 @@ export class NewQuoteComponent implements OnInit {
             ...this.applicantForm.value,
             ...this.employmentForm.value,
             ...this.policyForm.value,
-            ...this.additionalPersonsForm.value,
             ...this.paymentForm.value,
             status: 'pendiente',
             confirmed: false
@@ -748,11 +613,9 @@ export class NewQuoteComponent implements OnInit {
             formData.zip_code = sanitizeDigits(formData.zip_code, 5);
         }
 
-        ['ssn', 'person1_ssn', 'person2_ssn', 'person3_ssn', 'person4_ssn', 'person5_ssn', 'person6_ssn'].forEach(field => {
-            if (formData[field]) {
-                formData[field] = sanitizeDigits(formData[field], 9);
-            }
-        });
+        if (formData.ssn) {
+            formData.ssn = sanitizeDigits(formData.ssn, 9);
+        }
 
         if (formData.poliza_payment_day) {
             const dayDigits = sanitizeDigits(formData.poliza_payment_day, 2);
@@ -779,11 +642,9 @@ export class NewQuoteComponent implements OnInit {
         if (formData.dob) {
             formData.dob = this.formatDate(formData.dob);
         }
-        ['person1_dob', 'person2_dob', 'person3_dob', 'person4_dob', 'person5_dob', 'person6_dob'].forEach(field => {
-            if (formData[field]) {
-                formData[field] = this.formatDate(formData[field]);
-            }
-        });
+
+        const additionalPersonsPayload = this.buildAdditionalPersonsPayload(personsArray, sanitizeDigits);
+        Object.assign(formData, additionalPersonsPayload);
 
         // Convertir strings vacíos en null para evitar errores en el backend
         Object.keys(formData).forEach(key => {
@@ -853,28 +714,151 @@ export class NewQuoteComponent implements OnInit {
     selectPerson(personIndex: number): void {
         if (personIndex >= 1 && personIndex <= this.maxPersons) {
             this.selectedPersonIndex = personIndex;
+            this.currentAdditionalPersonGroup = this.getPersonGroup(personIndex);
         }
     }
 
     hasPersonData(personIndex: number): boolean {
-        const nameControl = this.additionalPersonsForm.get(`person${personIndex}_name`);
-        return nameControl?.value?.trim().length > 0;
+        const group = this.getPersonGroup(personIndex);
+        const nameValue = group.get('name')?.value;
+        return typeof nameValue === 'string' && nameValue.trim().length > 0;
     }
 
     getPersonsArray(): number[] {
         return Array.from({ length: this.maxPersons }, (_, i) => i + 1);
     }
 
-    getCurrentPersonForm(): FormGroup {
-        switch (this.selectedPersonIndex) {
-            case 1: return this.person1Form;
-            case 2: return this.person2Form;
-            case 3: return this.person3Form;
-            case 4: return this.person4Form;
-            case 5: return this.person5Form;
-            case 6: return this.person6Form;
-            default: return this.person1Form;
+    private getAdditionalPersonsArray(): FormArray {
+        return this.additionalPersonsForm.get('persons') as FormArray;
+    }
+
+    private createAdditionalPersonGroup(): FormGroup {
+        return this.fb.group({
+            name: ['', Validators.maxLength(255)],
+            relation: [''],
+            is_applicant: [false],
+            legal_status: ['', Validators.maxLength(100)],
+            document_number: ['', Validators.maxLength(50)],
+            dob: [null],
+            company_name: ['', Validators.maxLength(255)],
+            ssn: ['', [Validators.pattern('^(?:\\d{4}|\\d{9})?$')]],
+            gender: [''],
+            wages: [null, Validators.min(0)],
+            frequency: ['']
+        });
+    }
+
+    private getPersonGroup(index: number): FormGroup {
+        const personsArray = this.getAdditionalPersonsArray();
+        const group = personsArray.at(index - 1);
+        if (!group) {
+            throw new Error(`Person group index ${index} is out of range`);
         }
+        return group as FormGroup;
+    }
+
+    private restoreAdditionalPersons(data: any): void {
+        const personsArray = this.getAdditionalPersonsArray();
+
+        if (Array.isArray(data)) {
+            data.forEach((personData, idx) => {
+                const group = personsArray.at(idx) as FormGroup | undefined;
+                if (!group) {
+                    return;
+                }
+                const normalized = this.normalizePersonData(personData);
+                group.patchValue(normalized, { emitEvent: false });
+            });
+            this.currentAdditionalPersonGroup = this.getPersonGroup(this.selectedPersonIndex);
+            return;
+        }
+
+        for (let i = 1; i <= this.maxPersons; i++) {
+            const group = personsArray.at(i - 1) as FormGroup | undefined;
+            if (!group) {
+                continue;
+            }
+
+            const legacyData = {
+                name: data[`person${i}_name`],
+                relation: data[`person${i}_relation`],
+                is_applicant: data[`person${i}_is_applicant`],
+                legal_status: data[`person${i}_legal_status`],
+                document_number: data[`person${i}_document_number`],
+                dob: data[`person${i}_dob`],
+                company_name: data[`person${i}_company_name`],
+                ssn: data[`person${i}_ssn`],
+                gender: data[`person${i}_gender`],
+                wages: data[`person${i}_wages`],
+                frequency: data[`person${i}_frequency`]
+            };
+
+            const normalized = this.normalizePersonData(legacyData);
+            group.patchValue(normalized, { emitEvent: false });
+        }
+
+        this.currentAdditionalPersonGroup = this.getPersonGroup(this.selectedPersonIndex);
+    }
+
+    private normalizePersonData(raw: Partial<AdditionalPersonFormValue> | any): AdditionalPersonFormValue {
+        const toStringOrEmpty = (value: any): string => (typeof value === 'string' ? value : value ?? '');
+        const toBooleanOrFalse = (value: any): boolean => (typeof value === 'boolean' ? value : !!value);
+        const toNumberOrNull = (value: any): number | null => {
+            if (value === null || value === undefined || value === '') {
+                return null;
+            }
+            const parsed = Number(value);
+            return Number.isNaN(parsed) ? null : parsed;
+        };
+
+        let dobValue: Date | null = null;
+        if (raw?.dob) {
+            const parsedDate = new Date(raw.dob);
+            dobValue = Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+        }
+
+        return {
+            name: toStringOrEmpty(raw?.name),
+            relation: toStringOrEmpty(raw?.relation),
+            is_applicant: toBooleanOrFalse(raw?.is_applicant),
+            legal_status: toStringOrEmpty(raw?.legal_status),
+            document_number: toStringOrEmpty(raw?.document_number),
+            dob: dobValue,
+            company_name: toStringOrEmpty(raw?.company_name),
+            ssn: toStringOrEmpty(raw?.ssn),
+            gender: toStringOrEmpty(raw?.gender),
+            wages: toNumberOrNull(raw?.wages),
+            frequency: toStringOrEmpty(raw?.frequency)
+        };
+    }
+
+    private buildAdditionalPersonsPayload(personsArray: FormArray, sanitizeDigits: (value: any, maxLength?: number) => any): Record<string, any> {
+        const payload: Record<string, any> = {};
+
+        personsArray.controls.forEach((control, index) => {
+            const personIndex = index + 1;
+            const value = control.value as AdditionalPersonFormValue;
+
+            const entries: Record<string, any> = {
+                name: value.name ?? null,
+                relation: value.relation ?? null,
+                is_applicant: value.is_applicant ?? false,
+                legal_status: value.legal_status ?? null,
+                document_number: value.document_number ?? null,
+                dob: value.dob ? this.formatDate(value.dob) : null,
+                company_name: value.company_name ?? null,
+                ssn: value.ssn ? sanitizeDigits(value.ssn, 9) : null,
+                gender: value.gender ?? null,
+                wages: value.wages ?? null,
+                frequency: value.frequency ?? null
+            };
+
+            Object.entries(entries).forEach(([key, val]) => {
+                payload[`person${personIndex}_${key}`] = val === '' ? null : val;
+            });
+        });
+
+        return payload;
     }
 
     showSuccess(message: string): void {

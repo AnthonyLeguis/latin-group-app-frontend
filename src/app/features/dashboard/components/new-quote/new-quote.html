@@ -534,135 +534,107 @@
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
-                                <div class="form-grid" [formGroup]="getCurrentPersonForm()">
-                                    <!-- Nombre Completo -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">Nombre Completo:</label>
-                                        <mat-form-field appearance="outline">
-                                            <input matInput formControlName="name">
-                                            <mat-icon matPrefix>person</mat-icon>
-                                        </mat-form-field>
-                                    </div>
+                                <ng-container *ngIf="currentAdditionalPersonGroup as personGroup">
+                                    <div class="form-grid" [formGroup]="personGroup">
+                                        <!-- Nombre Completo -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Nombre Completo:</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="name">
+                                                <mat-icon matPrefix>person</mat-icon>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- Relación -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">Relación:</label>
-                                        <mat-form-field appearance="outline">
-                                            <mat-select formControlName="relation">
-                                                <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
-                                                    {{ rel.label }}
-                                                </mat-option>
-                                            </mat-select>
-                                            <mat-icon matPrefix>family_restroom</mat-icon>
-                                        </mat-form-field>
-                                    </div>
+                                        <!-- Relación -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Relación:</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="relation">
+                                                    <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
+                                                        {{ rel.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>family_restroom</mat-icon>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- Fecha de Nacimiento -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">Fecha de Nacimiento:</label>
-                                        <mat-form-field appearance="outline">
-                                            <input matInput [matDatepicker]="dobPickerPerson1"
-                                                *ngIf="selectedPersonIndex === 1" formControlName="dob">
-                                            <input matInput [matDatepicker]="dobPickerPerson2"
-                                                *ngIf="selectedPersonIndex === 2" formControlName="dob">
-                                            <input matInput [matDatepicker]="dobPickerPerson3"
-                                                *ngIf="selectedPersonIndex === 3" formControlName="dob">
-                                            <input matInput [matDatepicker]="dobPickerPerson4"
-                                                *ngIf="selectedPersonIndex === 4" formControlName="dob">
-                                            <input matInput [matDatepicker]="dobPickerPerson5"
-                                                *ngIf="selectedPersonIndex === 5" formControlName="dob">
-                                            <input matInput [matDatepicker]="dobPickerPerson6"
-                                                *ngIf="selectedPersonIndex === 6" formControlName="dob">
-                                            <mat-icon matPrefix>cake</mat-icon>
-                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson1"
-                                                *ngIf="selectedPersonIndex === 1">
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson2"
-                                                *ngIf="selectedPersonIndex === 2">
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson3"
-                                                *ngIf="selectedPersonIndex === 3">
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson4"
-                                                *ngIf="selectedPersonIndex === 4">
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson5"
-                                                *ngIf="selectedPersonIndex === 5">
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker-toggle matSuffix [for]="dobPickerPerson6"
-                                                *ngIf="selectedPersonIndex === 6">
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker #dobPickerPerson1></mat-datepicker>
-                                            <mat-datepicker #dobPickerPerson2></mat-datepicker>
-                                            <mat-datepicker #dobPickerPerson3></mat-datepicker>
-                                            <mat-datepicker #dobPickerPerson4></mat-datepicker>
-                                            <mat-datepicker #dobPickerPerson5></mat-datepicker>
-                                            <mat-datepicker #dobPickerPerson6></mat-datepicker>
-                                        </mat-form-field>
-                                    </div>
+                                        <!-- Fecha de Nacimiento -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Fecha de Nacimiento:</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput [matDatepicker]="additionalPersonDobPicker"
+                                                    formControlName="dob">
+                                                <mat-datepicker-toggle matSuffix
+                                                    [for]="additionalPersonDobPicker"></mat-datepicker-toggle>
+                                                <mat-datepicker #additionalPersonDobPicker></mat-datepicker>
+                                                <mat-icon matPrefix>cake</mat-icon>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- Género -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">Género:</label>
-                                        <mat-form-field appearance="outline">
-                                            <mat-select formControlName="gender">
-                                                <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
-                                                    {{ gender.label }}
-                                                </mat-option>
-                                            </mat-select>
-                                            <mat-icon matPrefix>wc</mat-icon>
-                                        </mat-form-field>
-                                    </div>
+                                        <!-- Género -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Género:</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="gender">
+                                                    <mat-option *ngFor="let gender of genderOptions"
+                                                        [value]="gender.value">
+                                                        {{ gender.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>wc</mat-icon>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- Legal Status -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">Estatus Legal:</label>
-                                        <mat-form-field appearance="outline">
-                                            <mat-select formControlName="legal_status">
-                                                <mat-option *ngFor="let status of legalStatusOptions"
-                                                    [value]="status.value">
-                                                    {{ status.label }}
-                                                </mat-option>
-                                            </mat-select>
-                                            <mat-icon matPrefix>gavel</mat-icon>
-                                        </mat-form-field>
-                                    </div>
+                                        <!-- Legal Status -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Estatus Legal:</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="legal_status">
+                                                    <mat-option *ngFor="let status of legalStatusOptions"
+                                                        [value]="status.value">
+                                                        {{ status.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>gavel</mat-icon>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- SSN -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">SSN (Opcional):</label>
-                                        <mat-form-field appearance="outline">
-                                            <input matInput formControlName="ssn" placeholder="Ingrese su SSN"
-                                                inputmode="numeric" maxlength="9"
-                                                (input)="enforceDigits(getCurrentPersonForm(), 'ssn', 9)">
-                                            <mat-icon matPrefix>badge</mat-icon>
-                                            <mat-error *ngIf="getCurrentPersonForm().get('ssn')?.hasError('pattern')">
-                                                Debe ingresar 4 o 9 dígitos
-                                            </mat-error>
-                                        </mat-form-field>
-                                    </div>
+                                        <!-- SSN -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">SSN (Opcional):</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="ssn" placeholder="Ingrese su SSN"
+                                                    inputmode="numeric" maxlength="9"
+                                                    (input)="enforceDigits(personGroup, 'ssn', 9)">
+                                                <mat-icon matPrefix>badge</mat-icon>
+                                                <mat-error *ngIf="personGroup.get('ssn')?.hasError('pattern')">
+                                                    Debe ingresar 4 o 9 dígitos
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- Número de Documento -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">Número de Documento (Opcional):</label>
-                                        <mat-form-field appearance="outline">
-                                            <input matInput formControlName="document_number">
-                                            <mat-icon matPrefix>credit_card</mat-icon>
-                                        </mat-form-field>
-                                    </div>
+                                        <!-- Número de Documento -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Número de Documento (Opcional):</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="document_number">
+                                                <mat-icon matPrefix>credit_card</mat-icon>
+                                            </mat-form-field>
+                                        </div>
 
-                                    <!-- ¿Es el aplicante principal? -->
-                                    <div class="custom-label-group">
-                                        <label class="custom-label-required">¿Es aplicante?</label>
-                                        <mat-form-field appearance="outline">
-                                            <mat-select formControlName="is_applicant">
-                                                <mat-option [value]="true">Sí</mat-option>
-                                                <mat-option [value]="false">No</mat-option>
-                                            </mat-select>
-                                            <mat-icon matPrefix>how_to_reg</mat-icon>
-                                        </mat-form-field>
+                                        <!-- ¿Es el aplicante principal? -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">¿Es aplicante?</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="is_applicant">
+                                                    <mat-option [value]="true">Sí</mat-option>
+                                                    <mat-option [value]="false">No</mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>how_to_reg</mat-icon>
+                                            </mat-form-field>
+                                        </div>
                                     </div>
-                                </div>
+                                </ng-container>
                             </mat-card-content>
                         </mat-card>
 
