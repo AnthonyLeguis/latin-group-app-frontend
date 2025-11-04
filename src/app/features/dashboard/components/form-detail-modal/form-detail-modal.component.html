@@ -478,9 +478,8 @@
                                         </div>
                                     </div>
                                     <div class="document-actions flex items-center justify-center">
-                                        <div class="relative group inline-block">
-                                            <button mat-icon-button (click)="viewDocument(doc)"
-                                                [disabled]="doc.is_audio">
+                                        <div *ngIf="canPreviewDocument(doc)" class="relative group inline-block">
+                                            <button mat-icon-button (click)="viewDocument(doc)">
                                                 <mat-icon>visibility</mat-icon>
                                             </button>
                                             <div

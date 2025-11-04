@@ -462,18 +462,34 @@ export class FormDetailModalComponent implements OnInit {
         });
     }
 
+    canPreviewDocument(document: ApplicationDocument): boolean {
+        if (document.is_audio) {
+            return false;
+        }
+
+        if (document.file_url) {
+            return true;
+        }
+
+        return !!this.form?.id;
+    }
+
     viewDocument(document: ApplicationDocument): void {
-        if (!this.form?.id || document.is_audio) {
+        if (!this.canPreviewDocument(document)) {
             return;
         }
 
-        if (document.is_image && document.file_url) {
-            window.open(document.file_url, '_blank');
+        if (document.file_url) {
+            window.open(document.file_url, '_blank', 'noopener');
+            return;
+        }
+
+        if (!this.form?.id) {
             return;
         }
 
         const url = `${environment.apiUrl}/application-forms/${this.form.id}/documents/${document.id}/view`;
-        window.open(url, '_blank');
+        window.open(url, '_blank', 'noopener');
     }
 
     downloadDocument(document: ApplicationDocument): void {
