@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, ChangeDetectorRef, AfterViewInit, LOCALE_ID } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -860,6 +860,14 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
         const personSsn = this.applicationForm.get(`person${personNum}_ssn`)?.value;
 
         return !!(personName || personRelation || personDob || personGender || personSsn);
+    }
+
+    getPersonControl(field: string): FormControl {
+        const control = this.applicationForm?.get(`person${this.selectedPersonIndex}_${field}`);
+        if (!(control instanceof FormControl)) {
+            throw new Error(`Control person${this.selectedPersonIndex}_${field} no encontrado en el formulario.`);
+        }
+        return control;
     }
 
     onCancel(): void {

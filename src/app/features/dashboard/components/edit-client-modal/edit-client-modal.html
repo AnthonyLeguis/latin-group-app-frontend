@@ -463,7 +463,7 @@
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
-                                            <input matInput [formControlName]="'person' + selectedPersonIndex + '_name'"
+                                            <input matInput [formControl]="getPersonControl('name')"
                                                 placeholder="Nombre completo">
                                         </mat-form-field>
                                     </div>
@@ -477,8 +477,7 @@
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
-                                            <mat-select
-                                                [formControlName]="'person' + selectedPersonIndex + '_relation'">
+                                            <mat-select [formControl]="getPersonControl('relation')">
                                                 <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
                                                     {{ rel.label }}
                                                 </mat-option>
@@ -497,7 +496,7 @@
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
                                             <input matInput [matDatepicker]="dobPickerPerson"
-                                                [formControlName]="'person' + selectedPersonIndex + '_dob'">
+                                                [formControl]="getPersonControl('dob')">
                                             <mat-datepicker-toggle matSuffix
                                                 [for]="dobPickerPerson"></mat-datepicker-toggle>
                                             <mat-datepicker #dobPickerPerson></mat-datepicker>
@@ -516,7 +515,7 @@
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
-                                            <mat-select [formControlName]="'person' + selectedPersonIndex + '_gender'">
+                                            <mat-select [formControl]="getPersonControl('gender')">
                                                 <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
                                                     {{ gender.label }}
                                                 </mat-option>
@@ -533,8 +532,7 @@
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
-                                            <mat-select
-                                                [formControlName]="'person' + selectedPersonIndex + '_legal_status'">
+                                            <mat-select [formControl]="getPersonControl('legal_status')">
                                                 <mat-option *ngFor="let status of legalStatusOptions"
                                                     [value]="status.value">
                                                     {{ status.label }}
@@ -552,8 +550,7 @@
                                         </div>
                                         <mat-form-field appearance="outline" class="edit-input">
                                             <mat-label>Nuevo valor</mat-label>
-                                            <input matInput [formControlName]="'person' + selectedPersonIndex + '_ssn'"
-                                                placeholder="SSN">
+                                            <input matInput [formControl]="getPersonControl('ssn')" placeholder="SSN">
                                         </mat-form-field>
                                     </div>
 
@@ -564,8 +561,7 @@
                                             <span>{{ data.client.application_form?.['person' + selectedPersonIndex +
                                                 '_is_applicant'] ? 'Sí' : 'No' }}</span>
                                         </div>
-                                        <mat-checkbox
-                                            [formControlName]="'person' + selectedPersonIndex + '_is_applicant'"
+                                        <mat-checkbox [formControl]="getPersonControl('is_applicant')"
                                             class="person-checkbox">
                                             Es el aplicante principal
                                         </mat-checkbox>
