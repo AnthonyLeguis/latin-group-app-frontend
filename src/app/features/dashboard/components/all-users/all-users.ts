@@ -96,10 +96,17 @@ export class AllUsersComponent implements OnInit {
     loadUsers(page: number = 1): void {
         this.isLoading = true;
 
-        const params: { page: number; type?: string } = { page };
+        const params: { page: number; type?: string; per_page: number; search?: string } = {
+            page,
+            per_page: this.pageSize
+        };
 
         if (this.selectedTypeFilter) {
             params.type = this.selectedTypeFilter;
+        }
+
+        if (this.searchTerm.trim()) {
+            params.search = this.searchTerm.trim();
         }
 
         this.userService.getUsers(params).subscribe({
@@ -136,20 +143,7 @@ export class AllUsersComponent implements OnInit {
     }
 
     applyFilters(): void {
-        let filtered = [...this.users];
-
-        // Filtrar por término de búsqueda
-        if (this.searchTerm.trim()) {
-            const term = this.searchTerm.toLowerCase();
-            filtered = filtered.filter(user =>
-                user.name?.toLowerCase().includes(term) ||
-                user.email?.toLowerCase().includes(term) ||
-                user.type?.toLowerCase().includes(term) ||
-                (user.created_by?.name && user.created_by.name.toLowerCase().includes(term))
-            );
-        }
-
-        this.filteredUsers = [...filtered];
+        this.filteredUsers = [...this.users];
     }
 
     // Seleccionar filtro de tipo
@@ -165,12 +159,14 @@ export class AllUsersComponent implements OnInit {
     }
 
     onSearch(): void {
-        this.applyFilters();
+        this.currentPage = 1;
+        this.loadUsers(1);
     }
 
     clearSearch(): void {
         this.searchTerm = '';
-        this.applyFilters();
+        this.currentPage = 1;
+        this.loadUsers(1);
     }
 
     onPageChange(event: PageEvent): void {

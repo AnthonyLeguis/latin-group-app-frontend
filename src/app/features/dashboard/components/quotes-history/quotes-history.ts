@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -18,6 +18,7 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 import { TokenAuthorizationModalComponent } from '../token-authorization-modal/token-authorization-modal.component';
 import { environment } from '../../../../core/config/environment';
+import { finalize } from 'rxjs/operators';
 
 @Component({
     selector: 'app-quotes-history',
@@ -44,6 +45,7 @@ export class QuotesHistoryComponent implements OnInit {
     private formService = inject(ApplicationFormService);
     private authService = inject(AuthService);
     private dialog = inject(MatDialog);
+    private cdr = inject(ChangeDetectorRef);
     private readonly apiBase = environment.apiUrl.replace(/\/$/, '');
 
     isLoading = true;
@@ -77,35 +79,49 @@ export class QuotesHistoryComponent implements OnInit {
 
     loadForms(page: number = 1): void {
         this.isLoading = true;
-        this.formService.getApplicationForms(page, this.pageSize).subscribe({
+        const searchValue = (this.searchTerm || '').trim();
+        const filters = searchValue ? { search: searchValue } : undefined;
+
+        this.formService.getApplicationForms(page, this.pageSize, filters).pipe(
+            finalize(() => {
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            })
+        ).subscribe({
             next: (response: any) => {
                 //////console.log('📋 Quotes history response:', response);
                 // El backend devuelve un objeto paginado: { data: [...], total: X, current_page, per_page }
                 this.forms = response.data || [];
-                this.filteredForms = [...this.forms];
-                this.totalForms = response.total || 0;
-                this.currentPage = response.current_page || 1;
-                this.pageSize = response.per_page || 15;
-                this.isLoading = false;
+                this.totalForms = response.total || this.forms.length;
+                this.currentPage = response.current_page || page;
+                this.pageSize = response.per_page || this.pageSize;
+                this.applyFilters();
+                this.cdr.detectChanges();
             },
             error: (error: any) => {
                 console.error('❌ Error loading forms:', error);
-                this.isLoading = false;
+                this.forms = [];
+                this.filteredForms = [];
+                this.cdr.detectChanges();
             }
         });
     }
 
     onPageChange(event: PageEvent): void {
-        this.loadForms(event.pageIndex + 1);
+        this.pageSize = event.pageSize;
+        this.currentPage = event.pageIndex + 1;
+        this.loadForms(this.currentPage);
     }
 
     onSearch(): void {
-        this.applyFilters();
+        this.currentPage = 1;
+        this.loadForms(1);
     }
 
     clearSearch(): void {
         this.searchTerm = '';
-        this.applyFilters();
+        this.currentPage = 1;
+        this.loadForms(1);
     }
 
     // Filtrar por estado

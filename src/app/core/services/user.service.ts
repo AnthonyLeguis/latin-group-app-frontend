@@ -91,7 +91,7 @@ export class UserService {
     /**
      * Obtener lista de usuarios con filtros opcionales y paginación
      */
-    getUsers(filters?: { type?: string; page?: number }): Observable<any> {
+    getUsers(filters?: { type?: string; page?: number; per_page?: number; search?: string }): Observable<any> {
         const params = new URLSearchParams();
 
         if (filters?.type) {
@@ -100,6 +100,14 @@ export class UserService {
 
         if (filters?.page) {
             params.append('page', filters.page.toString());
+        }
+
+        if (filters?.per_page) {
+            params.append('per_page', filters.per_page.toString());
+        }
+
+        if (filters?.search && filters.search.trim() !== '') {
+            params.append('search', filters.search.trim());
         }
 
         const url = `${environment.apiUrl}/users${params.toString() ? '?' + params.toString() : ''}`;

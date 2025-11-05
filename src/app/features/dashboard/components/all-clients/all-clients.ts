@@ -96,16 +96,26 @@ export class AllClientsComponent implements OnInit {
 
     loadClients(page: number = 1): void {
         this.isLoading = true;
-        this.userService.getUsers({ type: 'client', page }).subscribe({
+
+        const params: { type: string; page: number; per_page: number; search?: string } = {
+            type: 'client',
+            page,
+            per_page: this.pageSize
+        };
+
+        if (this.searchTerm.trim()) {
+            params.search = this.searchTerm.trim();
+        }
+
+        this.userService.getUsers(params).subscribe({
             next: (response) => {
                 //console.log('Clients response:', response);
                 this.clients = response.data || [];
                 this.filteredClients = [...this.clients];
-                this.totalClients = response.total || 0;
-                this.currentPage = response.current_page || 1;
-                this.pageSize = response.per_page || 15;
+                this.totalClients = response.total || this.clients.length;
+                this.currentPage = response.current_page || page;
+                this.pageSize = response.per_page || this.pageSize;
                 this.isLoading = false;
-                this.applyFilter();
                 this.cdr.detectChanges();
             },
             error: (error) => {
@@ -117,29 +127,20 @@ export class AllClientsComponent implements OnInit {
     }
 
     onPageChange(event: PageEvent): void {
-        this.loadClients(event.pageIndex + 1);
+        this.pageSize = event.pageSize;
+        this.currentPage = event.pageIndex + 1;
+        this.loadClients(this.currentPage);
     }
 
     onSearch(): void {
-        this.applyFilter();
-    }
-
-    applyFilter(): void {
-        if (!this.searchTerm || this.searchTerm.trim() === '') {
-            this.filteredClients = [...this.clients];
-        } else {
-            const searchLower = this.searchTerm.toLowerCase().trim();
-            this.filteredClients = this.clients.filter(client =>
-                (client.name && client.name.toLowerCase().includes(searchLower)) ||
-                (client.email && client.email.toLowerCase().includes(searchLower))
-            );
-        }
-        this.cdr.detectChanges();
+        this.currentPage = 1;
+        this.loadClients(1);
     }
 
     clearSearch(): void {
         this.searchTerm = '';
-        this.applyFilter();
+        this.currentPage = 1;
+        this.loadClients(1);
     }
 
     viewClient(client: Client): void {

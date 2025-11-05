@@ -17,7 +17,7 @@ export class ApplicationFormService {
     getApplicationForms(
         page: number = 1,
         perPage: number = 15,
-        filters?: { status?: string; client_id?: number }
+        filters?: { status?: string; client_id?: number; search?: string }
     ): Observable<any> {
         let params = new HttpParams()
             .set('page', page.toString())
@@ -29,6 +29,10 @@ export class ApplicationFormService {
 
         if (filters?.client_id) {
             params = params.set('client_id', filters.client_id.toString());
+        }
+
+        if (filters?.search && filters.search.trim() !== '') {
+            params = params.set('search', filters.search.trim());
         }
 
         return this.http.get<any>(this.apiUrl, { params });
