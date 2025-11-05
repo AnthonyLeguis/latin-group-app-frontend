@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -11,6 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApplicationFormService } from '../../../../core/services/application-form.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ApplicationForm } from '../../../../core/models/application-form.interface';
@@ -18,7 +19,8 @@ import { FormSkeletonComponent } from '../../../../shared/components/form-skelet
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
 import { TokenAuthorizationModalComponent } from '../token-authorization-modal/token-authorization-modal.component';
 import { environment } from '../../../../core/config/environment';
-import { finalize } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 
 @Component({
     selector: 'app-quotes-history',
@@ -36,12 +38,13 @@ import { finalize } from 'rxjs/operators';
         MatTooltipModule,
         MatPaginatorModule,
         MatDialogModule,
+        MatProgressSpinnerModule,
         FormSkeletonComponent
     ],
     templateUrl: './quotes-history.html',
     styleUrls: ['./quotes-history.scss']
 })
-export class QuotesHistoryComponent implements OnInit {
+export class QuotesHistoryComponent implements OnInit, OnDestroy {
     private formService = inject(ApplicationFormService);
     private authService = inject(AuthService);
     private dialog = inject(MatDialog);
@@ -49,13 +52,17 @@ export class QuotesHistoryComponent implements OnInit {
     private readonly apiBase = environment.apiUrl.replace(/\/$/, '');
 
     isLoading = true;
+    isLoadingTable = false; // Nuevo: solo para la tabla
     forms: ApplicationForm[] = [];
     filteredForms: ApplicationForm[] = [];
     searchTerm = '';
-    selectedStatus: string | null = null; // Estado seleccionado para filtrar
+    selectedStatus: string | null = null;
     totalForms = 0;
     currentPage = 1;
     pageSize = 15;
+    
+    // Subject para el debounce de búsqueda
+    private searchSubject = new Subject<string>();
 
     // Usuario actual
     isAdmin = false;
@@ -65,6 +72,20 @@ export class QuotesHistoryComponent implements OnInit {
     ngOnInit(): void {
         this.checkUserRole();
         this.loadForms();
+        this.setupSearchDebounce();
+    }
+    
+    /**
+     * Configurar debounce para la búsqueda
+     */
+    private setupSearchDebounce(): void {
+        this.searchSubject.pipe(
+            debounceTime(500),
+            distinctUntilChanged()
+        ).subscribe(searchTerm => {
+            this.currentPage = 1;
+            this.loadForms(1);
+        });
     }
 
     checkUserRole(): void {
@@ -78,19 +99,25 @@ export class QuotesHistoryComponent implements OnInit {
     }
 
     loadForms(page: number = 1): void {
-        this.isLoading = true;
+        // Si es la carga inicial, mostrar skeleton completo
+        // Si es búsqueda/filtro, solo mostrar loader en tabla
+        if (page === 1 && this.forms.length === 0) {
+            this.isLoading = true;
+        } else {
+            this.isLoadingTable = true;
+        }
+        
         const searchValue = (this.searchTerm || '').trim();
         const filters = searchValue ? { search: searchValue } : undefined;
 
         this.formService.getApplicationForms(page, this.pageSize, filters).pipe(
             finalize(() => {
                 this.isLoading = false;
+                this.isLoadingTable = false;
                 this.cdr.detectChanges();
             })
         ).subscribe({
             next: (response: any) => {
-                //////console.log('📋 Quotes history response:', response);
-                // El backend devuelve un objeto paginado: { data: [...], total: X, current_page, per_page }
                 this.forms = response.data || [];
                 this.totalForms = response.total || this.forms.length;
                 this.currentPage = response.current_page || page;
@@ -114,14 +141,17 @@ export class QuotesHistoryComponent implements OnInit {
     }
 
     onSearch(): void {
-        this.currentPage = 1;
-        this.loadForms(1);
+        this.searchSubject.next(this.searchTerm);
     }
 
     clearSearch(): void {
         this.searchTerm = '';
         this.currentPage = 1;
         this.loadForms(1);
+    }
+    
+    ngOnDestroy(): void {
+        this.searchSubject.complete();
     }
 
     // Filtrar por estado

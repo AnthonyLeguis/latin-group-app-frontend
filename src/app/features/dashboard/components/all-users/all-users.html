@@ -53,7 +53,7 @@
             </div>
 
             <!-- Tabla de usuarios -->
-            <div class="table-container" *ngIf="filteredUsers.length > 0">
+            <div class="table-container" *ngIf="!isLoadingTable && filteredUsers.length > 0">
                 <table mat-table [dataSource]="filteredUsers" class="users-table">
 
                     <!-- Columna Nombre -->
@@ -215,8 +215,14 @@
                 </mat-paginator>
             </div>
 
+            <!-- Loader solo para la tabla -->
+            <div class="table-loading" *ngIf="isLoadingTable">
+                <mat-spinner diameter="50"></mat-spinner>
+                <p>Cargando usuarios...</p>
+            </div>
+
             <!-- Sin resultados -->
-            <div class="no-data" *ngIf="filteredUsers.length === 0">
+            <div class="no-data" *ngIf="!isLoadingTable && filteredUsers.length === 0">
                 <mat-icon>inbox</mat-icon>
                 <h3>No hay usuarios {{ searchTerm ? 'que coincidan con la búsqueda' : 'registrados' }}</h3>
                 <p>{{ searchTerm ? 'Intenta con otro término de búsqueda' : 'Aún no se han creado usuarios en el

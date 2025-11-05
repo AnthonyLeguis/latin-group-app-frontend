@@ -386,10 +386,17 @@ export class FormDetailModalComponent implements OnInit {
 
     formatDate(date: string | undefined): string {
         if (!date) return 'N/A';
-        return new Date(date).toLocaleDateString('es-ES', {
+        
+        // Si la fecha es solo YYYY-MM-DD (sin hora), agregar 'T00:00:00' para evitar problemas de zona horaria
+        const dateStr = date.includes('T') ? date : `${date}T00:00:00`;
+        const dateObj = new Date(dateStr);
+        
+        // Usar toLocaleDateString con timeZone UTC para evitar desajustes
+        return dateObj.toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
+            day: 'numeric',
+            timeZone: 'UTC'
         });
     }
 
@@ -453,6 +460,8 @@ export class FormDetailModalComponent implements OnInit {
         if (!date) {
             return 'Sin fecha';
         }
+        
+        // Para fechas con hora, no aplicamos UTC ya que queremos mostrar la hora local
         return new Date(date).toLocaleString('es-ES', {
             year: 'numeric',
             month: 'short',

@@ -55,7 +55,7 @@
             </div>
 
             <!-- Tabla de planillas -->
-            <div class="table-container" *ngIf="filteredForms.length > 0">
+            <div class="table-container" *ngIf="!isLoadingTable && filteredForms.length > 0">
                 <table mat-table [dataSource]="filteredForms" class="quotes-table">
                     <!-- Columna Cliente -->
                     <ng-container matColumnDef="client">
@@ -182,8 +182,14 @@
                 </mat-paginator>
             </div>
 
+            <!-- Loader solo para la tabla -->
+            <div class="table-loading" *ngIf="isLoadingTable">
+                <mat-spinner diameter="50"></mat-spinner>
+                <p>Cargando planillas...</p>
+            </div>
+
             <!-- Sin resultados -->
-            <div class="no-data" *ngIf="filteredForms.length === 0">
+            <div class="no-data" *ngIf="!isLoadingTable && filteredForms.length === 0">
                 <mat-icon>inbox</mat-icon>
                 <h3>No hay planillas {{ searchTerm ? 'que coincidan con la búsqueda' : 'registradas' }}</h3>
                 <p>{{ searchTerm ? 'Intenta con otro término de búsqueda' : 'Aún no se han creado planillas de

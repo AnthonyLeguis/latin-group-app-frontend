@@ -13,10 +13,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule, MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/notification-dialog/confirm-dialog.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface User {
     id: number;
@@ -53,6 +56,7 @@ interface User {
         MatDialogModule,
         MatSelectModule,
         MatSlideToggleModule,
+        MatProgressSpinnerModule,
         FormSkeletonComponent
     ],
     templateUrl: './all-users.html',
@@ -62,10 +66,14 @@ export class AllUsersComponent implements OnInit {
     users: User[] = [];
     filteredUsers: User[] = [];
     isLoading = true;
+    isLoadingTable = false; // Nuevo: solo para la tabla
     searchTerm = '';
     currentPage = 1;
     pageSize = 15;
     totalUsers = 0;
+    
+    // Subject para el debounce de búsqueda
+    private searchSubject = new Subject<string>();
 
     // Filtros por tipo
     selectedTypeFilter: string | null = null;
@@ -91,10 +99,30 @@ export class AllUsersComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadUsers();
+        this.setupSearchDebounce();
+    }
+    
+    /**
+     * Configurar debounce para la búsqueda
+     */
+    private setupSearchDebounce(): void {
+        this.searchSubject.pipe(
+            debounceTime(500), // Esperar 500ms después de que el usuario deje de escribir
+            distinctUntilChanged() // Solo emitir si el valor cambió
+        ).subscribe(searchTerm => {
+            this.currentPage = 1;
+            this.loadUsers(1);
+        });
     }
 
     loadUsers(page: number = 1): void {
-        this.isLoading = true;
+        // Si es la carga inicial, mostrar skeleton completo
+        // Si es búsqueda/filtro, solo mostrar loader en tabla
+        if (page === 1 && this.users.length === 0) {
+            this.isLoading = true;
+        } else {
+            this.isLoadingTable = true;
+        }
 
         const params: { page: number; type?: string; per_page: number; search?: string } = {
             page,
@@ -111,10 +139,6 @@ export class AllUsersComponent implements OnInit {
 
         this.userService.getUsers(params).subscribe({
             next: (response: any) => {
-                ////console.log(`Usuarios cargados (página ${params.page}):`, response);
-                ////console.log('Total de usuarios en respuesta:', response.total);
-                ////console.log('Usuarios tipo agent en esta página:', response.data?.filter((u: any) => u.type === 'agent'));
-
                 if (response.data) {
                     this.users = response.data.map((user: any) => ({
                         ...user,
@@ -130,11 +154,13 @@ export class AllUsersComponent implements OnInit {
 
                 this.applyFilters();
                 this.isLoading = false;
+                this.isLoadingTable = false;
                 this.cd.detectChanges();
             },
             error: (error) => {
                 console.error('Error al cargar usuarios:', error);
                 this.isLoading = false;
+                this.isLoadingTable = false;
                 this.users = [];
                 this.filteredUsers = [];
                 this.cd.detectChanges();
@@ -159,8 +185,8 @@ export class AllUsersComponent implements OnInit {
     }
 
     onSearch(): void {
-        this.currentPage = 1;
-        this.loadUsers(1);
+        // Emitir valor al Subject para activar el debounce
+        this.searchSubject.next(this.searchTerm);
     }
 
     clearSearch(): void {
@@ -170,10 +196,14 @@ export class AllUsersComponent implements OnInit {
     }
 
     onPageChange(event: PageEvent): void {
-        ////console.log('Cambio de página desde paginador:', event);
         this.pageSize = event.pageSize;
         this.currentPage = event.pageIndex + 1;
         this.loadUsers(this.currentPage);
+    }
+    
+    ngOnDestroy(): void {
+        // Limpiar el Subject al destruir el componente
+        this.searchSubject.complete();
     }
 
     // Iniciar modo edición inline

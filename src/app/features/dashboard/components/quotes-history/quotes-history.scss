@@ -698,6 +698,27 @@
     opacity: 0.5;
 }
 
+// Loader para la tabla
+.table-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    min-height: 300px;
+
+    mat-spinner {
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: #6b7280;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin: 0;
+    }
+}
+
 // No data
 .no-data {
     display: flex;

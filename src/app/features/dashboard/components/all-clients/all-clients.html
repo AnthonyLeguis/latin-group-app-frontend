@@ -30,7 +30,7 @@
             </div>
 
             <!-- Tabla de clientes -->
-            <div class="table-container" *ngIf="filteredClients.length > 0">
+            <div class="table-container" *ngIf="!isLoadingTable && filteredClients.length > 0">
                 <table mat-table [dataSource]="filteredClients" class="clients-table">
                     <!-- Columna Nombre -->
                     <ng-container matColumnDef="name">
@@ -116,8 +116,14 @@
                 </mat-paginator>
             </div>
 
+            <!-- Loader solo para la tabla -->
+            <div class="table-loading" *ngIf="isLoadingTable">
+                <mat-spinner diameter="50"></mat-spinner>
+                <p>Cargando clientes...</p>
+            </div>
+
             <!-- Estado vacío -->
-            <div class="no-data" *ngIf="filteredClients.length === 0 && !searchTerm">
+            <div class="no-data" *ngIf="!isLoadingTable && filteredClients.length === 0 && !searchTerm">
                 <mat-icon>inbox</mat-icon>
                 <h3>No hay clientes registrados</h3>
                 <p>{{ isAdmin ? 'Aún no se han registrado clientes en el sistema' : 'Aún no has registrado clientes' }}
@@ -125,7 +131,7 @@
             </div>
 
             <!-- Sin resultados de búsqueda -->
-            <div class="no-data" *ngIf="filteredClients.length === 0 && searchTerm">
+            <div class="no-data" *ngIf="!isLoadingTable && filteredClients.length === 0 && searchTerm">
                 <mat-icon>search_off</mat-icon>
                 <h3>No se encontraron resultados</h3>
                 <p>No hay clientes que coincidan con "{{ searchTerm }}"</p>

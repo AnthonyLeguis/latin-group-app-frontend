@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -11,11 +11,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormSkeletonComponent } from '../../../../shared/components/form-skeleton/form-skeleton';
 import { UserService } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EditClientModalComponent } from '../edit-client-modal/edit-client-modal';
 import { FormDetailModalComponent } from '../form-detail-modal/form-detail-modal.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface Client {
     id: number;
@@ -53,17 +56,22 @@ interface Client {
         MatTooltipModule,
         MatChipsModule,
         MatDialogModule,
+        MatProgressSpinnerModule,
         FormSkeletonComponent
     ],
     templateUrl: './all-clients.html',
     styleUrls: ['./all-clients.scss']
 })
-export class AllClientsComponent implements OnInit {
+export class AllClientsComponent implements OnInit, OnDestroy {
     isLoading = true;
+    isLoadingTable = false; // Nuevo: solo para la tabla
     clients: Client[] = [];
     filteredClients: Client[] = [];
     displayedColumns: string[] = ['name', 'email', 'created_at', 'actions'];
     searchTerm = '';
+    
+    // Subject para el debounce de búsqueda
+    private searchSubject = new Subject<string>();
 
     // Paginación
     currentPage = 1;
@@ -82,6 +90,20 @@ export class AllClientsComponent implements OnInit {
     ngOnInit(): void {
         this.checkUserRole();
         this.loadClients();
+        this.setupSearchDebounce();
+    }
+    
+    /**
+     * Configurar debounce para la búsqueda
+     */
+    private setupSearchDebounce(): void {
+        this.searchSubject.pipe(
+            debounceTime(500),
+            distinctUntilChanged()
+        ).subscribe(searchTerm => {
+            this.currentPage = 1;
+            this.loadClients(1);
+        });
     }
 
     checkUserRole(): void {
@@ -95,7 +117,13 @@ export class AllClientsComponent implements OnInit {
     }
 
     loadClients(page: number = 1): void {
-        this.isLoading = true;
+        // Si es la carga inicial, mostrar skeleton completo
+        // Si es búsqueda/filtro, solo mostrar loader en tabla
+        if (page === 1 && this.clients.length === 0) {
+            this.isLoading = true;
+        } else {
+            this.isLoadingTable = true;
+        }
 
         const params: { type: string; page: number; per_page: number; search?: string } = {
             type: 'client',
@@ -109,18 +137,19 @@ export class AllClientsComponent implements OnInit {
 
         this.userService.getUsers(params).subscribe({
             next: (response) => {
-                //console.log('Clients response:', response);
                 this.clients = response.data || [];
                 this.filteredClients = [...this.clients];
                 this.totalClients = response.total || this.clients.length;
                 this.currentPage = response.current_page || page;
                 this.pageSize = response.per_page || this.pageSize;
                 this.isLoading = false;
+                this.isLoadingTable = false;
                 this.cdr.detectChanges();
             },
             error: (error) => {
                 console.error('Error loading clients:', error);
                 this.isLoading = false;
+                this.isLoadingTable = false;
                 this.cdr.detectChanges();
             }
         });
@@ -133,14 +162,17 @@ export class AllClientsComponent implements OnInit {
     }
 
     onSearch(): void {
-        this.currentPage = 1;
-        this.loadClients(1);
+        this.searchSubject.next(this.searchTerm);
     }
 
     clearSearch(): void {
         this.searchTerm = '';
         this.currentPage = 1;
         this.loadClients(1);
+    }
+    
+    ngOnDestroy(): void {
+        this.searchSubject.complete();
     }
 
     viewClient(client: Client): void {
