@@ -18,6 +18,7 @@ interface ConfirmationData {
     dob?: string;
     insurance_company?: string;
     insurance_plan?: string;
+    wages?: number;
     final_cost?: string;
     confirmed?: boolean;
     confirmed_at?: string;
