@@ -327,7 +327,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             email: [appForm?.email || ''],
             phone: [appForm?.phone || ''],
             phone2: [appForm?.phone2 || ''],
-            dob: [appForm?.dob || ''],
+            dob: [this.parseDateFromBackend(appForm?.dob)],
             gender: [appForm?.gender || ''],
             ssn: [appForm?.ssn || ''],
             legal_status: [appForm?.legal_status || ''],
@@ -359,7 +359,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             // Personas Adicionales (6 máximo)
             person1_name: [appForm?.person1_name || ''],
             person1_relation: [appForm?.person1_relation || ''],
-            person1_dob: [appForm?.person1_dob || ''],
+            person1_dob: [this.parseDateFromBackend(appForm?.person1_dob)],
             person1_gender: [appForm?.person1_gender || ''],
             person1_ssn: [appForm?.person1_ssn || ''],
             person1_legal_status: [appForm?.person1_legal_status || ''],
@@ -367,7 +367,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
 
             person2_name: [appForm?.person2_name || ''],
             person2_relation: [appForm?.person2_relation || ''],
-            person2_dob: [appForm?.person2_dob || ''],
+            person2_dob: [this.parseDateFromBackend(appForm?.person2_dob)],
             person2_gender: [appForm?.person2_gender || ''],
             person2_ssn: [appForm?.person2_ssn || ''],
             person2_legal_status: [appForm?.person2_legal_status || ''],
@@ -375,7 +375,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
 
             person3_name: [appForm?.person3_name || ''],
             person3_relation: [appForm?.person3_relation || ''],
-            person3_dob: [appForm?.person3_dob || ''],
+            person3_dob: [this.parseDateFromBackend(appForm?.person3_dob)],
             person3_gender: [appForm?.person3_gender || ''],
             person3_ssn: [appForm?.person3_ssn || ''],
             person3_legal_status: [appForm?.person3_legal_status || ''],
@@ -383,7 +383,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
 
             person4_name: [appForm?.person4_name || ''],
             person4_relation: [appForm?.person4_relation || ''],
-            person4_dob: [appForm?.person4_dob || ''],
+            person4_dob: [this.parseDateFromBackend(appForm?.person4_dob)],
             person4_gender: [appForm?.person4_gender || ''],
             person4_ssn: [appForm?.person4_ssn || ''],
             person4_legal_status: [appForm?.person4_legal_status || ''],
@@ -391,7 +391,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
 
             person5_name: [appForm?.person5_name || ''],
             person5_relation: [appForm?.person5_relation || ''],
-            person5_dob: [appForm?.person5_dob || ''],
+            person5_dob: [this.parseDateFromBackend(appForm?.person5_dob)],
             person5_gender: [appForm?.person5_gender || ''],
             person5_ssn: [appForm?.person5_ssn || ''],
             person5_legal_status: [appForm?.person5_legal_status || ''],
@@ -399,7 +399,7 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
 
             person6_name: [appForm?.person6_name || ''],
             person6_relation: [appForm?.person6_relation || ''],
-            person6_dob: [appForm?.person6_dob || ''],
+            person6_dob: [this.parseDateFromBackend(appForm?.person6_dob)],
             person6_gender: [appForm?.person6_gender || ''],
             person6_ssn: [appForm?.person6_ssn || ''],
             person6_legal_status: [appForm?.person6_legal_status || ''],
@@ -823,8 +823,9 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
         }
 
         try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
+            // Usar parseDateFromBackend para evitar problemas de zona horaria
+            const date = this.parseDateFromBackend(dateString);
+            if (!date || isNaN(date.getTime())) {
                 return 'N/A';
             }
 
@@ -836,6 +837,37 @@ export class EditClientModalComponent implements OnInit, AfterViewInit {
             return `${month}-${day}-${year}`;
         } catch (error) {
             return 'N/A';
+        }
+    }
+
+    /**
+     * Parsear fecha desde el backend evitando problemas de zona horaria
+     * Convierte "YYYY-MM-DD" a un objeto Date con la fecha correcta
+     */
+    parseDateFromBackend(dateString: string | null | undefined): Date | null {
+        if (!dateString) {
+            return null;
+        }
+
+        try {
+            // Si la fecha viene en formato ISO o con T, tomar solo la parte de la fecha
+            const datePart = dateString.includes('T') ? dateString.split('T')[0] : dateString;
+            
+            // Dividir en partes [año, mes, día]
+            const parts = datePart.split('-');
+            if (parts.length !== 3) {
+                return null;
+            }
+
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1; // Meses en JS son 0-indexed
+            const day = parseInt(parts[2], 10);
+
+            // Crear fecha en zona horaria local (sin conversión UTC)
+            return new Date(year, month, day);
+        } catch (error) {
+            console.error('Error parsing date:', error);
+            return null;
         }
     }
 
