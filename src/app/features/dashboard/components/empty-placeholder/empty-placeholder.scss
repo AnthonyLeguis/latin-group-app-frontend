@@ -25,17 +25,10 @@
         gap: 1rem;
     }
 
-    @media (min-width: 641px) and (max-width: 1024px) {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-
-    @media (min-width: 1025px) and (max-width: 1440px) {
+    /* Desde md en adelante, siempre 3 columnas (dos filas de 3 cotizadores) */
+    @media (min-width: 641px) {
         grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (min-width: 1441px) {
-        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
     }
 }
 

@@ -54,6 +54,13 @@ export class EmptyPlaceholderComponent {
             color: '#ef4444', // Rojo
             description: 'Accede a planes de salud en Illinois y obtén estimaciones de costos adaptadas a tu situación.'
         }
+        ,
+        {
+            title: 'Cotizador California',
+            url: 'https://apply.coveredca.com/lw-shopandcompare/',
+            color: '#f97316', // Naranja California
+            description: 'Cotizador oficial de Covered California para comparar planes y obtener cotizaciones.'
+        }
     ];
 
     goToCotizador(url: string): void {
