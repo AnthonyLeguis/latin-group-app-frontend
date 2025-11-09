@@ -517,7 +517,7 @@ export class NewApplicationPbComponent implements OnInit {
             next: (response: any) => {
                 this.agents = response.data || [];
                 this.isLoadingAgents = false;
-                console.log('✅ Agentes cargados:', this.agents.length);
+                //console.log('✅ Agentes cargados:', this.agents.length);
             },
             error: (error: any) => {
                 console.error('❌ Error al cargar agentes:', error);
@@ -542,7 +542,7 @@ export class NewApplicationPbComponent implements OnInit {
                 this.availableClients = allClients;
                 this.filteredClients = [...this.availableClients];
                 this.isLoadingClients = false;
-                console.log('✅ Clientes cargados:', this.availableClients.length);
+                //console.log('✅ Clientes cargados:', this.availableClients.length);
             },
             error: (error: any) => {
                 console.error('❌ Error al cargar clientes:', error);
@@ -711,7 +711,7 @@ export class NewApplicationPbComponent implements OnInit {
         // Usar endpoint público
         this.applicationFormService.createPublicApplication(formData).subscribe({
             next: (response: any) => {
-                console.log('✅ Planilla pública creada:', response);
+                //console.log('✅ Planilla pública creada:', response);
 
                 // Extraer el token de confirmación del backend
                 const token = response.confirmation_token;
@@ -1122,20 +1122,20 @@ export class NewApplicationPbComponent implements OnInit {
 
     // Método temporal de debug para el formulario de empleo
     debugEmploymentForm(): void {
-        console.log('📋 Estado del formulario de empleo:');
-        console.log('Valid:', this.employmentForm.valid);
-        console.log('Invalid:', this.employmentForm.invalid);
-        console.log('Errors:', this.employmentForm.errors);
-        console.log('Values:', this.employmentForm.value);
+        //console.log('📋 Estado del formulario de empleo:');
+        //console.log('Valid:', this.employmentForm.valid);
+        //console.log('Invalid:', this.employmentForm.invalid);
+        //console.log('Errors:', this.employmentForm.errors);
+        //console.log('Values:', this.employmentForm.value);
 
         // Revisar cada control individual
         Object.keys(this.employmentForm.controls).forEach(key => {
             const control = this.employmentForm.get(key);
             if (control && control.invalid) {
-                console.log(`❌ Campo inválido: ${key}`, {
-                    value: control.value,
-                    errors: control.errors
-                });
+                // console.log(`❌ Campo inválido: ${key}`, {
+                //     value: control.value,
+                //     errors: control.errors
+                // });
             }
         });
     }
