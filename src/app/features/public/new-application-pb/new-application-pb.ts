@@ -1,4 +1,4 @@
-import { Component, OnInit, LOCALE_ID, ViewChild, inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, ViewChild, inject, Injectable, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
@@ -292,6 +292,7 @@ export class NewApplicationPbComponent implements OnInit {
     private platformId = inject(PLATFORM_ID);
     private isBrowser = isPlatformBrowser(this.platformId);
     private pendingHasSavedDataTimeout: any = null;
+    private cdr = inject(ChangeDetectorRef);
 
     ngOnInit(): void {
         this.initializeForms();
@@ -513,16 +514,19 @@ export class NewApplicationPbComponent implements OnInit {
     // Cargar agentes públicos
     loadPublicAgents(): void {
         this.isLoadingAgents = true;
+        this.cdr.detectChanges(); // Forzar detección de cambios
         this.applicationFormService.getPublicAgentsList().subscribe({
             next: (response: any) => {
                 this.agents = response.data || [];
                 this.isLoadingAgents = false;
+                this.cdr.detectChanges(); // Forzar detección de cambios
                 //console.log('✅ Agentes cargados:', this.agents.length);
             },
             error: (error: any) => {
                 console.error('❌ Error al cargar agentes:', error);
                 this.showError('Error al cargar la lista de agentes');
                 this.isLoadingAgents = false;
+                this.cdr.detectChanges(); // Forzar detección de cambios
             }
         });
     }
@@ -536,18 +540,21 @@ export class NewApplicationPbComponent implements OnInit {
     // Cargar clientes disponibles sin application form
     loadAvailableClients(): void {
         this.isLoadingClients = true;
+        this.cdr.detectChanges(); // Forzar detección de cambios
         this.userService.getPublicClientsList().subscribe({
             next: (response: any) => {
                 const allClients = response.data || response;
                 this.availableClients = allClients;
                 this.filteredClients = [...this.availableClients];
                 this.isLoadingClients = false;
+                this.cdr.detectChanges(); // Forzar detección de cambios
                 //console.log('✅ Clientes cargados:', this.availableClients.length);
             },
             error: (error: any) => {
                 console.error('❌ Error al cargar clientes:', error);
                 this.showError('Error al cargar la lista de clientes');
                 this.isLoadingClients = false;
+                this.cdr.detectChanges(); // Forzar detección de cambios
             }
         });
     }
