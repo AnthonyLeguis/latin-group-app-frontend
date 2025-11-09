@@ -1,0 +1,843 @@
+<div class="new-quote-container">
+    <div class="header">
+        <div class="title-section">
+            <mat-icon class="title-icon">request_quote</mat-icon>
+            <div>
+                <h1>Nueva Cotización</h1>
+                <p class="subtitle">Crea una nueva planilla de aplicación para un cliente</p>
+                <!-- Indicador de datos guardados -->
+                <div *ngIf="hasSavedDataFlag" class="saved-data-indicator">
+                    <mat-icon>save</mat-icon>
+                    <span>Datos guardados automáticamente</span>
+                </div>
+            </div>
+        </div>
+        <button mat-stroked-button color="warn" (click)="cancel()" class="cancel-btn">
+            <mat-icon>close</mat-icon>
+            Cancelar
+        </button>
+    </div>
+
+    <!-- Botón para agregar un nuevo cliente en modal -->
+    <div class="add-client-button-container" *ngIf="!isLoadingClients && !selectedClient">
+        <button mat-raised-button color="accent" (click)="openAddClientModal()">
+            <mat-icon>person_add</mat-icon>
+            Ingresar Cliente
+        </button>
+    </div>
+
+    <!-- Modal para agregar nuevo cliente -->
+    <div *ngIf="showAddClientModal" class="add-client-modal-overlay">
+        <div class="modal-backdrop" (click)="closeAddClientModal()"></div>
+        <div class="modal-content">
+            <app-add-client-modal (clientCreated)="onClientCreated($event)" (cancelModal)="closeAddClientModal()">
+            </app-add-client-modal>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoadingClients || isLoadingAgents" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p *ngIf="isLoadingClients && isLoadingAgents">Cargando agentes y clientes...</p>
+        <p *ngIf="isLoadingClients && !isLoadingAgents">Cargando clientes disponibles...</p>
+        <p *ngIf="!isLoadingClients && isLoadingAgents">Cargando agentes disponibles...</p>
+    </div>
+
+    <!-- Main form -->
+    <div *ngIf="!isLoadingAgents && !isLoadingClients" class="stepper-container">
+        <mat-stepper #stepper>
+            <!-- ✅ Paso 0: Selección de AGENTE (obligatorio) -->
+            <mat-step [stepControl]="agentSelectionForm" label="Agente">
+                <form [formGroup]="agentSelectionForm">
+                    <div class="step-content max-w-5xl items-center mx-auto">
+                        <h2>Seleccionar Agente Responsable</h2>
+                        <p class="step-description">Seleccione el agente que recibirá los PDFs generados por correo
+                            electrónico</p>
+
+                        <div class="client-selection-box">
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Agente *</mat-label>
+                                <mat-select formControlName="agent_id" required>
+                                    <mat-option *ngFor="let agent of agents" [value]="agent.id">
+                                        <div class="client-option">
+                                            <mat-icon>person</mat-icon>
+                                            <div class="client-info">
+                                                <span class="client-name">{{ agent.name }}</span>
+                                                <span class="client-email">{{ agent.email }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>person_pin</mat-icon>
+                                <mat-error *ngIf="agentSelectionForm.get('agent_id')?.hasError('required')">
+                                    Debe seleccionar un agente
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Agente seleccionado -->
+                            <div *ngIf="agentSelectionForm.value.agent_id && getSelectedAgent()"
+                                class="selected-client-card">
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                <div class="client-details">
+                                    <h3>{{ getSelectedAgent()?.name }}</h3>
+                                    <p>{{ getSelectedAgent()?.email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Sin agentes disponibles -->
+                            <div *ngIf="agents.length === 0 && !isLoadingAgents" class="no-clients">
+                                <mat-icon>info</mat-icon>
+                                <p>No hay agentes disponibles en este momento</p>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious disabled>Anterior</button>
+                            <button mat-raised-button matStepperNext color="primary"
+                                [disabled]="!agentSelectionForm.valid || isLoadingAgents">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 1: Selección de Cliente -->
+            <mat-step [stepControl]="clientSelectionForm" label="Cliente">
+                <form [formGroup]="clientSelectionForm">
+                    <div class="step-content max-w-5xl items-center mx-auto">
+                        <h2>Seleccionar Cliente</h2>
+                        <p class="step-description">Elige el cliente para el cual crear la planilla de aplicación</p>
+
+                        <div class="client-selection-box">
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Cliente</mat-label>
+                                <input matInput formControlName="clientSearch"
+                                    placeholder="Escribe el nombre o email del cliente"
+                                    [matAutocomplete]="publicClientAuto">
+                                <mat-icon matPrefix>search</mat-icon>
+                                <button mat-icon-button matSuffix *ngIf="selectedClient"
+                                    (click)="clearClientSelection()" type="button">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                                <mat-autocomplete #publicClientAuto="matAutocomplete"
+                                    (optionSelected)="selectClient($event.option.value)">
+                                    <mat-option *ngFor="let client of filteredClients" [value]="client">
+                                        <div class="client-option">
+                                            <mat-icon>person</mat-icon>
+                                            <div class="client-info">
+                                                <span class="client-name">{{ client.name }}</span>
+                                                <span class="client-email">{{ client.email }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-option>
+                                </mat-autocomplete>
+                                <mat-error *ngIf="clientSelectionForm.get('clientSearch')?.hasError('required')">
+                                    Debe seleccionar un cliente
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Cliente seleccionado -->
+                            <div *ngIf="selectedClient" class="selected-client-card">
+                                <mat-icon class="check-icon">check_circle</mat-icon>
+                                <div class="client-details">
+                                    <h3>{{ selectedClient.name }}</h3>
+                                    <p>{{ selectedClient.email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Sin clientes disponibles -->
+                            <div *ngIf="availableClients.length === 0" class="no-clients">
+                                <mat-icon>info</mat-icon>
+                                <p>No hay clientes disponibles sin planilla de aplicación</p>
+                                <button mat-raised-button color="primary" (click)="openAddClientModal()">
+                                    <mat-icon>person_add</mat-icon>
+                                    Crear nuevo cliente
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary"
+                                [disabled]="!clientSelectionForm.valid">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 2: Datos del Aplicante -->
+            <mat-step [stepControl]="applicantForm" label="Aplicante">
+                <form [formGroup]="applicantForm">
+                    <div class="step-content">
+                        <h2>Información del Aplicante</h2>
+                        <p class="step-description">Completa los datos personales del aplicante</p>
+
+                        <div class="form-grid">
+                            <!-- Nombre completo -->
+                            <div class="custom-label-group full-width">
+                                <label class="custom-label-required">Nombre Completo:</label>
+                                <mat-form-field appearance="outline" class="full-width">
+                                    <input matInput formControlName="applicant_name" placeholder="Ej: Juan Pérez">
+                                    <mat-icon matPrefix>person</mat-icon>
+                                    <mat-error>Nombre requerido (máx. 255 caracteres)</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Fecha de nacimiento -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Fecha de Nacimiento:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput [matDatepicker]="dobPicker" formControlName="dob">
+                                    <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #dobPicker></mat-datepicker>
+                                    <mat-error>Fecha de nacimiento requerida</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Género -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Género:</label>
+                                <mat-form-field appearance="outline">
+                                    <mat-select formControlName="gender">
+                                        <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
+                                            {{ gender.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matPrefix>wc</mat-icon>
+                                    <mat-error>Género requerido</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- SSN (Opcional) -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">SSN (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="ssn" placeholder="Ingrese su SSN"
+                                        inputmode="numeric" maxlength="9"
+                                        (input)="enforceDigits(applicantForm, 'ssn', 9)">
+                                    <mat-icon matPrefix>badge</mat-icon>
+                                    <mat-error *ngIf="applicantForm.get('ssn')?.hasError('pattern')">
+                                        Debe ingresar 4 o 9 dígitos
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Dirección -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Dirección:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="address" placeholder="Calle, número">
+                                    <mat-icon matPrefix>home</mat-icon>
+                                    <mat-error>Dirección requerida</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Unidad/Apt -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Unidad/Apt (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="unit_apt" placeholder="Apt 123">
+                                    <mat-icon matPrefix>apartment</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Ciudad -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Ciudad:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="city" placeholder="Miami">
+                                    <mat-icon matPrefix>location_city</mat-icon>
+                                    <mat-error>Ciudad requerida</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Estado -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Estado:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="state" placeholder="FL">
+                                    <mat-icon matPrefix>map</mat-icon>
+                                    <mat-error>Estado requerido</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Zip Code -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Código Postal:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="zip_code" placeholder="33101" inputmode="numeric"
+                                        maxlength="5" (input)="enforceDigits(applicantForm, 'zip_code', 5)">
+                                    <mat-icon matPrefix>local_post_office</mat-icon>
+                                    <mat-error *ngIf="applicantForm.get('zip_code')?.hasError('required')">
+                                        Código postal requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="applicantForm.get('zip_code')?.hasError('pattern')">
+                                        Ingrese un código postal de 5 dígitos
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Teléfono:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="phone" placeholder="(305) 123-4567"
+                                        inputmode="numeric" maxlength="14"
+                                        (input)="formatPhone('phone', applicantForm)">
+                                    <mat-icon matPrefix>phone</mat-icon>
+                                    <mat-error *ngIf="applicantForm.get('phone')?.hasError('required')">
+                                        Teléfono requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="applicantForm.get('phone')?.hasError('invalidPhone')">
+                                        Debe ingresar un teléfono válido (10 dígitos)
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Teléfono 2 -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Teléfono Alterno (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="phone2" placeholder="(305) 987-6543"
+                                        inputmode="numeric" maxlength="14"
+                                        (input)="formatPhone('phone2', applicantForm)">
+                                    <mat-icon matPrefix>phone</mat-icon>
+                                    <mat-error *ngIf="applicantForm.get('phone2')?.hasError('invalidPhone')">
+                                        Debe ingresar un teléfono válido (10 dígitos)
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Email (Opcional) -->
+                            <div class="custom-label-group span-2">
+                                <label class="custom-label-required">Email (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="email" type="email"
+                                        placeholder="ejemplo@email.com">
+                                    <mat-icon matPrefix>email</mat-icon>
+                                    <mat-error>Email inválido</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Estatus Legal -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Estatus Legal:</label>
+                                <mat-form-field appearance="outline">
+                                    <mat-select formControlName="legal_status">
+                                        <mat-option *ngFor="let status of legalStatusOptions" [value]="status.value">
+                                            {{ status.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matPrefix>gavel</mat-icon>
+                                    <mat-error>Estatus legal requerido</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Número de Documento -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Número de Documento (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="document_number" placeholder="A123456789">
+                                    <mat-icon matPrefix>credit_card</mat-icon>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary" [disabled]="!applicantForm.valid">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 3: Información de Empleo -->
+            <mat-step [stepControl]="employmentForm" label="Empleo" [optional]="true"
+                [completed]="employmentStepCompleted">
+                <form [formGroup]="employmentForm">
+                    <div class="step-content">
+                        <h2>Información de Empleo</h2>
+                        <p class="step-description">Datos laborales del aplicante (Opcional)</p>
+
+                        <div class="form-grid">
+                            <!-- Tipo de empleo -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Tipo de Empleo:</label>
+                                <mat-form-field appearance="outline">
+                                    <mat-select formControlName="employment_type">
+                                        <mat-option *ngFor="let type of employmentTypeOptions" [value]="type.value">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matPrefix>work</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Nombre de la empresa -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Nombre de la Empresa (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="employment_company_name" placeholder="ABC Corp">
+                                    <mat-icon matPrefix>business</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Teléfono del trabajo -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Teléfono del Trabajo (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="work_phone" placeholder="(305) 555-1234"
+                                        inputmode="numeric" maxlength="14"
+                                        (input)="formatPhone('work_phone', employmentForm)">
+                                    <mat-icon matPrefix>phone</mat-icon>
+                                    <mat-error *ngIf="employmentForm.get('work_phone')?.hasError('invalidPhone')">
+                                        Debe ingresar un teléfono válido (10 dígitos)
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Salario -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Salario:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="wages" placeholder="0.00" step="0.01"
+                                        min="0" inputmode="decimal">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Frecuencia de pago -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Frecuencia de Pago:</label>
+                                <mat-form-field appearance="outline">
+                                    <mat-select formControlName="wages_frequency">
+                                        <mat-option *ngFor="let freq of wagesFrequencyOptions" [value]="freq.value">
+                                            {{ freq.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-icon matPrefix>schedule</mat-icon>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary"
+                                (click)="markEmploymentStepCompleted()">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 4: Póliza y Seguro -->
+            <mat-step [stepControl]="policyForm" label="Póliza" [optional]="true" [completed]="policyStepCompleted">
+                <form [formGroup]="policyForm">
+                    <div class="step-content">
+                        <h2>Información de Póliza y Seguro</h2>
+                        <p class="step-description">Detalles del seguro y póliza (Opcional)</p>
+
+                        <div class="form-grid">
+                            <!-- Compañía de Seguro -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Compañía de Seguro:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="insurance_company" placeholder="Ej: Blue Cross">
+                                    <mat-icon matPrefix>shield</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan de Seguro -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Plan de Seguro:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="insurance_plan" placeholder="Plan Gold">
+                                    <mat-icon matPrefix>description</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Subsidio (Opcional) -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Subsidio (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="subsidy" placeholder="0.00"
+                                        step="0.01" min="0" inputmode="decimal">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Costo de la Prima -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Costo de la Prima:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="final_cost" placeholder="0.00"
+                                        step="0.01" min="0" inputmode="decimal">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Número de Póliza -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Número de Póliza:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_number" placeholder="POL-123456">
+                                    <mat-icon matPrefix>confirmation_number</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Póliza Dental -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Póliza Dental:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_category" placeholder="Dental">
+                                    <mat-icon matPrefix>category</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Clave -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Clave (Opcional):</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_key" placeholder="Ingrese la clave">
+                                    <mat-icon matPrefix>key</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Monto Prima Dental -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Monto Prima Dental:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput type="number" formControlName="poliza_amount" placeholder="0.00"
+                                        step="0.01" min="0" inputmode="decimal">
+                                    <mat-icon matPrefix>attach_money</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Día de Pago -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Día de Pago:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_payment_day" placeholder="1-31"
+                                        inputmode="numeric" maxlength="2"
+                                        (input)="enforceDigits(policyForm, 'poliza_payment_day', 2)">
+                                    <mat-icon matPrefix>event</mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Beneficiario -->
+                            <div class="custom-label-group">
+                                <label class="custom-label-required">Beneficiario:</label>
+                                <mat-form-field appearance="outline">
+                                    <input matInput formControlName="poliza_beneficiary"
+                                        placeholder="Nombre del beneficiario">
+                                    <mat-icon matPrefix>person</mat-icon>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary"
+                                (click)="markPolicyStepCompleted()">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 5: Personas Adicionales -->
+            <mat-step [stepControl]="additionalPersonsForm" label="Adicionales" [optional]="true"
+                [completed]="additionalPersonsStepCompleted">
+                <form [formGroup]="additionalPersonsForm">
+                    <div class="step-content">
+                        <h2>Personas Adicionales</h2>
+                        <p class="step-description">Agrega hasta 6 personas adicionales (Opcional)</p>
+
+                        <!-- Navegación de Personas con Botones -->
+                        <div class="persons-navigation">
+                            <button *ngFor="let personNum of getPersonsArray()" type="button" mat-raised-button
+                                (click)="selectPerson(personNum)" [class.active]="selectedPersonIndex === personNum"
+                                [class.has-data]="hasPersonData(personNum)" class="person-button">
+                                <mat-icon>{{ hasPersonData(personNum) ? 'check_circle' : 'person' }}</mat-icon>
+                                Persona {{ personNum }}
+                            </button>
+                        </div>
+
+                        <!-- Formulario Dinámico para la Persona Seleccionada -->
+                        <mat-card class="person-card">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <mat-icon>person_add</mat-icon>
+                                    Persona {{ selectedPersonIndex }}
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <ng-container *ngIf="currentAdditionalPersonGroup as personGroup">
+                                    <div class="form-grid" [formGroup]="personGroup">
+                                        <!-- Nombre Completo -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Nombre Completo:</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="name">
+                                                <mat-icon matPrefix>person</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Relación -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Relación:</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="relation">
+                                                    <mat-option *ngFor="let rel of relationOptions" [value]="rel.value">
+                                                        {{ rel.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>family_restroom</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Fecha de Nacimiento -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Fecha de Nacimiento:</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput [matDatepicker]="additionalPersonDobPicker"
+                                                    formControlName="dob">
+                                                <mat-datepicker-toggle matSuffix
+                                                    [for]="additionalPersonDobPicker"></mat-datepicker-toggle>
+                                                <mat-datepicker #additionalPersonDobPicker></mat-datepicker>
+                                                <mat-icon matPrefix>cake</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Género -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Género:</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="gender">
+                                                    <mat-option *ngFor="let gender of genderOptions"
+                                                        [value]="gender.value">
+                                                        {{ gender.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>wc</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Legal Status -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Estatus Legal:</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="legal_status">
+                                                    <mat-option *ngFor="let status of legalStatusOptions"
+                                                        [value]="status.value">
+                                                        {{ status.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>gavel</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- SSN -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">SSN (Opcional):</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="ssn" placeholder="Ingrese su SSN"
+                                                    inputmode="numeric" maxlength="9"
+                                                    (input)="enforceDigits(personGroup, 'ssn', 9)">
+                                                <mat-icon matPrefix>badge</mat-icon>
+                                                <mat-error *ngIf="personGroup.get('ssn')?.hasError('pattern')">
+                                                    Debe ingresar 4 o 9 dígitos
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Número de Documento -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">Número de Documento (Opcional):</label>
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="document_number">
+                                                <mat-icon matPrefix>credit_card</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- ¿Es el aplicante principal? -->
+                                        <div class="custom-label-group">
+                                            <label class="custom-label-required">¿Es aplicante?</label>
+                                            <mat-form-field appearance="outline">
+                                                <mat-select formControlName="is_applicant">
+                                                    <mat-option [value]="true">Sí</mat-option>
+                                                    <mat-option [value]="false">No</mat-option>
+                                                </mat-select>
+                                                <mat-icon matPrefix>how_to_reg</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button matStepperNext color="primary"
+                                (click)="markAdditionalPersonsStepCompleted()">
+                                Siguiente
+                                <mat-icon>arrow_forward</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+
+            <!-- Paso 6: Método de Pago -->
+            <mat-step [stepControl]="paymentForm" label="Pago" [optional]="true" [completed]="paymentStepCompleted">
+                <form [formGroup]="paymentForm">
+                    <div class="step-content">
+                        <h2>Método de Pago</h2>
+                        <p class="step-description">Información de pago (Opcional)</p>
+
+                        <div class="payment-sections">
+                            <!-- Tarjeta de Crédito/Débito -->
+                            <div class="payment-section">
+                                <h3>
+                                    <mat-icon>credit_card</mat-icon>
+                                    Tarjeta de Crédito/Débito
+                                </h3>
+                                <div class="form-grid">
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Tipo de Tarjeta:</label>
+                                        <mat-form-field appearance="outline">
+                                            <mat-select formControlName="card_type">
+                                                <mat-option *ngFor="let type of cardTypeOptions" [value]="type.value">
+                                                    {{ type.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-icon matPrefix>credit_card</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Número de Tarjeta:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_number"
+                                                placeholder="XXXX XXXX XXXX XXXX" inputmode="numeric" maxlength="19"
+                                                (input)="enforceDigits(paymentForm, 'card_number', 19)">
+                                            <mat-icon matPrefix>payment</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_number')?.hasError('pattern')">
+                                                Ingrese entre 13 y 19 dígitos
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Fecha de Expiración:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_expiration" placeholder="MM/YY"
+                                                maxlength="5"
+                                                (input)="formatCardExpiration(paymentForm, 'card_expiration')">
+                                            <mat-icon matPrefix>event</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_expiration')?.hasError('pattern')">
+                                                Formato inválido (MM/YY)
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">CVV:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_cvv" placeholder="XXX"
+                                                inputmode="numeric" maxlength="4"
+                                                (input)="enforceDigits(paymentForm, 'card_cvv', 4)">
+                                            <mat-icon matPrefix>lock</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_cvv')?.hasError('pattern')">
+                                                Ingrese 3 o 4 dígitos
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cuenta Bancaria -->
+                            <div class="payment-section">
+                                <h3>
+                                    <mat-icon>account_balance</mat-icon>
+                                    Cuenta Bancaria
+                                </h3>
+                                <div class="form-grid">
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Nombre del Banco:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="bank_name" placeholder="Bank of America">
+                                            <mat-icon matPrefix>account_balance</mat-icon>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group">
+                                        <label class="custom-label-required">Routing Number:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_routing" placeholder="123456789"
+                                                inputmode="numeric" maxlength="9"
+                                                (input)="enforceDigits(paymentForm, 'card_routing', 9)">
+                                            <mat-icon matPrefix>tag</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_routing')?.hasError('pattern')">
+                                                Ingrese 9 dígitos
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="custom-label-group span-2">
+                                        <label class="custom-label-required">Número de Cuenta:</label>
+                                        <mat-form-field appearance="outline">
+                                            <input matInput formControlName="card_account" placeholder="1234567890"
+                                                inputmode="numeric" maxlength="17"
+                                                (input)="enforceDigits(paymentForm, 'card_account', 17)">
+                                            <mat-icon matPrefix>numbers</mat-icon>
+                                            <mat-error *ngIf="paymentForm.get('card_account')?.hasError('pattern')">
+                                                Ingrese entre 4 y 17 dígitos
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button matStepperPrevious>
+                                <mat-icon>arrow_back</mat-icon>
+                                Anterior
+                            </button>
+                            <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="isSubmitting">
+                                <mat-spinner *ngIf="isSubmitting" diameter="20" class="button-spinner"></mat-spinner>
+                                <span *ngIf="!isSubmitting">
+                                    <mat-icon>check_circle</mat-icon>
+                                    Crear Planilla
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+        </mat-stepper>
+    </div>
+</div>

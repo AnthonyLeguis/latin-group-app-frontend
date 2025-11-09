@@ -1,0 +1,1644 @@
+// Label personalizado arriba del input
+.custom-label-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 0.1rem;
+}
+
+.custom-label-required {
+    color: #dc2626;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.1rem;
+    margin-left: 2px;
+}
+
+.new-quote-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem; // Reducido desde 2rem
+    animation: fadeIn 0.3s ease-in-out;
+
+    input::placeholder {
+        color: #9ca3af;
+        opacity: 1;
+    }
+
+    input::-webkit-inner-spin-button,
+    input::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type='number'] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    @media (max-width: 768px) {
+        padding: 0.75rem; // Reducido desde 1rem
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Header
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem; // Reducido desde 2rem
+    padding-bottom: 1rem; // Reducido desde 1.5rem
+    border-bottom: 2px solid #e5e7eb;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0.75rem; // Reducido desde 1rem
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .title-section {
+        display: flex;
+        gap: 0.75rem; // Reducido desde 1rem
+        align-items: center;
+
+        .title-icon {
+            font-size: 2rem; // Reducido desde 2.5rem
+            width: 2rem;
+            height: 2rem;
+            color: #dc2626;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem; // Reducido desde 1.875rem
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .subtitle {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.8rem; // Reducido desde 0.875rem
+            color: #6b7280;
+        }
+
+        .saved-data-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background-color: #10b98110;
+            border: 1px solid #10b981;
+            border-radius: 6px;
+            color: #059669;
+            font-size: 0.75rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+
+            mat-icon {
+                font-size: 1rem;
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    }
+
+    .cancel-btn {
+        border-color: #dc2626;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: #dc2626;
+        padding: 0.5rem 1rem;
+
+        &:hover {
+            background-color: #dc262610;
+        }
+    }
+}
+
+// Loading
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+
+    p {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+}
+
+// Stepper Container - Diseño moderno basado en Ahmad Shadeed
+.stepper-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+
+    @media (max-width: 768px) {
+        padding: 0.6rem;
+    }
+
+    @media (max-width: 480px) {
+        padding: 0.75rem;
+    }
+
+    ::ng-deep {
+
+        // Container de headers como flexbox
+        .mat-horizontal-stepper-header-container {
+            display: flex !important;
+            flex-wrap: wrap;
+            padding: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: none !important;
+
+            @media (max-width: 768px) {
+                margin-bottom: 1.2rem;
+            }
+        }
+
+        // Cada paso como flex item
+        .mat-step-header {
+            flex: 1;
+            display: flex !important;
+            flex-direction: column;
+            text-align: center;
+            padding: 0 !important;
+            min-height: auto !important;
+            position: relative;
+            background: transparent !important;
+            pointer-events: all;
+
+            &:hover {
+                background: transparent !important;
+            }
+
+            // El círculo del número
+            .mat-step-icon {
+                --size: 2.2rem;
+                position: relative;
+                z-index: 3;
+                width: var(--size) !important;
+                height: var(--size) !important;
+                background-color: #e5e7eb;
+                border-radius: 50%;
+                margin: 0 auto 0.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                font-weight: 600;
+                color: #6b7280;
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+
+                @media (max-width: 768px) {
+                    --size: 2rem;
+                    font-size: 0.9rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                @media (max-width: 480px) {
+                    --size: 1.5rem;
+                    font-size: 0.8rem;
+                    margin-bottom: 0.35rem;
+                }
+
+                .mat-step-icon-content {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+
+            // Estado: seleccionado (activo)
+            &.mat-step-header-selected .mat-step-icon {
+                background-color: #dc2626 !important;
+                color: white !important;
+                box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+                transform: scale(1.1);
+            }
+
+            // Estado: completado
+            .mat-step-icon-state-edit {
+                background-color: #059669;
+                color: white;
+            }
+
+            // Label del paso - visible y completo
+            .mat-step-label {
+                font-weight: 500;
+                color: #6b7280;
+                font-size: 0.875rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.4;
+                padding: 0 0.5rem 1rem;
+                max-width: 100%;
+                min-height: 2.25rem;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                text-align: center;
+
+                @media (max-width: 768px) {
+                    font-size: 0.75rem;
+                    padding: 0 0.35rem 0.75rem;
+                    min-height: 2rem;
+                }
+
+                @media (max-width: 480px) {
+                    font-size: 0.7rem;
+                    padding: 0 0.25rem 0.65rem;
+                    min-height: 1.85rem;
+                }
+            }
+
+            .mat-step-label-selected {
+                color: #dc2626;
+                font-weight: 600;
+            }
+
+            .mat-step-label-active {
+                color: #dc2626;
+            }
+
+            .mat-step-text-label {
+                display: block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap !important;
+            }
+
+            .mat-step-optional {
+                display: none !important;
+            }
+
+            // Línea conectora hacia la derecha (gris) - conecta con el siguiente paso
+            &:not(:last-child)::after {
+                content: "";
+                position: absolute;
+                top: calc(var(--size, 3rem) / 2 - 10px);
+                left: 50%;
+                height: 3px;
+                background-color: #d1d5db;
+                order: -1;
+                width: 50%;
+                z-index: 1;
+                transition: background-color 0.3s ease;
+
+                @media (max-width: 768px) {
+                    height: 2px;
+                    top: calc(var(--size, 2.5rem) / 2 - 8px);
+                }
+
+                @media (max-width: 480px) {
+                    height: 2px;
+                    top: calc(var(--size, 2rem) / 2 - 6px);
+                }
+            }
+
+            // Línea conectora hacia la izquierda (gris) - conecta con el paso anterior
+            &:not(:first-child)::before {
+                content: "";
+                position: absolute;
+                top: calc(var(--size, 3rem) / 2 - 10px);
+                left: 0;
+                height: 3px;
+                background-color: #d1d5db;
+                width: 50%;
+                z-index: 1;
+                transition: background-color 0.3s ease;
+
+                @media (max-width: 768px) {
+                    height: 2px;
+                    top: calc(var(--size, 2.5rem) / 2 - 8px);
+                }
+
+                @media (max-width: 480px) {
+                    height: 2px;
+                    top: calc(var(--size, 2rem) / 2 - 6px);
+                }
+            }
+
+            // Línea completada (roja) hacia la derecha - pasos ya completados
+            &.cdk-step-completed:not(:last-child)::after {
+                background-color: #dc2626;
+            }
+
+            // Línea completada (roja) hacia la izquierda - pasos ya completados
+            &.cdk-step-completed:not(:first-child)::before {
+                background-color: #dc2626;
+            }
+
+            // Línea roja hacia la izquierda del paso activo
+            &.mat-step-header-selected:not(:first-child)::before {
+                background-color: #dc2626;
+            }
+
+            // Línea gris hacia la derecha del paso activo
+            &.mat-step-header-selected:not(:last-child)::after {
+                background-color: #d1d5db;
+            }
+        }
+
+        .mat-stepper-horizontal-line {
+            display: none !important;
+        }
+
+        // Responsive: Layout vertical en móviles muy pequeños
+        @media (max-width: 380px) {
+            .mat-horizontal-stepper-header-container {
+                flex-direction: column;
+            }
+
+            .mat-step-header {
+                width: 100%;
+                flex-direction: row;
+                text-align: left;
+                align-items: center;
+                padding: 0.5rem 0 !important;
+                gap: 1rem;
+
+                .mat-step-icon {
+                    margin: 0;
+                    flex-shrink: 0;
+                }
+
+                .mat-step-label {
+                    text-align: left;
+                    padding: 0;
+                    flex: 1; // Usar todo el espacio disponible
+                }
+
+                // Línea vertical hacia abajo
+                &:not(:last-child)::after {
+                    content: "";
+                    position: absolute;
+                    left: calc(var(--size, 2rem) / 2);
+                    top: var(--size, 2rem);
+                    width: 2px;
+                    height: calc(100% - var(--size, 2rem));
+                    background-color: #d1d5db;
+                    transform: none;
+                }
+
+                // Línea vertical hacia arriba para paso completado
+                &.cdk-step-completed:not(:last-child)::after {
+                    background-color: #dc2626;
+                }
+
+                // Línea vertical hacia arriba para paso actual (desde el anterior)
+                &.mat-step-header-selected::before {
+                    content: "";
+                    position: absolute;
+                    left: calc(var(--size, 2rem) / 2);
+                    bottom: calc(100% - var(--size, 2rem));
+                    width: 2px;
+                    height: calc(100% - var(--size, 2rem));
+                    background-color: #dc2626;
+                    transform: none;
+                }
+
+                // Ocultar línea antes del primer paso
+                &:first-child.mat-step-header-selected::before {
+                    display: none;
+                }
+
+                // Línea hacia abajo del paso actual (gris)
+                &.mat-step-header-selected:not(:last-child)::after {
+                    background-color: #d1d5db;
+                }
+            }
+        }
+
+        // Ocultar el contenedor de contenido del stepper de Material
+        .mat-horizontal-content-container {
+            padding: 0 !important;
+        }
+    }
+}
+
+// Step Content
+.step-content {
+    padding: 1rem;
+    overflow: visible;
+
+
+    @media (max-width: 480px) {
+        padding: 0.75rem;
+    }
+
+    h2 {
+        margin: 0 0 0.35rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        line-height: 1.3;
+
+        @media (max-width: 768px) {
+            font-size: 1.15rem;
+        }
+
+        @media (max-width: 480px) {
+            font-size: 1rem;
+        }
+    }
+
+    .step-description {
+        margin: 0 0 1.5rem 0;
+        color: #6b7280;
+        font-size: 0.8rem;
+        line-height: 1.4;
+
+        @media (max-width: 768px) {
+            font-size: 0.75rem;
+            margin: 0 0 1.25rem 0;
+        }
+
+        @media (max-width: 480px) {
+            font-size: 0.7rem;
+            margin: 0 0 1rem 0;
+        }
+    }
+}
+
+// Client Selection
+.client-selection-box {
+    margin-bottom: 2rem;
+
+    .full-width {
+        width: 100%;
+    }
+
+    // Estilos específicos para el input de búsqueda de cliente
+    ::ng-deep mat-form-field.full-width {
+        .mat-mdc-text-field-wrapper {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .mat-mdc-form-field-infix {
+            min-height: 44px; // Reducido desde 56px
+            padding-top: 10px 0px; // Reducido
+        }
+
+        .mat-mdc-floating-label {
+            font-size: 0.875rem;
+            max-width: none;
+            white-space: nowrap;
+            overflow: visible !important;
+            display: block;
+            top: 24px;
+            z-index: 10;
+            background-color: transparent;
+            padding-left: 4px;
+            padding-right: 4px;
+            position: relative;
+        }
+
+        input.mat-mdc-input-element {
+            font-size: 0.875rem;
+        }
+
+        .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: rgba(0, 0, 0, 0.12);
+            }
+
+            .mdc-notched-outline__leading {
+                border-radius: 8px 0 0 8px !important;
+            }
+
+            .mdc-notched-outline__trailing {
+                border-radius: 0 8px 8px 0 !important;
+            }
+
+            .mdc-notched-outline__notch {
+                border-top: 1px solid rgba(0, 0, 0, 0.12) !important;
+                border-right: none !important;
+                border-radius: 8px;
+                padding: 0 !important;
+                width: 0 !important;
+            }
+
+            &:hover .mdc-notched-outline {
+
+                .mdc-notched-outline__leading,
+                .mdc-notched-outline__notch,
+                .mdc-notched-outline__trailing {
+                    border-color: #dc2626;
+                }
+
+                .mdc-notched-outline__notch {
+                    border-top: 1px solid #dc2626 !important;
+                    border-right: none !important;
+                }
+            }
+        }
+
+        &.mat-focused {
+
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: #dc2626 !important;
+                border-width: 2px !important;
+            }
+
+            .mat-mdc-floating-label {
+                color: #dc2626 !important;
+            }
+        }
+
+        mat-icon[matPrefix] {
+            color: #dc2626;
+            margin-right: 0.5rem;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .mat-mdc-form-field-error {
+            font-size: 0.82rem !important;
+            color: #e53935 !important;
+            margin-top: 0.15rem;
+            font-weight: 500;
+        }
+
+        // Responsive
+        @media (max-width: 480px) {
+            .mat-mdc-floating-label {
+                font-size: 0.82rem;
+                max-width: 80vw;
+            }
+        }
+    }
+
+    .client-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+
+        mat-icon {
+            color: #6b7280;
+        }
+
+        .client-info {
+            display: flex;
+            flex-direction: column;
+
+            .client-name {
+                font-weight: 500;
+                color: #1f2937;
+            }
+
+            .client-email {
+                font-size: 0.75rem;
+                color: #6b7280;
+            }
+        }
+    }
+
+    .selected-client-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.6rem;
+        background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
+        border-radius: 8px;
+        margin-top: 1rem;
+        border: 2px solid #059669;
+
+        .check-icon {
+            color: #059669;
+            font-size: 2rem;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .client-details {
+            h3 {
+                margin: 0;
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: #065f46;
+            }
+
+            p {
+                margin: 0.25rem 0 0 0;
+                font-size: 0.875rem;
+                color: #047857;
+            }
+        }
+    }
+
+    .no-clients {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 3rem 1rem;
+        text-align: center;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 2px dashed #d1d5db;
+
+        mat-icon {
+            font-size: 3rem;
+            width: 3rem;
+            height: 3rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+    }
+}
+
+// Form Grid
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 1024px) {
+        gap: 0.85rem; // Reducir espacio en tablets
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr; // Una columna en móvil
+        gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+        gap: 0.65rem; // Menor espacio en móviles pequeños
+    }
+
+    mat-form-field {
+        width: 100%;
+    }
+
+    .full-width,
+    .span-2 {
+        grid-column: span 2;
+
+        @media (max-width: 768px) {
+            grid-column: span 1;
+        }
+    }
+
+    mat-checkbox {
+        margin-top: 1rem;
+
+        @media (max-width: 480px) {
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+        }
+    }
+}
+
+// Navegación de Personas Adicionales
+.persons-navigation {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.65rem;
+        margin-bottom: 1.75rem;
+        padding: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
+        margin-bottom: 1.25rem;
+        padding: 0.6rem;
+    }
+
+    .person-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.625rem 0.75rem !important;
+        font-size: 0.85rem !important;
+        font-weight: 500;
+        border-radius: 6px;
+        border: 2px solid #d1d5db;
+        background-color: white;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 40px;
+
+        @media (max-width: 768px) {
+            padding: 0.5rem 0.6rem !important;
+            font-size: 0.8rem !important;
+            min-height: 36px;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.4rem 0.5rem !important;
+            font-size: 0.75rem !important;
+            min-height: 32px;
+        }
+
+        mat-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+
+            @media (max-width: 768px) {
+                font-size: 0.9rem;
+                width: 0.9rem;
+                height: 0.9rem;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 0.8rem;
+                width: 0.8rem;
+                height: 0.8rem;
+            }
+        }
+
+        // Estado normal
+        &:hover:not(.active):not(.has-data) {
+            border-color: #9ca3af;
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        // Estado: Tiene datos (check_circle icon)
+        &.has-data:not(.active) {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+            color: #059669;
+
+            &:hover {
+                border-color: #059669;
+                background-color: #dcfce7;
+            }
+        }
+
+        // Estado: Activo (seleccionado)
+        &.active {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+
+            mat-icon {
+                animation: scaleIn 0.3s ease;
+            }
+
+            &:hover {
+                border-color: #1d4ed8;
+                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            }
+        }
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.8);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+// Person Card
+.person-card {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    animation: slideDown 0.3s ease;
+
+    @media (max-width: 480px) {
+        margin-bottom: 1rem;
+        border-radius: 6px;
+    }
+
+    mat-card-header {
+        background: #f9fafb;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+
+        @media (max-width: 768px) {
+            padding: 0.85rem;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.75rem;
+        }
+
+        mat-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            color: #374151;
+            margin: 0;
+
+            @media (max-width: 768px) {
+                font-size: 1rem;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 0.95rem;
+            }
+
+            mat-icon {
+                color: #dc2626;
+                flex-shrink: 0;
+            }
+        }
+    }
+
+    mat-card-content {
+        padding: 1.5rem;
+
+        @media (max-width: 768px) {
+            padding: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.75rem;
+        }
+    }
+}
+
+.more-persons-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #eff6ff;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 768px) {
+        padding: 0.85rem;
+        gap: 0.65rem;
+    }
+
+    @media (max-width: 480px) {
+        padding: 0.75rem;
+        gap: 0.5rem;
+        border-radius: 6px;
+    }
+
+    mat-icon {
+        color: #3b82f6;
+        flex-shrink: 0;
+    }
+
+    p {
+        margin: 0;
+        color: #1e40af;
+        font-size: 0.875rem;
+        line-height: 1.4;
+
+        @media (max-width: 768px) {
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 480px) {
+            font-size: 0.75rem;
+        }
+    }
+}
+
+// Payment Sections
+.payment-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .payment-section {
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f9fafb;
+
+        @media (max-width: 768px) {
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.85rem;
+        }
+
+        h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 1rem 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #374151;
+
+            @media (max-width: 768px) {
+                font-size: 1rem;
+                margin: 0 0 0.85rem 0;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 0.95rem;
+                margin: 0 0 0.75rem 0;
+            }
+
+            mat-icon {
+                color: #dc2626;
+                flex-shrink: 0;
+            }
+        }
+    }
+}
+
+// Step Actions
+.step-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+
+    @media (max-width: 1024px) {
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+
+        button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        margin-top: 1.25rem;
+        padding-top: 0.85rem;
+        gap: 0.65rem;
+    }
+
+    button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.5rem;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: normal;
+        min-height: 40px; // Asegurar altura mínima para tocar fácilmente
+
+        @media (max-width: 768px) {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 480px) {
+            padding: 0.65rem 1rem;
+            font-size: 0.85rem;
+            min-height: 44px; // Mejor para tocar en móviles
+        }
+
+        mat-icon {
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+
+            @media (max-width: 480px) {
+                font-size: 1.1rem;
+                width: 1.1rem;
+                height: 1.1rem;
+            }
+        }
+    }
+
+    .button-spinner {
+        margin-right: 0.5rem;
+
+        ::ng-deep circle {
+            stroke: white;
+        }
+    }
+}
+
+// Material Field Customizations
+::ng-deep {
+
+    // Estilos globales para TODOS los mat-form-field del formulario
+    .mat-mdc-form-field {
+        .mat-mdc-text-field-wrapper {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+
+            .mat-mdc-form-field-flex {
+                .mat-mdc-notch {
+                    .mat-mdc-notch-piece {
+                        border-radius: 8px;
+                    }
+                }
+            }
+        }
+
+        ::ng-deep .mat-mdc-select-arrow {
+            width: 10px;
+            height: 5px;
+            position: relative;
+            right: 7px;
+        }
+
+        .mat-mdc-form-field-infix {
+            min-height: 44px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+
+            @media (max-width: 480px) {
+                font-size: 0.875rem;
+            }
+        }
+
+        input.mat-mdc-input-element {
+            font-size: 0.875rem;
+
+            // Padding izquierdo cuando tiene valor (fecha seleccionada)
+            &:not(:placeholder-shown) {
+                padding-left: 0.75rem;
+            }
+        }
+
+        // Estilos del outline (bordes)
+        .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: rgba(0, 0, 0, 0.12);
+            }
+
+            .mdc-notched-outline__leading {
+                border-radius: 8px 0 0 8px !important;
+            }
+
+            .mdc-notched-outline__trailing {
+                border-radius: 0 8px 8px 0 !important;
+            }
+
+            .mdc-notched-outline__notch {
+                border-top: 1px solid rgba(0, 0, 0, 0.12) !important;
+                border-right: none !important;
+                border-radius: 8px;
+                padding: 0 !important;
+                width: 0 !important;
+            }
+
+            &:hover .mdc-notched-outline {
+
+                .mdc-notched-outline__leading,
+                .mdc-notched-outline__notch,
+                .mdc-notched-outline__trailing {
+                    border-color: #dc2626;
+                }
+
+                .mdc-notched-outline__notch {
+                    border-top: 1px solid #dc2626 !important;
+                    border-right: none !important;
+                }
+            }
+        }
+
+        &.mat-focused {
+            .mat-mdc-form-field-focus-overlay {
+                opacity: 0;
+            }
+
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: #dc2626 !important;
+                border-width: 2px;
+            }
+
+            .mdc-notched-outline__notch {
+                border-top: 2px solid #dc2626 !important;
+                border-right: none !important;
+            }
+        }
+
+        // Iconos con prefijo
+        mat-icon[matPrefix] {
+            color: #dc2626;
+            margin-right: 0.5rem;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        // Mensajes de error
+        .mat-mdc-form-field-error {
+            font-size: 0.82rem !important;
+            color: #e53935 !important;
+            margin-top: 0.15rem;
+            font-weight: 500;
+        }
+    }
+
+    .mat-primary {
+        --mdc-filled-button-container-color: #dc2626;
+        --mdc-protected-button-container-color: #dc2626;
+        --mat-protected-button-state-layer-color: #dc2626;
+        --mat-protected-button-ripple-color: rgba(220, 38, 38, 0.1);
+    }
+
+    // Snackbar Styles
+    .success-snackbar {
+        --mdc-snackbar-container-color: #059669;
+        --mat-snack-bar-button-color: #ffffff;
+
+        .mat-mdc-snack-bar-label {
+            color: white;
+        }
+    }
+
+    .error-snackbar {
+        --mdc-snackbar-container-color: #dc2626;
+        --mat-snack-bar-button-color: #ffffff;
+
+        .mat-mdc-snack-bar-label {
+            color: white;
+        }
+    }
+
+    // Autocomplete panel responsive
+    .mat-mdc-autocomplete-panel {
+        max-width: 100% !important;
+
+        @media (max-width: 768px) {
+            max-height: 60vh !important; // Limitar altura en móvil
+        }
+
+        @media (max-width: 480px) {
+            max-height: 50vh !important;
+        }
+
+        .mat-mdc-option {
+            min-height: 48px; // Mejor para tocar
+
+            @media (max-width: 480px) {
+                font-size: 0.875rem;
+                padding: 0 12px;
+            }
+        }
+    }
+
+    // Select panel responsive
+    .mat-mdc-select-panel {
+        @media (max-width: 768px) {
+            max-height: 60vh !important;
+        }
+
+        @media (max-width: 480px) {
+            max-height: 50vh !important;
+        }
+
+        .mat-mdc-option {
+            min-height: 48px;
+
+            @media (max-width: 480px) {
+                font-size: 0.875rem;
+                padding: 0 12px;
+            }
+        }
+    }
+
+    // Datepicker responsive
+    .mat-datepicker-content {
+        @media (max-width: 480px) {
+            .mat-calendar {
+                width: 280px !important;
+            }
+
+            .mat-calendar-body-cell {
+                min-width: 36px !important;
+                width: 36px !important;
+                height: 36px !important;
+            }
+        }
+    }
+
+    // Form fields responsive
+    .mat-mdc-form-field {
+        @media (max-width: 480px) {
+            .mat-mdc-form-field-infix {
+                font-size: 0.875rem;
+            }
+
+            .mat-mdc-floating-label {
+                font-size: 0.875rem;
+            }
+
+            input.mat-mdc-input-element {
+                font-size: 0.875rem;
+            }
+        }
+    }
+
+    mat-option.mat-mdc-option {
+        &.mdc-list-item {
+            background-color: rgb(248, 248, 248) !important;
+
+            // Estado hover
+            &:hover {
+                background-color: rgb(255, 202, 202) !important;
+            }
+
+            // Estado seleccionado y activo
+            &.mdc-list-item--selected.mat-mdc-option-active {
+                background-color: rgb(248, 248, 248) !important;
+            }
+
+            // Estado seleccionado
+            &.mdc-list-item--selected {
+                background-color: rgba(220, 38, 38, 0.12) !important;
+            }
+        }
+    }
+
+    // Datepicker Calendar Styles - Moderno y dinámico
+    .mat-datepicker-content {
+        background-color: rgb(248, 248, 248) !important;
+        border: 1px solid #ff4444;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+        .mat-calendar {
+            background-color: rgb(248, 248, 248) !important;
+
+            // Header del calendario
+            .mat-calendar-header {
+                background-color: #dc2626;
+                color: white;
+                padding: 0.2rem;
+                font-weight: 600;
+
+                .mat-calendar-controls {
+
+                    .mat-calendar-period-button,
+                    .mat-calendar-previous-button,
+                    .mat-calendar-next-button {
+                        color: white !important;
+                        font-weight: 600;
+
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 0.15) !important;
+                        }
+                    }
+                }
+            }
+
+            // Contenido del calendario
+            .mat-calendar-content {
+                background-color: rgb(248, 248, 248) !important;
+                padding: 0.5rem;
+            }
+
+            // Tabla del calendario
+            .mat-calendar-table {
+                background-color: transparent;
+
+                // Headers de días de la semana
+                .mat-calendar-table-header th {
+                    color: #6b7280;
+                    font-weight: 600;
+                    font-size: 0.75rem;
+                    padding: 0.2rem 0;
+                }
+
+            }
+
+            .mat-calendar-body-label {
+                padding: 0 !important;
+                color: transparent !important;
+            }
+
+            // Vista de años/meses
+            .mat-calendar-body-cell-container {
+                .mat-calendar-body-cell-content {
+                    background-color: white;
+                    border-radius: 8px;
+                    border: 1px solid #e5e7eb;
+                    transition: all 0.2s ease;
+
+                    &:hover {
+                        background-color: rgba(220, 38, 38, 0.1) !important;
+                        border-color: #dc2626;
+                        color: #dc2626;
+                        transform: scale(1.05);
+                    }
+                }
+            }
+        }
+
+        // Botones de acción del datepicker
+        .mat-datepicker-actions {
+            background-color: rgb(248, 248, 248) !important;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e5e7eb;
+
+            button {
+                &.mat-button {
+                    color: #6b7280;
+
+                    &:hover {
+                        background-color: #f3f4f6;
+                    }
+                }
+
+                &.mat-raised-button,
+                &.mat-flat-button {
+                    background-color: #dc2626 !important;
+                    color: white !important;
+
+                    &:hover {
+                        background-color: #b91c1c !important;
+                        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+                    }
+                }
+            }
+        }
+
+        // Responsive
+        @media (max-width: 480px) {
+            border-radius: 8px;
+
+            .mat-calendar {
+                .mat-calendar-header {
+                    padding: 0.75rem;
+                }
+
+                .mat-calendar-table {
+                    .mat-calendar-body-cell {
+                        .mat-calendar-body-cell-content {
+                            font-size: 0.875rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Overlay backdrop del datepicker
+    .cdk-overlay-backdrop.mat-datepicker-backdrop {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    // Ocultar TODOS los tooltips de Material globalmente
+    .mat-mdc-tooltip,
+    .mdc-tooltip,
+    .mat-tooltip {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        color: transparent !important;
+    }
+
+    // // Ocultar overlay de tooltips
+    // .cdk-overlay-container {
+
+    //     .mat-mdc-tooltip-panel,
+    //     .mdc-tooltip-wrapper {
+    //         display: none !important;
+    //         visibility: hidden !important;
+    //         opacity: 0 !important;
+    //     }
+    // }
+
+    // Ocultar tooltips nativos de Material en el datepicker
+    .mat-calendar-previous-button,
+    .mat-calendar-next-button {
+
+        .mat-mdc-button-touch-target,
+        .mat-mdc-tooltip,
+        [mattooltip] {
+            display: none !important;
+        }
+
+        // Tooltip nuevo visible
+        &[aria-label] {
+
+            // Tooltip nuevo visible    
+            &::after {
+                display: visible !important;
+                z-index: 11;
+            }
+        }
+
+        // Agregar tooltips personalizados con Tailwind
+        position: relative;
+
+        &::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: -35px; // Cambiado de bottom a top
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1001;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: -8px; // Cambiado de bottom a top
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg); // Rotado para apuntar hacia abajo
+            border: 6px solid transparent;
+            border-bottom-color: #1f2937;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+        }
+
+        &:hover::after,
+        &:hover::before {
+            opacity: 1;
+        }
+    }
+
+    // Tooltip en español para el botón anterior
+    .mat-calendar-previous-button::after {
+        content: 'Mes anterior';
+    }
+
+    // Tooltip en español para el botón siguiente
+    .mat-calendar-next-button::after {
+        content: 'Mes siguiente';
+    }
+
+}
+
+// Estilos para el botón y modal de agregar cliente
+.add-client-button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+
+    button {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        border-radius: 8px;
+        border: 2px solid #dc2626 !important;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+
+        mat-icon {
+            margin-right: 0.5rem;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+    }
+}
+
+.add-client-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease-out;
+        cursor: pointer;
+    }
+
+    .modal-content {
+        position: relative;
+        z-index: 1001;
+        background: white;
+        border-radius: 12px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.4s ease-out;
+
+        @media (max-width: 768px) {
+            max-width: 95%;
+            max-height: 95vh;
+        }
+    }
+}

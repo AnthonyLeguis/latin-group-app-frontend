@@ -144,4 +144,19 @@ export class ApplicationFormService {
             {}
         );
     }
+
+    /**
+     * Crear nueva planilla de aplicación sin autenticación (endpoint público)
+     * Para uso del formulario público /new-application-pb
+     */
+    createPublicApplication(data: any): Observable<any> {
+        return this.http.post<any>(`${environment.apiUrl}/public/new-application`, data);
+    }
+
+    /**
+     * Obtener lista de agentes (endpoint público sin autenticación)
+     */
+    getPublicAgentsList(): Observable<{ success: boolean; data: any[] }> {
+        return this.http.get<{ success: boolean; data: any[] }>(`${environment.apiUrl}/public/agents`);
+    }
 }

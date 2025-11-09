@@ -30,6 +30,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/public/confirm-form/confirm-form').then(m => m.ConfirmFormComponent)
     },
     {
+        path: 'new-application-pb',
+        loadComponent: () => import('./features/public/new-application-pb/new-application-pb').then(m => m.NewApplicationPbComponent)
+    },
+    {
         path: '**',
         redirectTo: '/home'
     }

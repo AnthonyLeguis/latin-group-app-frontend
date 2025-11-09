@@ -147,4 +147,23 @@ export class UserService {
             { headers: this.getHeaders() }
         );
     }
+
+    /**
+     * Crear un nuevo usuario/cliente (público - sin autenticación)
+     */
+    createUser(data: any): Observable<any> {
+        return this.http.post<any>(
+            `${environment.apiUrl}/public/clients`,
+            data
+        );
+    }
+
+    /**
+     * Obtener lista pública de clientes (sin autenticación)
+     */
+    getPublicClientsList(): Observable<any> {
+        return this.http.get<any>(
+            `${environment.apiUrl}/public/clients`
+        );
+    }
 }

@@ -1,0 +1,85 @@
+<div class="add-client-modal-wrapper">
+    <!-- Skeleton durante inicialización -->
+    <app-form-skeleton *ngIf="isInitializing"></app-form-skeleton>
+
+    <!-- Formulario real después de inicialización -->
+    <mat-card class="add-client-card" *ngIf="!isInitializing">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>person_add</mat-icon>
+                Ingresar Nuevo Cliente
+            </mat-card-title>
+            <mat-card-subtitle>
+                Complete el formulario para registrar un nuevo cliente
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="client-form">
+
+                <!-- Nombre completo -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre Completo</mat-label>
+                    <input matInput formControlName="name" placeholder="Ej: Juan Pérez" required
+                        (input)="onNameInput()">
+                    <mat-icon matPrefix>person</mat-icon>
+                    <mat-error *ngIf="clientForm.get('name')?.invalid">
+                        {{ getErrorMessage('name') }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Email (ahora opcional) -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Correo Electrónico (Opcional)</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="cliente@ejemplo.com"
+                        (input)="onEmailInput()">
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-error *ngIf="clientForm.get('email')?.invalid">
+                        {{ getErrorMessage('email') }}
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Agente (siempre visible y obligatorio) -->
+                <div class="agent-section">
+                    <!-- Select de agentes (obligatorio) -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Asignar Agente</mat-label>
+                        <mat-select formControlName="agent_id" required>
+                            <mat-option *ngFor="let agent of agents" [value]="agent.id">
+                                {{ agent.name }} ({{ agent.email }})
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>assignment_ind</mat-icon>
+                        <mat-error *ngIf="clientForm.get('agent_id')?.invalid">
+                            Debe seleccionar un agente
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Info de contraseña por defecto -->
+                <div class="password-info">
+                    <mat-icon>info</mat-icon>
+                    <span>
+                        La contraseña por defecto será: <strong>latin1234*</strong>
+                        <br>
+                        <small>El cliente podrá cambiarla después de su primer acceso</small>
+                    </span>
+                </div>
+
+                <!-- Botones -->
+                <div class="form-actions">
+                    <button mat-raised-button type="button" (click)="onCancel()" [disabled]="loading">
+                        <mat-icon>close</mat-icon>
+                        Cancelar
+                    </button>
+
+                    <button mat-raised-button color="primary" type="submit" [disabled]="loading || clientForm.invalid">
+                        <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+                        <mat-icon *ngIf="!loading">save</mat-icon>
+                        <span *ngIf="!loading">Crear Cliente</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
