@@ -1,6 +1,6 @@
 <div class="custom-dialog-container">
     <!-- Icono animado -->
-    <div class="icon-container" *ngIf="data.type">
+    <div class="icon-container" *ngIf="data.type && !data.isLoading">
         <div class="icon-circle" [ngClass]="'icon-' + data.type">
             <mat-icon class="icon-main">{{ getIcon() }}</mat-icon>
         </div>
@@ -11,10 +11,15 @@
 
     <!-- Contenido -->
     <div mat-dialog-content class="dialog-content">
-        <p *ngIf="data.message" class="dialog-message">{{ data.message }}</p>
+        <div class="loading-container" *ngIf="data.isLoading">
+            <app-spinner-global size="small"></app-spinner-global>
+            <p *ngIf="data.loadingMessage" class="loading-message">{{ data.loadingMessage }}</p>
+        </div>
+
+        <p *ngIf="data.message && !data.isLoading" class="dialog-message">{{ data.message }}</p>
 
         <!-- Link de confirmación -->
-        <div *ngIf="data.showLink && data.linkUrl" class="link-container">
+        <div *ngIf="data.showLink && data.linkUrl && !data.isLoading" class="link-container">
             <label class="link-label">{{ data.linkLabel || 'Su link es:' }}</label>
             <div class="link-box">
                 <input type="text" [value]="data.linkUrl" readonly class="link-input" #linkInput>

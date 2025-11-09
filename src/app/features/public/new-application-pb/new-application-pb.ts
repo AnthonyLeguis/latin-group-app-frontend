@@ -291,6 +291,7 @@ export class NewApplicationPbComponent implements OnInit {
     private router = inject(Router);
     private platformId = inject(PLATFORM_ID);
     private isBrowser = isPlatformBrowser(this.platformId);
+    private pendingHasSavedDataTimeout: any = null;
 
     ngOnInit(): void {
         this.initializeForms();
@@ -387,7 +388,7 @@ export class NewApplicationPbComponent implements OnInit {
     // Cargar datos guardados del localStorage
     loadSavedFormData(): void {
         if (!this.isBrowser) return;
-        this.hasSavedDataFlag = false;
+        this.setHasSavedDataFlag(false);
         
         try {
             const savedData = localStorage.getItem(this.STORAGE_KEY);
@@ -396,7 +397,7 @@ export class NewApplicationPbComponent implements OnInit {
             }
 
             const formData = JSON.parse(savedData);
-            this.hasSavedDataFlag = true;
+            this.setHasSavedDataFlag(true);
 
             // Restaurar selección de agente
             if (formData.agentSelection) {
@@ -454,7 +455,7 @@ export class NewApplicationPbComponent implements OnInit {
             console.error('❌ Error al cargar datos guardados:', error);
             // Si hay error, limpiar el localStorage corrupto
             localStorage.removeItem(this.STORAGE_KEY);
-            this.hasSavedDataFlag = false;
+            this.setHasSavedDataFlag(false);
         }
     }
 
@@ -496,7 +497,7 @@ export class NewApplicationPbComponent implements OnInit {
             };
 
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(formData));
-            this.hasSavedDataFlag = true;
+            this.setHasSavedDataFlag(true);
         } catch (error) {
             console.error('❌ Error al guardar datos:', error);
         }
@@ -506,7 +507,7 @@ export class NewApplicationPbComponent implements OnInit {
     clearSavedFormData(): void {
         if (!this.isBrowser) return;
         localStorage.removeItem(this.STORAGE_KEY);
-        this.hasSavedDataFlag = false;
+        this.setHasSavedDataFlag(false);
     }
 
     // Cargar agentes públicos
@@ -614,6 +615,26 @@ export class NewApplicationPbComponent implements OnInit {
 
         this.isSubmitting = true;
 
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+                title: 'Creando la planilla...',
+                isLoading: true,
+                loadingMessage: 'Estamos procesando la solicitud. Por favor, espere.',
+                type: 'info',
+                disableBackdropClick: true
+            },
+            width: '600px',
+            disableClose: true
+        });
+
+        let submissionSucceeded = false;
+
+        dialogRef.afterClosed().subscribe(() => {
+            if (submissionSucceeded) {
+                this.resetAllForms();
+            }
+        });
+
         const personsArray = this.getAdditionalPersonsArray();
 
         // Combinar todos los datos - agent_id es obligatorio
@@ -696,21 +717,27 @@ export class NewApplicationPbComponent implements OnInit {
                 const token = response.confirmation_token;
                 const confirmationLink = response.confirmation_link || `${environment.frontendUrl}/confirm/${token}`;
 
-                // Mostrar notificación con link y mensaje de email enviado
-                const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-                    data: {
+                submissionSucceeded = true;
+
+                const dialogComponent = dialogRef.componentInstance;
+                if (dialogComponent) {
+                    Object.assign(dialogComponent.data, {
+                        isLoading: false,
+                        loadingMessage: undefined,
                         title: '¡Planilla Creada Exitosamente!',
                         message: 'La planilla ha sido creada y el PDF completo fue enviado al agente por correo electrónico. Comparta el siguiente link con el cliente para que confirme su información:',
                         type: 'success',
                         confirmButtonText: 'Entendido',
+                        cancelButtonText: undefined,
                         showLink: true,
                         linkUrl: confirmationLink,
                         linkLabel: 'Link de confirmación para el cliente:',
                         disableBackdropClick: true
-                    },
-                    width: '600px',
-                    disableClose: true
-                });
+                    });
+                    dialogComponent.linkCopied = false;
+                    dialogRef.disableClose = true;
+                    dialogComponent.updateView();
+                }
 
                 // Envolver en setTimeout para evitar ExpressionChangedAfterItHasBeenCheckedError
                 setTimeout(() => {
@@ -719,17 +746,33 @@ export class NewApplicationPbComponent implements OnInit {
 
                 // Limpiar datos guardados del localStorage
                 this.clearSavedFormData();
-
-                // Reiniciar formulario tras cerrar el diálogo
-                dialogRef.afterClosed().subscribe(() => {
-                    this.resetAllForms();
-                });
             },
             error: (error: any) => {
                 console.error('Error al crear planilla pública:', error);
                 const errorMsg = error.error?.error || error.error?.message || 'Error al crear la planilla de aplicación';
-                this.showError(errorMsg);
-                this.isSubmitting = false;
+                const dialogComponent = dialogRef.componentInstance;
+                if (dialogComponent) {
+                    Object.assign(dialogComponent.data, {
+                        isLoading: false,
+                        loadingMessage: undefined,
+                        title: 'Error al crear la planilla',
+                        message: errorMsg,
+                        type: 'error',
+                        confirmButtonText: 'Cerrar',
+                        cancelButtonText: undefined,
+                        showLink: false,
+                        linkUrl: undefined,
+                        linkLabel: undefined,
+                        disableBackdropClick: false
+                    });
+                    dialogComponent.linkCopied = false;
+                    dialogRef.disableClose = false;
+                    dialogComponent.updateView();
+                }
+
+                setTimeout(() => {
+                    this.isSubmitting = false;
+                }, 0);
             }
         });
     }
@@ -809,11 +852,29 @@ export class NewApplicationPbComponent implements OnInit {
         this.policyStepCompleted = false;
         this.additionalPersonsStepCompleted = false;
         this.paymentStepCompleted = false;
-        this.hasSavedDataFlag = false;
+    this.setHasSavedDataFlag(false);
         this.showAddClientModal = false;
 
         setTimeout(() => {
             this.isResettingForms = false;
+        }, 0);
+    }
+
+    private setHasSavedDataFlag(value: boolean): void {
+        if (!this.isBrowser) {
+            this.hasSavedDataFlag = value;
+            return;
+        }
+        if (this.hasSavedDataFlag === value) {
+            return;
+        }
+        if (this.pendingHasSavedDataTimeout) {
+            clearTimeout(this.pendingHasSavedDataTimeout);
+            this.pendingHasSavedDataTimeout = null;
+        }
+        this.pendingHasSavedDataTimeout = setTimeout(() => {
+            this.hasSavedDataFlag = value;
+            this.pendingHasSavedDataTimeout = null;
         }, 0);
     }
 

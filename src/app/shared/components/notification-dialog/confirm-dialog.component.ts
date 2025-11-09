@@ -1,10 +1,11 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectorRef, ViewRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SpinnerGlobalComponent } from '../../components/spinner-global/spinner-global';
 
 export interface DialogData {
     title?: string;
@@ -18,12 +19,14 @@ export interface DialogData {
     linkUrl?: string; // URL del link
     linkLabel?: string; // Etiqueta para el link
     disableBackdropClick?: boolean; // Evitar cerrar al hacer click fuera
+    isLoading?: boolean; // Mostrar spinner de carga
+    loadingMessage?: string; // Mensaje mientras se carga
 }
 
 @Component({
     selector: 'app-confirm-dialog',
     standalone: true,
-    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule],
+    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule, SpinnerGlobalComponent],
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss']
 })
@@ -32,7 +35,8 @@ export class ConfirmDialogComponent {
 
     constructor(
         public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: DialogData
+        @Inject(MAT_DIALOG_DATA) public data: DialogData,
+        private cdr: ChangeDetectorRef
     ) {
         // Establecer tipo por defecto si no se proporciona
         if (!data.type) {
@@ -48,6 +52,15 @@ export class ConfirmDialogComponent {
         if (data.autoClose && !data.showLink) {
             setTimeout(() => this.dialogRef.close(true), data.autoCloseDuration || 3000);
         }
+    }
+
+    updateView(): void {
+        const viewRef = this.cdr as ViewRef;
+        if (viewRef.destroyed) {
+            return;
+        }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
     }
 
     getIcon(): string {
