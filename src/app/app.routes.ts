@@ -34,6 +34,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/public/new-application-pb/new-application-pb').then(m => m.NewApplicationPbComponent)
     },
     {
+        path: 'privacy-policy',
+        loadComponent: () => import('./features/public/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent)
+    },
+    {
+        path: 'terms-conditions',
+        loadComponent: () => import('./features/public/terms-conditions/terms-conditions').then(m => m.TermsConditionsComponent)
+    },
+    {
         path: '**',
         redirectTo: '/home'
     }
